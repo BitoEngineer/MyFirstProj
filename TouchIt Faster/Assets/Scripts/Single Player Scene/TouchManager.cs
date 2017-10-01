@@ -19,8 +19,8 @@ public class TouchManager : MonoBehaviour
     private float lastCircleAge_s = 0;
     private BoxCollider circleCollider;
     public float CIRCLE_SPAWN_s = 2f;
-    public float CIRCLE_SPAWN_LIMIT_s = 0.6f;
-    public float DEC_CIRCLE_SPAWN_s = 0.05f;
+    public float CIRCLE_SPAWN_LIMIT_s = 2f;
+    public float DEC_CIRCLE_SPAWN_s = 0.2f;
     public float MAX_CIRCLES = 5;
     private float Circle_X_Width, Circle_Y_Height;
     private RectTransform Circle_Rect;
@@ -51,6 +51,10 @@ public class TouchManager : MonoBehaviour
 
 
     //DATA
+    public int Lifes = 3;
+    public Image Life1;
+    public Image Life2;
+    public Image Life3;
     public GameObject GameOverPanel;
     public Text GameOverPointsText;
     public bool OnPause = false;
@@ -189,7 +193,20 @@ public class TouchManager : MonoBehaviour
 
     public void BombTouched(GameObject gameObject)
     {
-       
+        switch (Lifes)
+        {
+            case 3:
+                Life1.enabled = true;
+                break;          
+            case 2:             
+                Life2.enabled = true;
+                break;          
+            case 1:             
+                Life3.enabled = true;
+                GameOver();
+                break;
+        }
+
         Vector3 v = gameObject.transform.position;
         points = points * (1 - HitBombDamage_percentage);
         pointsText.text = points.ToString("f0");
@@ -197,7 +214,7 @@ public class TouchManager : MonoBehaviour
         Destroy(gameObject);
 
         LastBombExplosion = Instantiate(BombExplosion, v, Quaternion.identity);
-
+        --Lifes;
         if (probability_bomb < MAX_BOMB_SPAWN_probability)
             probability_bomb += Bomb_Spawn_Inc_probability;
     }
@@ -264,8 +281,12 @@ public class TouchManager : MonoBehaviour
         Destroy(aliveCircles[destroyedCircle].counter);
         aliveCircles.Remove(destroyedCircle);
 
-        if (CIRCLE_SPAWN_s >= CIRCLE_SPAWN_LIMIT_s)
+        if(CIRCLE_SPAWN_s > CIRCLE_SPAWN_LIMIT_s)
+        {
             CIRCLE_SPAWN_s -= DEC_CIRCLE_SPAWN_s;
+            DEC_CIRCLE_SPAWN_s -= DEC_CIRCLE_SPAWN_s/20;
+        }
+        
     }
 
     public Vector3 WorldToCanvasCoords(Vector3 v)

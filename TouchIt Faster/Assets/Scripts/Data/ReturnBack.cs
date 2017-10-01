@@ -15,7 +15,7 @@ public class ReturnBack : MonoBehaviour {
     }
 
 
-    private void OnMouseDown()
+    public void OnMouseDown()
     {
         touchM.OnPause = true;
         ExitPopup.SetActive(true);
