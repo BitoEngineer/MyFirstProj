@@ -7,16 +7,25 @@ public class TimerCounter : MonoBehaviour {
 
     public Text timerText;
     public float startTime;
-
+    private TouchManager touchM;
     private bool active = true;
 
 	// Use this for initialization
 	void Start () {
         startTime = Time.time;
-	}
+        touchM = GameObject.Find("Touch").GetComponent<TouchManager>();
+    }
 	
 	// Update is called once per frame
 	void Update () {
+        if (touchM.OnPause)
+        {
+             StopTimer();
+        }
+        else
+        {
+            ResumeTimer();
+        }
 
         if (active)
         {

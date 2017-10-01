@@ -51,6 +51,9 @@ public class TouchManager : MonoBehaviour
 
 
     //DATA
+    public GameObject GameOverPanel;
+    public Text GameOverPointsText;
+    public bool OnPause = false;
     public Canvas canvas;
     private RectTransform CanvasRect;
     public Text HitSquare;
@@ -77,8 +80,8 @@ public class TouchManager : MonoBehaviour
         stageDimensions = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
         Circle_X_Width = (circleCollider.size.x * (stageDimensions.x * 2)) / Screen.width;
         Circle_Y_Height = (circleCollider.size.y * (stageDimensions.y * 2)) / Screen.height;
-        X_length = stageDimensions.x - (circleCollider.size.x / 4);
-        Y_length = stageDimensions.y - (circleCollider.size.y / 4);
+        X_length = stageDimensions.x - (circleCollider.size.x / 1.5f);
+        Y_length = stageDimensions.y - (circleCollider.size.y );
     }
 
 
@@ -86,13 +89,16 @@ public class TouchManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        CheckGameOver();
+        if (!OnPause)
+        {
+            CheckGameOver();
 
-        float time = Time.time;
-        SpawnObjects(time);
-        CheckSquaresToDestroy(time);
-        CheckBombsToDestroy(time);
-
+            float time = Time.time;
+            SpawnObjects(time);
+            CheckSquaresToDestroy(time);
+            CheckBombsToDestroy(time);
+        }
+        
     }
 
     private void OnDestroy()
@@ -106,10 +112,6 @@ public class TouchManager : MonoBehaviour
         {
             GenerateCircles();
             GenerateSquare();
-        }
-
-        if(time - Last_Bomb_Spawn_s > Bomb_Spawn_s)
-        {
             GenerateBomb();
         }
     }
@@ -194,16 +196,7 @@ public class TouchManager : MonoBehaviour
         AliveBombs.Remove(gameObject);
         Destroy(gameObject);
 
-        //Animation
         LastBombExplosion = Instantiate(BombExplosion, v, Quaternion.identity);
-
-        //Text
-        //v = WorldToCanvasCoords(v);
-        //Text t = Instantiate(HitBombText, v, Quaternion.identity) as Text;
-        //float index = Random.Range(0f, Bomb_Explode_Message.Length);
-        //t.text = Bomb_Explode_Message[(int)index];
-        //t.transform.SetParent(canvas.transform, false);
-        //TextBombsTouched.Add(new TextTimer { text = t, Age_s = Time.time });
 
         if (probability_bomb < MAX_BOMB_SPAWN_probability)
             probability_bomb += Bomb_Spawn_Inc_probability;
@@ -284,6 +277,19 @@ public class TouchManager : MonoBehaviour
 
     private void GameOver()
     {
-        SceneManager.LoadScene("Game Over Single Player");
+        OnPause = true;
+        GameOverPanel.SetActive(true);
+        GameOverPointsText.text += points.ToString("f0");
     }
+
+    public void Restart()
+    {
+        SceneManager.LoadScene("Single Player");
+    }
+
+    public void JumpMenu()
+    {
+        SceneManager.LoadScene("Main Menu");
+    }
+
 }

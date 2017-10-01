@@ -11,7 +11,7 @@ public class CircleClick : MonoBehaviour {
 
     //Use this for initialization
     void Start () {
-          touchM = GameObject.Find("Background").GetComponent<TouchManager>();
+          touchM = GameObject.Find("Touch").GetComponent<TouchManager>();
     }
 
     private void OnMouseDown()

@@ -1,10 +1,20 @@
 fileFormatVersion: 2
 guid: 2aad2fa6bbef0344a8c90f6acd07bf69
-timeCreated: 1506132294
+timeCreated: 1506778438
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - circle: {fileID: 1781901291123880, guid: 5fb2760c308234d4e95197f30f7fa299, type: 2}
+  - pointsText: {instanceID: 0}
+  - BombExplosion: {instanceID: 0}
+  - bomb: {instanceID: 0}
+  - HitBombText: {instanceID: 0}
+  - square: {instanceID: 0}
+  - GameOverPanel: {instanceID: 0}
+  - GameOverPointsText: {instanceID: 0}
+  - canvas: {instanceID: 0}
+  - HitSquare: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
