@@ -18,6 +18,11 @@ public class TimerCounter : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if (touchM.CD.counting)
+        {
+            startTime = Time.time;
+            return;
+        }
         if (touchM.OnPause)
         {
              StopTimer();

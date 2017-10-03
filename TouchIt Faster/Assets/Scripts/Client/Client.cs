@@ -24,7 +24,7 @@ public class Client : MonoBehaviour {
         if (socketReady)
             return;
         // Default host and port values
-        string host = "127.0.0.1";
+        string host = "https://console.firebase.google.com";
         int port = 6321;
 
         //Overwrite default host / port values if there is something in those boxes
