@@ -73,6 +73,7 @@ public class TouchManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+
         CD = CountDown.GetComponent<CountDown>();
        
         gameObject.AddComponent<AudioSource>();
@@ -86,6 +87,8 @@ public class TouchManager : MonoBehaviour
         stageDimensions = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
         X_length = stageDimensions.x - (CircleGO.transform.localScale.x / 1.5f);
         Y_length = stageDimensions.y - (CircleGO.transform.localScale.y * 2 );
+
+        AdManager.Instance.ShowBanner();
     }
 
 
@@ -307,6 +310,9 @@ public class TouchManager : MonoBehaviour
         OnPause = true;
         GameOverPanel.SetActive(true);
         GameOverPointsText.text += Points.ToString("f0");
+
+        //AdManager.Instance.ShowVideo();
+        AdManager.Instance.ShowBanner();
     }
 
     public void Restart()

@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/_Scenes/Single player.unity
     guid: 19cd2f39c5d80464ba9b1d456387273a
   - enabled: 0
-    path: 
+    path: Assets/_Scenes/Game Over Single Player.unity
     guid: e599b492646073a4489cf7d60de280dc
   - enabled: 0
     path: Assets/_Scenes/Chat.unity
