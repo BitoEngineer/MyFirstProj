@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-
 public class TouchManager : MonoBehaviour
 {
 
@@ -32,6 +31,7 @@ public class TouchManager : MonoBehaviour
     public float Prob_Bomb = 0.2f;
     public float Bomb_Spawn_Inc_probability = 0.01f;
     public float MAX_BOMB_SPAWN_probability = 0.5f;
+    private float LastBombSpawn_s = 0f;
     private Dictionary<GameObject, Bomb> AliveBombs = new Dictionary<GameObject, Bomb>();
 
     //SQUARE
@@ -63,6 +63,7 @@ public class TouchManager : MonoBehaviour
     private AudioSource source { get { return GetComponent<AudioSource>(); } }
     public Text CountDown;
     public CountDown CD;
+    private bool AdSeen = false;
 
     private readonly float MAX_POINTS_CIRCLE = 15F;
     private readonly float POINTS_SQUARE = 30F;
@@ -75,7 +76,7 @@ public class TouchManager : MonoBehaviour
     {
 
         CD = CountDown.GetComponent<CountDown>();
-       
+        CD.StartCountDown();
         gameObject.AddComponent<AudioSource>();
         source.clip = CircleSound;
         source.playOnAwake = false;
@@ -87,8 +88,6 @@ public class TouchManager : MonoBehaviour
         stageDimensions = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
         X_length = stageDimensions.x - (CircleGO.transform.localScale.x / 1.5f);
         Y_length = stageDimensions.y - (CircleGO.transform.localScale.y * 2 );
-
-        AdManager.Instance.ShowBanner();
     }
 
 
@@ -98,7 +97,7 @@ public class TouchManager : MonoBehaviour
     {
         if (!OnPause && !CD.counting)
         {
-            CheckGameOver();
+            if(CheckGameOver()) return;
 
             float time = Time.time;
             SpawnObjects(time);
@@ -119,17 +118,23 @@ public class TouchManager : MonoBehaviour
         {
             GenerateCircles();
             GenerateSquare();
+        }
+        if(time - LastBombSpawn_s > Bomb_Spawn_s)
+        {
             GenerateBomb();
         }
     }
 
-    private void CheckGameOver()
+    private bool CheckGameOver()
     {
         if (AliveCircles.Count > MAX_CIRCLES)
         {
             GameOver();
+            return true;
         }
+        return false;
     }
+
     private void CheckSquaresToDestroy(float time){
         foreach (Square s in AliveSpecialCircles.Values)
         {
@@ -178,7 +183,7 @@ public class TouchManager : MonoBehaviour
             scaled.x += scaled.x / ScaleBomb;
             scaled.y += scaled.y / ScaleBomb;
             b.Bomb_GO.transform.localScale = scaled;
-
+            LastBombSpawn_s = b.Age_s;
             AliveBombs.Add(b.Bomb_GO,b);
             return true;
         }
@@ -307,12 +312,11 @@ public class TouchManager : MonoBehaviour
 
     private void GameOver()
     {
+        TimerCounter.Instance.StopTimer();
         OnPause = true;
         GameOverPanel.SetActive(true);
-        GameOverPointsText.text += Points.ToString("f0");
+        GameOverPointsText.text = "Points: "+Points.ToString("f0");
 
-        //AdManager.Instance.ShowVideo();
-        AdManager.Instance.ShowBanner();
     }
 
     public void Restart()
@@ -325,4 +329,36 @@ public class TouchManager : MonoBehaviour
         SceneManager.LoadScene("Main Menu");
     }
 
+    public void ContinueOnClick()
+    {
+        if (!AdSeen)
+        {
+            //AdManager.Instance.showInterstitialAd();
+            AdSeen = true;
+            GameOverPanel.SetActive(false);
+
+            CleanUpCircles();
+            Life1.enabled = false;
+            Life2.enabled = false;
+            Life3.enabled = false;
+            OnPause = false;
+            Lifes = 3;
+            CD.StartCountDown();
+        }
+        else
+        {
+            //Generate text saying that AD already was used
+        }
+        
+    }
+
+    private void CleanUpCircles()
+    {
+        foreach(GameObject c in AliveCircles.Keys)
+        {
+            Destroy(c);
+        }
+
+        AliveCircles.Clear();
+    }
 }

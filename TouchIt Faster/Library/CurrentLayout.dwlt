@@ -65,8 +65,8 @@ MonoBehaviour:
     y: 0
     width: 356
     height: 651
-  m_MinSize: {x: 277, y: 71}
-  m_MaxSize: {x: 4002, y: 4021}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 15}
   m_Panes:
   - {fileID: 15}
@@ -94,10 +94,10 @@ MonoBehaviour:
     y: 0
     width: 1920
     height: 651
-  m_MinSize: {x: 683, y: 221}
-  m_MaxSize: {x: 12008, y: 4021}
+  m_MinSize: {x: 677, y: 221}
+  m_MaxSize: {x: 12002, y: 4021}
   vertical: 0
-  controlID: 46
+  controlID: 11
 --- !u!114 &5
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -144,10 +144,10 @@ MonoBehaviour:
     y: 0
     width: 1920
     height: 926
-  m_MinSize: {x: 683, y: 492}
-  m_MaxSize: {x: 12008, y: 14042}
+  m_MinSize: {x: 677, y: 492}
+  m_MaxSize: {x: 12002, y: 14042}
   vertical: 1
-  controlID: 45
+  controlID: 10
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -167,10 +167,10 @@ MonoBehaviour:
     y: 30
     width: 1920
     height: 926
-  m_MinSize: {x: 683, y: 492}
-  m_MaxSize: {x: 12008, y: 14042}
+  m_MinSize: {x: 677, y: 492}
+  m_MaxSize: {x: 12002, y: 14042}
   vertical: 0
-  controlID: 44
+  controlID: 9
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -192,7 +192,7 @@ MonoBehaviour:
     y: 0
     width: 1920
     height: 976
-  m_MinSize: {x: 950, y: 542}
+  m_MinSize: {x: 950, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
 --- !u!114 &9
 MonoBehaviour:
@@ -359,19 +359,19 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets/Scripts
+    - Assets/Scripts/Single Player Scene
   m_ViewMode: 1
   m_StartGridSize: 73
   m_LastFolders:
-  - Assets/Scripts
+  - Assets/Scripts/Single Player Scene
   m_LastFoldersGridSize: 73
   m_LastProjectPath: C:\Users\BitoEngineer\Documents\MyFirstProj\TouchIt Faster
   m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 99}
-    m_SelectedIDs: a6270000
-    m_LastClickedID: 10150
-    m_ExpandedIDs: 00000000ce07000074260000902600005e270000a62700000c280000182900001a2900001c2900001e290000202900002229000000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 143}
+    m_SelectedIDs: 82280000
+    m_LastClickedID: 10370
+    m_ExpandedIDs: 00000000462700002c2800002e2a0000302a0000322a0000342a0000362a0000382a00003a2a00003c2a00003e2a0000402a000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -399,7 +399,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000742600005e2700000c280000182900001a2900001c2900001e2900002029000022290000
+    m_ExpandedIDs: 00000000462700002c2800002e2a0000302a0000322a0000342a0000362a0000382a00003a2a00003c2a00003e2a0000402a0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -427,7 +427,7 @@ MonoBehaviour:
     m_SelectedInstanceIDs: 
     m_LastClickedInstanceID: 0
     m_HadKeyboardFocusLastEvent: 1
-    m_ExpandedInstanceIDs: c62300005e28000034260000842600003c3b000000000000
+    m_ExpandedInstanceIDs: c62300005e28000034260000842600003c3b0000000000007a320000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -515,9 +515,9 @@ MonoBehaviour:
     height: 630
   m_TreeViewState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 1a270000
+    m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 7a28feff3a29feff4a2afeff562afeff5a2afeff224efeffe04efefff04ffefffc4ffeff0050feff2267feffde67fefff268feff0269feff0a69feff26c9ffff00caffff12cbffff1ecbffff22cbffff64e1ffff20e2ffff34e3ffff44e3ffff4ce3ffff06f6ffffc2f6ffffd4f7ffffe0f7ffffe4f7ffff1afcffff00000000364c0000
+    m_ExpandedIDs: b0a3ffff1afcffff0000000028290000342900006829000098290000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -536,7 +536,7 @@ MonoBehaviour:
       m_ClientGUIView: {fileID: 2}
     m_SearchString: 
   m_ExpandedScenes:
-  - Main Menu
+  - Single player
   m_CurrenRootInstanceID: 0
   m_Locked: 0
   m_CurrentSortingName: TransformSorting
@@ -567,14 +567,14 @@ MonoBehaviour:
     width: 1356
     height: 630
   m_SceneLighting: 1
-  lastFramingTime: 1680.1848658808221
+  lastFramingTime: 51196.866738677214
   m_2DMode: 1
   m_isRotationLocked: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 426.64868, y: 300.20154, z: 0}
+    m_Target: {x: 490.5, y: 306.5, z: 0}
     speed: 2
-    m_Value: {x: 426.64868, y: 300.20154, z: 0}
+    m_Value: {x: 490.5, y: 306.5, z: 0}
   m_RenderMode: 0
   m_ValidateTrueMetals: 0
   m_SceneViewState:
@@ -601,9 +601,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 842.468
+    m_Target: 693.11804
     speed: 2
-    m_Value: 842.468
+    m_Value: 693.11804
   m_Ortho:
     m_Target: 1
     speed: 2

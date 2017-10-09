@@ -24,4 +24,9 @@ public class MainMenuManager : MonoBehaviour {
     {
         SceneManager.LoadScene(sceneName);
     }
+
+    private void OnDestroy()
+    {
+        //AdManager.Instance.DestroyBanner();
+    }
 }

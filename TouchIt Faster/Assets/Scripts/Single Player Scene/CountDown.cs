@@ -8,10 +8,13 @@ public class CountDown : MonoBehaviour {
     public Text countdown;
     public float startTime;
     public bool counting = true;
+    public static CountDown Instance { set; get; }
 
     // Use this for initialization
     void Start () {
+        Instance = this;
         startTime = Time.time;
+        countdown.enabled = true;
     }
 	
 	// Update is called once per frame
@@ -30,7 +33,19 @@ public class CountDown : MonoBehaviour {
 
         if (t > 3f)
         {
+            if (counting)
+                TimerCounter.Instance.ResumeTimer();
             counting = false;
         }
+    }
+
+    public void StartCountDown()
+    {
+        TimerCounter.Instance.StopTimer();
+        startTime = Time.time;
+        countdown.text = "";
+        countdown.enabled = true;
+        
+        counting = true;
     }
 }

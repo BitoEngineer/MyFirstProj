@@ -9,32 +9,21 @@ public class TimerCounter : MonoBehaviour {
     public float startTime;
     private TouchManager touchM;
     private bool active = true;
-
+    private float t;
+    public static TimerCounter Instance { get; set; }
 	// Use this for initialization
 	void Start () {
-        startTime = Time.time;
+        Instance = this;
+        startTime = Time.realtimeSinceStartup;
         touchM = GameObject.Find("Touch").GetComponent<TouchManager>();
     }
 	
 	// Update is called once per frame
 	void Update () {
-        if (touchM.CD.counting)
-        {
-            startTime = Time.time;
-            return;
-        }
-        if (touchM.OnPause)
-        {
-             StopTimer();
-        }
-        else
-        {
-            ResumeTimer();
-        }
 
         if (active)
         {
-            float t = Time.time - startTime;
+            t = Time.realtimeSinceStartup - (startTime ) ;
 
             string minutes = ((int)t / 60).ToString();
             string seconds = (t % 60).ToString("f2");
@@ -47,9 +36,10 @@ public class TimerCounter : MonoBehaviour {
     public void StopTimer()
     {
         active = false;
+
     }
 
-    public void ResumeTimer()
+    public void ResumeTimer(float afterSec = 0)
     {
         active = true;
     }

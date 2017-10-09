@@ -18,6 +18,7 @@ public class ReturnBack : MonoBehaviour {
     public void OnMouseDown()
     {
         touchM.OnPause = true;
+        TimerCounter.Instance.StopTimer();
         ExitPopup.SetActive(true);
     }
 
@@ -30,6 +31,7 @@ public class ReturnBack : MonoBehaviour {
     {
         ExitPopup.SetActive(false);
         touchM.OnPause = false;
+        TimerCounter.Instance.ResumeTimer();
 
     }
 }
