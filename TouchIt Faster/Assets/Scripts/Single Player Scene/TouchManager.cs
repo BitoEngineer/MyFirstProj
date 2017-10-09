@@ -67,8 +67,8 @@ public class TouchManager : MonoBehaviour
 
     private readonly float MAX_POINTS_CIRCLE = 15F;
     private readonly float POINTS_SQUARE = 30F;
-   
-
+    private RectTransform CircleRT;
+    public GameObject Grey_Circle;
 
 
     // Use this for initialization
@@ -86,8 +86,9 @@ public class TouchManager : MonoBehaviour
         Points = 0;
       
         stageDimensions = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
-        X_length = stageDimensions.x - (CircleGO.transform.localScale.x / 1.5f);
-        Y_length = stageDimensions.y - (CircleGO.transform.localScale.y * 2 );
+        CircleRT = Grey_Circle.GetComponent<RectTransform>();
+        X_length = (CanvasRect.sizeDelta.x - CircleRT.sizeDelta.x * 3 )/2;
+        Y_length = (CanvasRect.sizeDelta.y - CircleRT.sizeDelta.y * 5) /2;
     }
 
 
@@ -97,12 +98,14 @@ public class TouchManager : MonoBehaviour
     {
         if (!OnPause && !CD.counting)
         {
-            if(CheckGameOver()) return;
+            if (CheckGameOver()) return;
 
             float time = Time.time;
             SpawnObjects(time);
             CheckSquaresToDestroy(time);
             CheckBombsToDestroy(time);
+
+
         }
         
     }
@@ -179,6 +182,7 @@ public class TouchManager : MonoBehaviour
         {
             Vector3 v = GetVallidCoords();
             Bomb b = new Bomb { Bomb_GO = Instantiate(BombGO, v, Quaternion.identity) as GameObject, Age_s = Time.time };
+            b.Bomb_GO.transform.SetParent(canvas.transform, false);
             Vector3 scaled = b.Bomb_GO.transform.localScale;
             scaled.x += scaled.x / ScaleBomb;
             scaled.y += scaled.y / ScaleBomb;
@@ -228,6 +232,7 @@ public class TouchManager : MonoBehaviour
         {
             Vector3 v = GetVallidCoords();
             GameObject square_go = Instantiate(SpecialCircleGO, v, Quaternion.identity) as GameObject;
+            square_go.transform.SetParent(canvas.transform, false);
             Square s = new Square { Square_GO = square_go, Age_s = Time.time };
             Vector3 scaled = s.Square_GO.transform.localScale;
             scaled.x -= scaled.x / ScaleCircle;
@@ -258,7 +263,7 @@ public class TouchManager : MonoBehaviour
         Vector3 v = GetVallidCoords();
         Circle add = new Circle
         {
-            Circle_Prefab = Instantiate(CircleGO, v, Quaternion.identity) as GameObject,
+            Circle_Prefab = Instantiate(Grey_Circle, v, Quaternion.identity) as GameObject,
             Age_s = Time.time,
             counter = null
         };
@@ -266,7 +271,7 @@ public class TouchManager : MonoBehaviour
         scaled.x -=scaled.x/ScaleCircle;
         scaled.y -= scaled.y/ScaleCircle;
         add.Circle_Prefab.transform.localScale = scaled;
-
+        add.Circle_Prefab.transform.SetParent(canvas.transform, false);
         AliveCircles.Add(add.Circle_Prefab, add);
         LastCircleSpawnAge_s = Time.time;
         
@@ -278,7 +283,8 @@ public class TouchManager : MonoBehaviour
         float x = Random.Range(-X_length, X_length);
         float y = Random.Range(-Y_length, Y_length);
         v.x = x; v.y = y; v.z = transform.position.z - 1;
-        while (Physics.CheckSphere(v, CircleGO.transform.localScale.x))
+
+        while (Physics.CheckSphere(v, CircleRT.sizeDelta.x))
         {
             v.x = Random.Range(-X_length, X_length); v.y = Random.Range(-Y_length, Y_length); ;
         }

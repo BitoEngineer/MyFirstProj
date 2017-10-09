@@ -12,7 +12,7 @@ public class BombClick : MonoBehaviour {
         touchM = GameObject.Find("Touch").GetComponent<TouchManager>();
     }
 
-    private void OnMouseDown()
+    public void OnPointerEnter()
     {
         if(!touchM.OnPause) 
             touchM.BombTouched(gameObject);

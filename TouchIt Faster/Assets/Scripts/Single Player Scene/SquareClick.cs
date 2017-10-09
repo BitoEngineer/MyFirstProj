@@ -13,7 +13,7 @@ public class SquareClick : MonoBehaviour {
         touchM = GameObject.Find("Touch").GetComponent<TouchManager>();
     }
 
-    private void OnMouseDown()
+    public void OnPointerEnter()
     {
         if (!touchM.OnPause)
         {

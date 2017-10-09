@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -15,16 +16,13 @@ public class CircleClick : MonoBehaviour {
           touchM = GameObject.Find("Touch").GetComponent<TouchManager>();
     }
 
-    private void OnMouseDown()
+    public void OnPointerEnter()
     {
-        //ServerManager.Instance.Send(0, new MousePosition(){ x = Input.mousePosition.x, y = Input.mousePosition.y });
         if (!touchM.OnPause)
         {
             touchM.PointsUpdate(gameObject);
-            Destroy(gameObject); 
+            Destroy(gameObject);
         }
-              
     }
-
 
 }
