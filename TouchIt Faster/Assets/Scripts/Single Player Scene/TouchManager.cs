@@ -11,7 +11,9 @@ public class TouchManager : MonoBehaviour
 
 
     //CIRCLES
-    public GameObject CircleGO;
+    public GameObject Circle_Black_GO;
+    public GameObject Circle_Red_GO;
+    public GameObject Circle_Blue_GO;
     public float ScaleCircle = 10;
     public Text PointsText;
     private Dictionary<GameObject, Circle> AliveCircles = new Dictionary<GameObject, Circle>();
@@ -67,14 +69,16 @@ public class TouchManager : MonoBehaviour
 
     private readonly float MAX_POINTS_CIRCLE = 15F;
     private readonly float POINTS_SQUARE = 30F;
-   
+    private GameObject[] Circles = new GameObject[3];
 
 
 
     // Use this for initialization
     void Start()
     {
-
+        Circles[0] = Circle_Black_GO;
+        Circles[1] = Circle_Red_GO;
+        Circles[2] = Circle_Blue_GO;
         CD = CountDown.GetComponent<CountDown>();
         CD.StartCountDown();
         gameObject.AddComponent<AudioSource>();
@@ -86,8 +90,8 @@ public class TouchManager : MonoBehaviour
         Points = 0;
       
         stageDimensions = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
-        X_length = stageDimensions.x - (CircleGO.transform.localScale.x / 1.5f);
-        Y_length = stageDimensions.y - (CircleGO.transform.localScale.y * 2 );
+        X_length = stageDimensions.x - (Circle_Black_GO.transform.localScale.x / 1.5f);
+        Y_length = stageDimensions.y - (Circle_Black_GO.transform.localScale.y * 2 );
     }
 
 
@@ -256,9 +260,10 @@ public class TouchManager : MonoBehaviour
     private void GenerateCircles()
     {
         Vector3 v = GetVallidCoords();
+        int index = Random.Range(0, 3);
         Circle add = new Circle
         {
-            Circle_Prefab = Instantiate(CircleGO, v, Quaternion.identity) as GameObject,
+            Circle_Prefab = Instantiate(Circles[index], v, Quaternion.identity) as GameObject,
             Age_s = Time.time,
             counter = null
         };
@@ -278,7 +283,7 @@ public class TouchManager : MonoBehaviour
         float x = Random.Range(-X_length, X_length);
         float y = Random.Range(-Y_length, Y_length);
         v.x = x; v.y = y; v.z = transform.position.z - 1;
-        while (Physics.CheckSphere(v, CircleGO.transform.localScale.x))
+        while (Physics.CheckSphere(v, Circle_Black_GO.transform.localScale.x))
         {
             v.x = Random.Range(-X_length, X_length); v.y = Random.Range(-Y_length, Y_length); ;
         }
