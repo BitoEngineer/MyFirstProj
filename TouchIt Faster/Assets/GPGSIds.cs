@@ -22,9 +22,9 @@
 ///
 
 
-public static class GoogleConstants
+public static class GPGSIds
 {
-        public const string leaderboard_touchit_faster = "CgkI7tzZmd0LEAIQAQ"; // <GPGSID>
+        public const string achievement_test = "CgkI36T0mt0QEAIQAQ"; // <GPGSID>
 
 }
 

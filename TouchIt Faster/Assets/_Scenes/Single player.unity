@@ -611,9 +611,10 @@ MonoBehaviour:
   ScaleCircle: 10
   PointsText: {fileID: 1511296164}
   CIRCLE_SPAWN_s: 2
-  CIRCLE_SPAWN_LIMIT_s: 0.4
+  CIRCLE_SPAWN_LIMIT_s: 0.3
   DEC_CIRCLE_SPAWN_s: 0.1
   MAX_CIRCLES: 5
+  CIRCLE_LIFETIME_s: 1
   BombExplosion: {fileID: 1635876460730662, guid: 0335b417f8c06ea4dbdb4c22008f1404,
     type: 2}
   ScaleBomb: 10
@@ -626,7 +627,7 @@ MonoBehaviour:
   MAX_BOMB_SPAWN_probability: 0.8
   SpecialCircleGO: {fileID: 1712286596921222, guid: c833637685e07e5458e19adc64b7da32,
     type: 2}
-  SpecialCircleLifeTime_s: 0.5
+  SpecialCircleLifeTime_s: 0.8
   Prob_SpecialCircle: 0.5
   Life1: {fileID: 1504718010}
   Life2: {fileID: 1689846685}

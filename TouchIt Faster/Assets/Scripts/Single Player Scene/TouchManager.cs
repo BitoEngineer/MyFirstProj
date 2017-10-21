@@ -22,6 +22,7 @@ public class TouchManager : MonoBehaviour
     public float CIRCLE_SPAWN_LIMIT_s = 2f;
     public float DEC_CIRCLE_SPAWN_s = 0.2f;
     public float MAX_CIRCLES = 5;
+    public float CIRCLE_LIFETIME_s = 2.0f;
 
     //BOMB
     public GameObject BombExplosion;
@@ -90,8 +91,8 @@ public class TouchManager : MonoBehaviour
         Points = 0;
       
         stageDimensions = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
-        X_length = stageDimensions.x - (Circle_Black_GO.transform.localScale.x / 1.5f);
-        Y_length = stageDimensions.y - (Circle_Black_GO.transform.localScale.y * 2 );
+        X_length = stageDimensions.x - (Circle_Black_GO.transform.localScale.x);
+        Y_length = stageDimensions.y - (Circle_Black_GO.transform.localScale.y * 4 );
     }
 
 
@@ -107,6 +108,7 @@ public class TouchManager : MonoBehaviour
             SpawnObjects(time);
             CheckSquaresToDestroy(time);
             CheckBombsToDestroy(time);
+            CheckCirclesToDestroy(time);
         }
         
     }
@@ -161,6 +163,22 @@ public class TouchManager : MonoBehaviour
 
     }
 
+    public void CheckCirclesToDestroy(float time)
+    {
+        foreach(Circle c in AliveCircles.Values)
+        {
+            if(time - c.Age_s > CIRCLE_LIFETIME_s)
+            {
+                GameObject circle = c.Circle_Prefab;
+                Vector3 v = c.Circle_Prefab.transform.position;
+                AliveCircles.Remove(circle);
+                Destroy(circle);
+                GenerateBomb(v);
+            }
+        }
+    }
+
+
     private void CheckBombsToDestroy(float time)
     {
         foreach (Bomb b in AliveBombs.Values)
@@ -192,6 +210,17 @@ public class TouchManager : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    private void GenerateBomb(Vector3 v)
+    {
+        Bomb b = new Bomb { Bomb_GO = Instantiate(BombGO, v, Quaternion.identity) as GameObject, Age_s = Time.time };
+        Vector3 scaled = b.Bomb_GO.transform.localScale;
+        scaled.x += scaled.x / ScaleBomb;
+        scaled.y += scaled.y / ScaleBomb;
+        b.Bomb_GO.transform.localScale = scaled;
+        LastBombSpawn_s = b.Age_s;
+        AliveBombs.Add(b.Bomb_GO, b);
     }
 
     public void BombTouched(GameObject gameObject)

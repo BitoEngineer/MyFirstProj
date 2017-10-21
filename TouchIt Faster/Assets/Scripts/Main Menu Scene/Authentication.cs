@@ -17,10 +17,10 @@ public class Authentication : MonoBehaviour {
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         //GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        //        .requestEmail()
+        //       .requestEmail()
         //        .build();
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
-        PlayGamesPlatform.Activate();
+
     }
 	
 	// Update is called once per frame
@@ -30,27 +30,37 @@ public class Authentication : MonoBehaviour {
 
     public void OnLoginClick()
     {
-        Social.localUser.Authenticate((bool success)=>
+        if (!Social.localUser.authenticated)
         {
-            if (success)
+            Social.localUser.Authenticate((bool success) =>
             {
-                ((GooglePlayGames.PlayGamesPlatform)Social.Active).SetGravityForPopups(Gravity.BOTTOM);
-                Debug.Log("You have successfully logged in!");
-            }
+                if (success)
+                {
+                    ((PlayGamesPlatform)Social.Active).SetGravityForPopups(Gravity.TOP);
+                    Debug.Log("Authentication successful");
+                    string userInfo = "Username: " + Social.localUser.userName +
+                        "\nUser ID: " + Social.localUser.id +
+                        "\nIsUnderage: " + Social.localUser.underage;
+                    Debug.Log(userInfo);
+                }
 
-            else
-            {
-                Debug.Log("Login failed!");
-            }
-        });
+                else
+                {
+                    Debug.Log("Login failed!");
+                }
+            });
+        }
+        
+        //AuthenticateUser();
 
     }
 
 
     public void AuthenticateUser()
     {
+
         Firebase.Auth.Credential credential =
-        Firebase.Auth.GoogleAuthProvider.GetCredential(googleIdToken, googleAccessToken);
+        Firebase.Auth.GoogleAuthProvider.GetCredential(googleIdToken, null);
         auth.SignInWithCredentialAsync(credential).ContinueWith(task => {
             if (task.IsCanceled)
             {
