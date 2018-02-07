@@ -27,6 +27,7 @@ public class AdManager : MonoBehaviour
 
     private void showBannerAd()
     {
+        return;
         string adID = "ca-app-pub-3940256099942544/6300978111";
 
         //***For Testing in the Device***
@@ -52,6 +53,7 @@ public class AdManager : MonoBehaviour
 
     public void showInterstitialAd()
     {
+        return;
         //Show Ad
         if (interstitial.IsLoaded())
         {
@@ -68,6 +70,7 @@ public class AdManager : MonoBehaviour
     InterstitialAd interstitial;
     private void RequestInterstitialAds()
     {
+        return;
         string adID = "ca-app-pub-3940256099942544/1033173712";
 
 #if UNITY_ANDROID

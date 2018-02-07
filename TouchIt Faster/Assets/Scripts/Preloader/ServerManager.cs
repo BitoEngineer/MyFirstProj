@@ -1,10 +1,12 @@
-﻿using Assets.Server.Protocol;
+﻿using Assets.Server.Models;
+using Assets.Server.Protocol;
 using LitJson;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class ServerManager : MonoBehaviour {
@@ -20,6 +22,11 @@ public class ServerManager : MonoBehaviour {
     private byte[] bufferCallback = new byte[MAX_BYTES];
     private List<byte> buffer = new List<byte>();
 
+    public enum ReplyResult { Timedout, ServerUnavailable, Success }
+    public delegate void ReplyReceived(JsonPacket p, ReplyResult result);
+
+    private Dictionary<int, ReplyReceived> waitingReply = new Dictionary<int, ReplyReceived>();
+    private Dictionary<int, Timer> waitingTimers = new Dictionary<int, Timer>();
 
 
     // Use this for initialization
@@ -27,8 +34,8 @@ public class ServerManager : MonoBehaviour {
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        ClientId = "1234565";
-        ServerName = "192.168.1.3";
+        ClientId = SystemInfo.deviceUniqueIdentifier;
+        ServerName = "192.168.1.70";
         ServerPort = 2222;
 
         socket = new TcpClient(ServerName, ServerPort);
@@ -37,11 +44,16 @@ public class ServerManager : MonoBehaviour {
         startReceiving();
     }
 
+    public void SetClientID(string clientID)
+    {
+        this.ClientId = clientID;
+    }
 
     DateTime lastRetry = DateTime.UtcNow;
     private void Send(object obj)
     {
-        byte[] packet = (byte[])obj;
+        JsonPacket jpacket = (JsonPacket)obj;
+        byte[] packet = jpacket.GetPacket();
 
         bool retryConnect = false;
 
@@ -60,6 +72,8 @@ public class ServerManager : MonoBehaviour {
 
         if (retryConnect)
         {
+            Process(jpacket, ReplyResult.ServerUnavailable);
+
             if ((DateTime.UtcNow - lastRetry).TotalSeconds > 10)
             {
                 socket = new TcpClient(ServerName, ServerPort);
@@ -68,16 +82,41 @@ public class ServerManager : MonoBehaviour {
         }
     }
 
-    public void Send(JsonPacket p)
+    private void Send(JsonPacket p)
     {
-        ThreadPool.QueueUserWorkItem(Send, p.GetPacket());
+        ThreadPool.QueueUserWorkItem(Send, p);
     }
 
-    public void Send(byte contentType, object o)
+    public void Send(byte contentType, object o, ReplyReceived callback = null, int timeoutMs = 0)
     {
-        ThreadPool.QueueUserWorkItem(Send, (new JsonPacket(ClientId, contentType, JsonMapper.ToJson(o))).GetPacket());
+        JsonPacket p = new JsonPacket(ClientId, contentType, JsonUtility.ToJson(o));
+
+        if (callback != null)
+        {
+            waitingReply.Add(p.PacketID, callback);
+        }
+        
+        if(timeoutMs > 0)
+        {
+            Timer t = new Timer(timeElapsed, p, timeoutMs, timeoutMs);
+            waitingTimers.Add(p.PacketID, t);
+        }
+
+        ThreadPool.QueueUserWorkItem(Send, p);
     }
-    
+
+    private void timeElapsed(object state)
+    {
+        JsonPacket p = (JsonPacket)state;
+        if (waitingReply.ContainsKey(p.PacketID))
+        {
+            ReplyReceived r = waitingReply[p.PacketID];
+            waitingReply.Remove(p.PacketID);
+            r(p, ReplyResult.Timedout);
+        }
+        waitingTimers[p.PacketID].Dispose();
+    }
+
     private void startReceiving()
     {
         socket.Client.BeginReceive(bufferCallback, 0, bufferCallback.Length, SocketFlags.None, new AsyncCallback(receiveCallback), this);
@@ -109,20 +148,32 @@ public class ServerManager : MonoBehaviour {
         if (JsonPacket.DeserializePacket(buffer, out p))
         {
             if (!string.IsNullOrEmpty(p.ContentJson))
-                Process(p);
+                Task.Run(()=>Process(p));
             return true;
         }
 
         return false;
     }
 
-    private void Process(JsonPacket p)
+    private void Process(JsonPacket p, ReplyResult result = ReplyResult.Success)
     {
+        if (waitingReply.ContainsKey(p.PacketID))
+        {
+            ReplyReceived r = waitingReply[p.PacketID];
+            waitingReply.Remove(p.PacketID);
+            r(p, result);
+            return;
+        }
+
+        if (waitingTimers.ContainsKey(p.PacketID))
+        {
+            waitingTimers[p.PacketID].Dispose();
+        }
+
         switch (p.ContentType)
         {
             default:
                 break;
-                
         }
     }
 }

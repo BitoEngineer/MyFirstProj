@@ -15,14 +15,16 @@ public class PreloaderManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        DontDestroyOnLoad(gameObject);
+
         PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
             // enables saving game progress.
-            .EnableSavedGames()
+            //.EnableSavedGames()
             // registers a callback to handle game invitations received while the game is not running.
-            .WithInvitationDelegate((x, y) => Debug.Log("Invitation received"))
+            //.WithInvitationDelegate((x, y) => Debug.Log("Invitation received"))
             // registers a callback for turn based match notifications received while the
             // game is not running.
-            .WithMatchDelegate((x, y) => Debug.Log("Match turn received"))
+            //.WithMatchDelegate((x, y) => Debug.Log("Match turn received"))
             // requests the email address of the player be available.
             // Will bring up a prompt for consent.
             .RequestEmail()

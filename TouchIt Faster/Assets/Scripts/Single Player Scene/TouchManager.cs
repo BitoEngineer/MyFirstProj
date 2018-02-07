@@ -225,14 +225,13 @@ public class TouchManager : MonoBehaviour
 
     public void BombTouched(GameObject gameObject)
     {
-
-
         Vector3 v = gameObject.transform.position;
         Points = Points * (1 - HitBombDamage_percentage);
         PointsText.text = Points.ToString("f0");
         AliveBombs.Remove(gameObject);
         Destroy(gameObject);
-        Instantiate(BombExplosion, v, Quaternion.identity);
+        GameObject anim = Instantiate(BombExplosion, v, Quaternion.identity);
+
 
         if (Prob_Bomb < MAX_BOMB_SPAWN_probability)
             Prob_Bomb += Bomb_Spawn_Inc_probability;

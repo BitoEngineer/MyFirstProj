@@ -9,7 +9,7 @@ public class Authentication : MonoBehaviour {
 
     Firebase.Auth.FirebaseAuth auth;
     public string googleIdToken = "", googleAccessToken = "";
-    public string ClientID = "574776742495-hn1nvvf6au6q261bi9ij7jvmsgk4oodh.apps.googleusercontent.com";
+    public string ClientID = "574776742495-hkkjt0av75rdb3ipceh6iefugrikuldm.apps.googleusercontent.com";
 
 
     // Use this for initialization
@@ -36,11 +36,14 @@ public class Authentication : MonoBehaviour {
             {
                 if (success)
                 {
-                    ((PlayGamesPlatform)Social.Active).SetGravityForPopups(Gravity.TOP);
                     Debug.Log("Authentication successful");
+                    ((PlayGamesPlatform)Social.Active).SetGravityForPopups(Gravity.TOP);
                     string userInfo = "Username: " + Social.localUser.userName +
                         "\nUser ID: " + Social.localUser.id +
                         "\nIsUnderage: " + Social.localUser.underage;
+
+
+
                     Debug.Log(userInfo);
                 }
 

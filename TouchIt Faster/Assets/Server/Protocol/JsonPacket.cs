@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LitJson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ namespace Assets.Server.Protocol
         public const byte FINALIZER = 0x04;
 
         public string ClientID { get; set; }
+        public int PacketID { get; private set; }
         public int ContentType { get; set; }
         public string ContentJson { get; set; }
 
@@ -21,6 +23,21 @@ namespace Assets.Server.Protocol
             ClientID = clientId;
             ContentType = contentType;
             ContentJson = contentJson;
+            PacketID = (int)(DateTime.UtcNow-DateTime.UtcNow.Date).TotalMilliseconds;
+        }
+
+        protected JsonPacket(string clientId, int contentType, string contentJson, int packetId)
+        {
+            ClientID = clientId;
+            ContentType = contentType;
+            ContentJson = contentJson;
+            PacketID = packetId;
+        }
+
+        public T DeserializeContent<T>()
+        {
+            //return JsonMapper.ToObject<T>(ContentJson);
+            return JsonUtility.FromJson<T>(ContentJson);
         }
 
         public byte[] GetPacket()
@@ -28,6 +45,7 @@ namespace Assets.Server.Protocol
             BinaryContentCreator payload = new BinaryContentCreator();
 
             payload.AddString(ClientID ?? "");
+            payload.AddInt(PacketID, 4);
             payload.AddInt(ContentType, 2);
             payload.AddString(ContentJson);
 
@@ -90,15 +108,18 @@ namespace Assets.Server.Protocol
                 return false;
             }
 
+            buffer.RemoveRange(0, reader.CurrentIndex);
+
             // Decode payload
 
             reader = new BinaryContentReader(payload);
 
             string clientId = reader.ReadString();
+            int packetId = reader.ReadInt(4);
             int contentType = reader.ReadInt(2);
             string json = reader.ReadString();
 
-            p = new JsonPacket(clientId, contentType, json);
+            p = new JsonPacket(clientId, contentType, json, packetId);
 
             return true;
         }
