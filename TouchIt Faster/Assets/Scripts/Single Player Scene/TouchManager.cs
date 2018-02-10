@@ -53,7 +53,9 @@ public class TouchManager : MonoBehaviour
     public Text GameOverPointsText;
     public bool OnPause = false;
     public Canvas canvas;
+    public Canvas SpawnerCanvas;
     private RectTransform CanvasRect;
+    private RectTransform SpawnerCanvasRect;
     public Text SpecialCircleHittedText;
     public float SpecialCircleTextLifeTime_s = 1f;
     private float X_length;
@@ -67,6 +69,7 @@ public class TouchManager : MonoBehaviour
     public Text CountDown;
     public CountDown CD;
     private bool AdSeen = false;
+    private Vector3 CircleSize, BombSize;
 
     private readonly float MAX_POINTS_CIRCLE = 15F;
     private readonly float POINTS_SQUARE = 30F;
@@ -87,12 +90,17 @@ public class TouchManager : MonoBehaviour
         source.playOnAwake = false;
 
         CanvasRect = canvas.GetComponent<RectTransform>();
+        SpawnerCanvasRect = SpawnerCanvas.GetComponent<RectTransform>();
 
         Points = 0;
       
         stageDimensions = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
         X_length = stageDimensions.x - (Circle_Black_GO.transform.localScale.x);
         Y_length = stageDimensions.y - (Circle_Black_GO.transform.localScale.y * 4 );
+
+        CircleSize = new Vector3(CanvasRect.rect.width/32, CanvasRect.rect.width / 32, 0);
+        BombSize = new Vector3(CanvasRect.rect.width/30, CanvasRect.rect.width / 30, 0);
+        
     }
 
 
@@ -199,12 +207,11 @@ public class TouchManager : MonoBehaviour
         float randomBomb = Random.Range(0f, 100f) / 100f;
         if (randomBomb <= Prob_Bomb)
         {
-            Vector3 v = GetVallidCoords();
+            BoxCollider bc = BombGO.GetComponent<BoxCollider>();
+            Vector3 v = GetVallidCoords(bc.size.x*100);
             Bomb b = new Bomb { Bomb_GO = Instantiate(BombGO, v, Quaternion.identity) as GameObject, Age_s = Time.time };
-            Vector3 scaled = b.Bomb_GO.transform.localScale;
-            scaled.x += scaled.x / ScaleBomb;
-            scaled.y += scaled.y / ScaleBomb;
-            b.Bomb_GO.transform.localScale = scaled;
+            b.Bomb_GO.transform.SetParent(SpawnerCanvas.transform, false);
+            b.Bomb_GO.transform.localScale = BombSize;
             LastBombSpawn_s = b.Age_s;
             AliveBombs.Add(b.Bomb_GO,b);
             return true;
@@ -215,10 +222,8 @@ public class TouchManager : MonoBehaviour
     private void GenerateBomb(Vector3 v)
     {
         Bomb b = new Bomb { Bomb_GO = Instantiate(BombGO, v, Quaternion.identity) as GameObject, Age_s = Time.time };
-        Vector3 scaled = b.Bomb_GO.transform.localScale;
-        scaled.x += scaled.x / ScaleBomb;
-        scaled.y += scaled.y / ScaleBomb;
-        b.Bomb_GO.transform.localScale = scaled;
+        b.Bomb_GO.transform.SetParent(SpawnerCanvas.transform, false);
+        b.Bomb_GO.transform.localScale = CircleSize;
         LastBombSpawn_s = b.Age_s;
         AliveBombs.Add(b.Bomb_GO, b);
     }
@@ -231,7 +236,8 @@ public class TouchManager : MonoBehaviour
         AliveBombs.Remove(gameObject);
         Destroy(gameObject);
         GameObject anim = Instantiate(BombExplosion, v, Quaternion.identity);
-
+        anim.transform.SetParent(GameObject.FindGameObjectWithTag("CanvasSpawner").transform, false);
+        Destroy(anim, 0.8f); //fix this
 
         if (Prob_Bomb < MAX_BOMB_SPAWN_probability)
             Prob_Bomb += Bomb_Spawn_Inc_probability;
@@ -258,12 +264,14 @@ public class TouchManager : MonoBehaviour
         float randomSquare = Random.Range(0f, 100f) / 100f;
         if (randomSquare <= Prob_SpecialCircle)
         {
-            Vector3 v = GetVallidCoords();
+            BoxCollider bc = SpecialCircleGO.GetComponent<BoxCollider>();
+            Vector3 v = GetVallidCoords(bc.size.x*100);
             GameObject square_go = Instantiate(SpecialCircleGO, v, Quaternion.identity) as GameObject;
+            square_go.transform.SetParent(SpawnerCanvas.transform, false);
             Square s = new Square { Square_GO = square_go, Age_s = Time.time };
             Vector3 scaled = s.Square_GO.transform.localScale;
-            scaled.x -= scaled.x / ScaleCircle;
-            scaled.y -= scaled.y / ScaleCircle;
+            scaled.x = CircleSize.x /2;
+            scaled.y = CircleSize.y / 2;
             s.Square_GO.transform.localScale = scaled;
             AliveSpecialCircles.Add(square_go, s);
             return true;
@@ -287,34 +295,35 @@ public class TouchManager : MonoBehaviour
 
     private void GenerateCircles()
     {
-        Vector3 v = GetVallidCoords();
         int index = Random.Range(0, 3);
+        GameObject circle = Circles[index];
+        BoxCollider b = circle.GetComponent<BoxCollider>();
+        Vector3 v = GetVallidCoords((b.size.x/2)*100);
         Circle add = new Circle
         {
-            Circle_Prefab = Instantiate(Circles[index], v, Quaternion.identity) as GameObject,
+            Circle_Prefab = Instantiate(circle, v, Quaternion.identity) as GameObject,
             Age_s = Time.time,
             counter = null
         };
-        Vector3 scaled = add.Circle_Prefab.transform.localScale;
-        scaled.x -=scaled.x/ScaleCircle;
-        scaled.y -= scaled.y/ScaleCircle;
-        add.Circle_Prefab.transform.localScale = scaled;
+        add.Circle_Prefab.transform.SetParent(SpawnerCanvas.transform, false);
+        add.Circle_Prefab.transform.localScale = CircleSize;
 
         AliveCircles.Add(add.Circle_Prefab, add);
         LastCircleSpawnAge_s = Time.time;
         
     }
 
-    private Vector3 GetVallidCoords()
+    private Vector3 GetVallidCoords(float halfWidth)
     {
         Vector3 v =transform.position;
-        float x = Random.Range(-X_length, X_length);
-        float y = Random.Range(-Y_length, Y_length);
-        v.x = x; v.y = y; v.z = transform.position.z - 1;
-        while (Physics.CheckSphere(v, Circle_Black_GO.transform.localScale.x))
+        bool valid = false;
+        while (!valid)
         {
-            v.x = Random.Range(-X_length, X_length); v.y = Random.Range(-Y_length, Y_length); ;
+            v.x = Random.Range(-SpawnerCanvasRect.rect.width / 2, SpawnerCanvasRect.rect.width / 2);
+            v.y = Random.Range(-SpawnerCanvasRect.rect.height / 2, SpawnerCanvasRect.rect.height / 2);
+            valid = !Physics.CheckSphere(v, halfWidth);
         }
+        v.z = -100;
         return v;
     }
 

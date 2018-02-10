@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: 36be99e2403f26e44b7c7d2861079ccf
+timeCreated: 1506778438
+licenseType: Free
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - circle: {fileID: 1781901291123880, guid: 5fb2760c308234d4e95197f30f7fa299, type: 2}
+  - pointsText: {instanceID: 0}
+  - BombExplosion: {instanceID: 0}
+  - bomb: {instanceID: 0}
+  - HitBombText: {instanceID: 0}
+  - square: {instanceID: 0}
+  - GameOverPanel: {instanceID: 0}
+  - GameOverPointsText: {instanceID: 0}
+  - canvas: {instanceID: 0}
+  - HitSquare: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

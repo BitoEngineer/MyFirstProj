@@ -1,6 +1,5 @@
 ﻿using Assets.Server.Models;
 using Assets.Server.Protocol;
-using LitJson;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,6 +26,7 @@ public class ServerManager : MonoBehaviour {
 
     private Dictionary<int, ReplyReceived> waitingReply = new Dictionary<int, ReplyReceived>();
     private Dictionary<int, Timer> waitingTimers = new Dictionary<int, Timer>();
+    public ReplyReceived PacketReceivedEvent { get; set; }
 
 
     // Use this for initialization
@@ -39,7 +39,6 @@ public class ServerManager : MonoBehaviour {
         ServerPort = 2222;
 
         socket = new TcpClient(ServerName, ServerPort);
-        socket.Connect(ServerName, ServerPort);
 
         startReceiving();
     }
@@ -87,9 +86,9 @@ public class ServerManager : MonoBehaviour {
         ThreadPool.QueueUserWorkItem(Send, p);
     }
 
-    public void Send(byte contentType, object o, ReplyReceived callback = null, int timeoutMs = 0)
+    public void Send(TouchItFasterContentType contentType, object o, ReplyReceived callback = null, int timeoutMs = 0)
     {
-        JsonPacket p = new JsonPacket(ClientId, contentType, JsonUtility.ToJson(o));
+        JsonPacket p = new JsonPacket(ClientId, (byte)contentType, JsonUtility.ToJson(o));
 
         if (callback != null)
         {
@@ -170,10 +169,7 @@ public class ServerManager : MonoBehaviour {
             waitingTimers[p.PacketID].Dispose();
         }
 
-        switch (p.ContentType)
-        {
-            default:
-                break;
-        }
+        if(PacketReceivedEvent!=null)
+            PacketReceivedEvent(p, result);
     }
 }

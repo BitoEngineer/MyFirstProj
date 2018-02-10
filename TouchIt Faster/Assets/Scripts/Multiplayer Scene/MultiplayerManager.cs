@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using Assets.Server.Protocol;
 using UnityEngine.UI;
 using System;
+using MyFirstServ.Models.TouchItFaster;
 
 public class MultiplayerManager : MonoBehaviour {
 
@@ -16,7 +17,6 @@ public class MultiplayerManager : MonoBehaviour {
     private List<PlayerInfo> Friends = new List<PlayerInfo>();
     private List<GameObject> FriendsGO = new List<GameObject>();
     private List<GameObject> SearchedGO = new List<GameObject>();
-    //private PlayerSearch ps;
 
     private bool FriendsUpdated = false, SearchedPlayers = false;
 
@@ -43,6 +43,16 @@ public class MultiplayerManager : MonoBehaviour {
             {
                 GameObject go=Instantiate(FriendGO, FriendsContainer.transform) as GameObject;
                 go.GetComponentInChildren<Text>().text = f.PlayerName;
+                Button b=go.GetComponent<Button>();
+                b.onClick.AddListener(()=>
+                {
+                    ChallengeRequest cr = new ChallengeRequest()
+                    {
+                        RequesterID = PlayerContainer.Instance.Info.ID,
+                        RequestedID = f.ID
+                    };
+                    ServerManager.Instance.Send(TouchItFasterContentType.ChallengeRequest, cr, ChallengeRequestReply);
+                });
                 FriendsGO.Add(go);
             }
         }
@@ -67,13 +77,55 @@ public class MultiplayerManager : MonoBehaviour {
         }
 	}
 
+    private void ChallengeRequestReply(JsonPacket p, ServerManager.ReplyResult result)
+    {
+        if (result == ServerManager.ReplyResult.Success)
+        {
+            if (p.ContentType == (int)TouchItFasterContentType.ChallengeReply)
+            {
+                var reply = p.DeserializeContent<ChallengeReply>();
+
+                if (reply.Reply == ChallengeReplyType.Waiting)
+                {
+                    ServerManager.Instance.PacketReceivedEvent += GamePacketReceived;
+                }
+            }
+            else
+            {
+                //invalid content type
+            }
+
+        }
+    }
+
+    private void GamePacketReceived(JsonPacket p, ServerManager.ReplyResult result)
+    {
+        if (result == ServerManager.ReplyResult.Success)
+        {
+            if (p.ContentType == (int)TouchItFasterContentType.ChallengeReply)
+            {
+                var reply = p.DeserializeContent<ChallengeReply>();
+
+                if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
+                {
+                    //start game
+                }
+            }
+            else
+            {
+                //invalid content type
+            }
+
+        }
+    }
+
     public void UpdateFriends()
     {
         Request r = new Request()
         {
             ReqType = RequestType.Friends
         };
-        ServerManager.Instance.Send((byte)TouchItFasterContentType.Request, r, RequestFriendsNamesReply);
+        ServerManager.Instance.Send(TouchItFasterContentType.Request, r, RequestFriendsNamesReply);
     }
 
     private void RequestFriendsNamesReply(JsonPacket p, ServerManager.ReplyResult result)
@@ -107,6 +159,7 @@ public class MultiplayerManager : MonoBehaviour {
     {
         //ServerManager.Instance.Send((byte)TouchItFasterContentType.SearchPlayer, new PlayerSearch() { Key = value }, PlayerSearchResult);
     }
+
 
     private void PlayerSearchResult(JsonPacket p, ServerManager.ReplyResult result)
     {

@@ -36,7 +36,7 @@ public class MainMenuManager : MonoBehaviour {
 #if DEBUG
             string debugClientID = "debugtestclientid";
             ServerManager.Instance.SetClientID(debugClientID);
-            ServerManager.Instance.Send((byte)TouchItFasterContentType.Handshake, new Handshake(), HandshakeReply, 5000);
+            ServerManager.Instance.Send(TouchItFasterContentType.Handshake, new Handshake(), HandshakeReply, 5000);
 #else
             Authenticate();
 #endif
@@ -80,7 +80,7 @@ public class MainMenuManager : MonoBehaviour {
         Debug.Log(userInfo);
 
         ServerManager.Instance.SetClientID(Social.localUser.id);
-        ServerManager.Instance.Send((byte)TouchItFasterContentType.Handshake, new Handshake(), HandshakeReply, 5000);
+        ServerManager.Instance.Send(TouchItFasterContentType.Handshake, new Handshake(), HandshakeReply, 5000);
     }
 
     private void Authenticate()
