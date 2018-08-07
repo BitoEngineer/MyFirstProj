@@ -27,8 +27,11 @@ public class TimerCounter : MonoBehaviour {
 
             string minutes = ((int)t / 60).ToString();
             string seconds = (t % 60).ToString("f2");
-
-            timerText.text = minutes + ":" + seconds;
+            string sec= seconds.Split('.')[0];
+            sec= sec.Length > 1 ? sec : "0" + sec;
+            string ms=seconds.Split('.')[1];
+            ms = ms.Length > 1 ? ms : "0" + ms;
+            timerText.text = minutes + ":" + sec + "."+ms;
         }
         
 	} 

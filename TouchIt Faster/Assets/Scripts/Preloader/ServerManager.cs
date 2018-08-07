@@ -35,7 +35,7 @@ public class ServerManager : MonoBehaviour {
         DontDestroyOnLoad(gameObject);
 
         ClientId = SystemInfo.deviceUniqueIdentifier;
-        ServerName = "192.168.1.70";
+        ServerName = "192.168.1.6";
         ServerPort = 2222;
 
         socket = new TcpClient(ServerName, ServerPort);

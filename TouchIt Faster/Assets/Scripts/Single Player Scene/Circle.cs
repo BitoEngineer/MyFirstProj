@@ -8,5 +8,6 @@ public class Circle {
 
 	public GameObject Circle_Prefab { get; set; }
     public float Age_s { get; set; }
+    public Vector3 Position { get; set; }
     public Text counter;
 }

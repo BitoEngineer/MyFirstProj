@@ -108,7 +108,7 @@ public class MultiplayerManager : MonoBehaviour {
 
                 if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
                 {
-                    //start game
+                    ChangeScene("MultiplayerInGame");
                 }
             }
             else

@@ -8,8 +8,6 @@ using UnityEngine.UI;
 
 public class TouchManager : MonoBehaviour
 {
-
-
     //CIRCLES
     public GameObject Circle_Black_GO;
     public GameObject Circle_Red_GO;
@@ -178,10 +176,9 @@ public class TouchManager : MonoBehaviour
             if(time - c.Age_s > CIRCLE_LIFETIME_s)
             {
                 GameObject circle = c.Circle_Prefab;
-                Vector3 v = c.Circle_Prefab.transform.position;
                 AliveCircles.Remove(circle);
-                Destroy(circle);
-                GenerateBomb(v);
+                Destroy(circle);           
+                GenerateBomb(c.Position);
             }
         }
     }
@@ -203,17 +200,12 @@ public class TouchManager : MonoBehaviour
 
     private bool GenerateBomb()
     {
-
         float randomBomb = Random.Range(0f, 100f) / 100f;
         if (randomBomb <= Prob_Bomb)
         {
             BoxCollider bc = BombGO.GetComponent<BoxCollider>();
             Vector3 v = GetVallidCoords(bc.size.x*100);
-            Bomb b = new Bomb { Bomb_GO = Instantiate(BombGO, v, Quaternion.identity) as GameObject, Age_s = Time.time };
-            b.Bomb_GO.transform.SetParent(SpawnerCanvas.transform, false);
-            b.Bomb_GO.transform.localScale = BombSize;
-            LastBombSpawn_s = b.Age_s;
-            AliveBombs.Add(b.Bomb_GO,b);
+            GenerateBomb(v);
             return true;
         }
         return false;
@@ -223,7 +215,7 @@ public class TouchManager : MonoBehaviour
     {
         Bomb b = new Bomb { Bomb_GO = Instantiate(BombGO, v, Quaternion.identity) as GameObject, Age_s = Time.time };
         b.Bomb_GO.transform.SetParent(SpawnerCanvas.transform, false);
-        b.Bomb_GO.transform.localScale = CircleSize;
+        b.Bomb_GO.transform.localScale = BombSize;
         LastBombSpawn_s = b.Age_s;
         AliveBombs.Add(b.Bomb_GO, b);
     }
@@ -236,8 +228,8 @@ public class TouchManager : MonoBehaviour
         AliveBombs.Remove(gameObject);
         Destroy(gameObject);
         GameObject anim = Instantiate(BombExplosion, v, Quaternion.identity);
-        anim.transform.SetParent(GameObject.FindGameObjectWithTag("CanvasSpawner").transform, false);
-        Destroy(anim, 0.8f); //fix this
+        anim.transform.SetParent(SpawnerCanvasRect);
+        Destroy(anim, 0.8f);
 
         if (Prob_Bomb < MAX_BOMB_SPAWN_probability)
             Prob_Bomb += Bomb_Spawn_Inc_probability;
@@ -282,7 +274,7 @@ public class TouchManager : MonoBehaviour
     public void SquareTouched(GameObject go)
     {
         source.PlayOneShot(SquareSound);
-        Vector3 v = WorldToCanvasCoords(go.transform.position);
+        Vector3 v = WorldToCanvasCoords(go.transform.position, SpawnerCanvasRect);
         AliveSpecialCircles.Remove(go);
         Text t = Instantiate(SpecialCircleHittedText, v, Quaternion.identity) as Text;
         t.transform.SetParent(canvas.transform, false);
@@ -298,12 +290,13 @@ public class TouchManager : MonoBehaviour
         int index = Random.Range(0, 3);
         GameObject circle = Circles[index];
         BoxCollider b = circle.GetComponent<BoxCollider>();
-        Vector3 v = GetVallidCoords((b.size.x/2)*100);
+        Vector3 v = GetVallidCoords(0);
         Circle add = new Circle
         {
             Circle_Prefab = Instantiate(circle, v, Quaternion.identity) as GameObject,
             Age_s = Time.time,
-            counter = null
+            counter = null,
+            Position = v
         };
         add.Circle_Prefab.transform.SetParent(SpawnerCanvas.transform, false);
         add.Circle_Prefab.transform.localScale = CircleSize;
@@ -316,14 +309,15 @@ public class TouchManager : MonoBehaviour
     private Vector3 GetVallidCoords(float halfWidth)
     {
         Vector3 v =transform.position;
+        v.z = -100;
         bool valid = false;
         while (!valid)
         {
             v.x = Random.Range(-SpawnerCanvasRect.rect.width / 2, SpawnerCanvasRect.rect.width / 2);
             v.y = Random.Range(-SpawnerCanvasRect.rect.height / 2, SpawnerCanvasRect.rect.height / 2);
-            valid = !Physics.CheckSphere(v, halfWidth);
+            valid = Physics2D.OverlapCircleAll(v, 100).Length == 0;
         }
-        v.z = -100;
+
         return v;
     }
 
@@ -345,10 +339,10 @@ public class TouchManager : MonoBehaviour
         
     }
 
-    public Vector3 WorldToCanvasCoords(Vector3 v)
+    public Vector3 WorldToCanvasCoords(Vector3 v, RectTransform canvas)
     {
-        v.x= ((v.x * CanvasRect.sizeDelta.x) / (stageDimensions.x * 2));
-        v.y= ((v.y * CanvasRect.sizeDelta.y) / (stageDimensions.y * 2));
+        v.x= ((v.x * canvas.sizeDelta.x) / (stageDimensions.x * 2));
+        v.y= ((v.y * canvas.sizeDelta.y) / (stageDimensions.y * 2));
         return v;
     }
 
