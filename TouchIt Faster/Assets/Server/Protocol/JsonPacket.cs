@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 
 namespace Assets.Server.Protocol
 {
+    public enum ReplyStatus : byte { None = 0, Request, OK, Created, NotAuthorized, NoContent, NotFound, BadContent, Forbidden, Conflict, ContentTypeNotFound, InternalServerError };
+
     public class JsonPacket
     {
         public const byte INITIALIZER = 0x01;
@@ -13,30 +15,33 @@ namespace Assets.Server.Protocol
 
         public string ClientID { get; set; }
         public int PacketID { get; private set; }
-        public int ContentType { get; set; }
+        public ReplyStatus ReplyStatus { get; set; }
+        public string ContentType { get; set; }
         public string ContentJson { get; set; }
 
 
-        public JsonPacket(string clientId, int contentType, string contentJson)
+        public JsonPacket(string clientId, string contentType, string contentJson)
         {
             ClientID = clientId;
             ContentType = contentType;
             ContentJson = contentJson;
-            PacketID = (int)(DateTime.UtcNow-DateTime.UtcNow.Date).TotalMilliseconds;
+            PacketID = (int)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
         }
 
-        protected JsonPacket(string clientId, int contentType, string contentJson, int packetId)
+        protected JsonPacket(string clientId, string contentType, string contentJson, ReplyStatus contentResult, int packetId)
         {
             ClientID = clientId;
             ContentType = contentType;
             ContentJson = contentJson;
             PacketID = packetId;
+            ReplyStatus = contentResult;
         }
 
         public T DeserializeContent<T>()
         {
             //return JsonMapper.ToObject<T>(ContentJson);
-            return JsonUtility.FromJson<T>(ContentJson);
+            //return JsonUtility.FromJson<T>(ContentJson);
+            return JsonConvert.DeserializeObject<T>(ContentJson);
         }
 
         public byte[] GetPacket()
@@ -45,7 +50,8 @@ namespace Assets.Server.Protocol
 
             payload.AddString(ClientID ?? "");
             payload.AddInt(PacketID, 4);
-            payload.AddInt(ContentType, 2);
+            payload.AddInt((int)ReplyStatus, 1);
+            payload.AddString(ContentType ?? "");
             payload.AddString(ContentJson);
 
             BinaryContentCreator packet = new BinaryContentCreator();
@@ -76,7 +82,7 @@ namespace Assets.Server.Protocol
 
             if (initializerIdx > 0)
             {
-                Debug.LogFormat("{0} bytes of trush removed", initializerIdx);
+                //Debug.LogFormat("{0} bytes of trush removed", initializerIdx);
                 buffer.RemoveRange(0, initializerIdx);
                 initializerIdx = 0;
             }
@@ -102,7 +108,7 @@ namespace Assets.Server.Protocol
 
             if (reader.ReadInt(1) != FINALIZER)
             {
-                Debug.LogErrorFormat("UNEXPECTED ERROR! {0} bytes removed, finalizer wasn't in the correct place", reader.CurrentIndex);
+                //Debug.LogErrorFormat("UNEXPECTED ERROR! {0} bytes removed, finalizer wasn't in the correct place", reader.CurrentIndex);
                 buffer.RemoveRange(0, reader.CurrentIndex);
                 return false;
             }
@@ -115,10 +121,11 @@ namespace Assets.Server.Protocol
 
             string clientId = reader.ReadString();
             int packetId = reader.ReadInt(4);
-            int contentType = reader.ReadInt(2);
+            ReplyStatus result = (ReplyStatus)reader.ReadInt(1);
+            string contentType = reader.ReadString();
             string json = reader.ReadString();
 
-            p = new JsonPacket(clientId, contentType, json, packetId);
+            p = new JsonPacket(clientId, contentType, json, result, packetId);
 
             return true;
         }

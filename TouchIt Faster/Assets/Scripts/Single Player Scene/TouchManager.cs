@@ -72,6 +72,7 @@ public class TouchManager : MonoBehaviour
     private readonly float MAX_POINTS_CIRCLE = 15F;
     private readonly float POINTS_SQUARE = 30F;
     private GameObject[] Circles = new GameObject[3];
+    public LayerMask mask;
 
 
 
@@ -203,7 +204,7 @@ public class TouchManager : MonoBehaviour
         float randomBomb = Random.Range(0f, 100f) / 100f;
         if (randomBomb <= Prob_Bomb)
         {
-            BoxCollider bc = BombGO.GetComponent<BoxCollider>();
+            BoxCollider2D bc = BombGO.GetComponent<BoxCollider2D>();
             Vector3 v = GetVallidCoords(bc.size.x*100);
             GenerateBomb(v);
             return true;
@@ -256,7 +257,7 @@ public class TouchManager : MonoBehaviour
         float randomSquare = Random.Range(0f, 100f) / 100f;
         if (randomSquare <= Prob_SpecialCircle)
         {
-            BoxCollider bc = SpecialCircleGO.GetComponent<BoxCollider>();
+            BoxCollider2D bc = SpecialCircleGO.GetComponent<BoxCollider2D>();
             Vector3 v = GetVallidCoords(bc.size.x*100);
             GameObject square_go = Instantiate(SpecialCircleGO, v, Quaternion.identity) as GameObject;
             square_go.transform.SetParent(SpawnerCanvas.transform, false);
@@ -289,8 +290,8 @@ public class TouchManager : MonoBehaviour
     {
         int index = Random.Range(0, 3);
         GameObject circle = Circles[index];
-        BoxCollider b = circle.GetComponent<BoxCollider>();
-        Vector3 v = GetVallidCoords(0);
+        BoxCollider2D b = circle.GetComponent<BoxCollider2D>();
+        Vector3 v = GetVallidCoords(b.size.x);
         Circle add = new Circle
         {
             Circle_Prefab = Instantiate(circle, v, Quaternion.identity) as GameObject,
@@ -308,14 +309,13 @@ public class TouchManager : MonoBehaviour
 
     private Vector3 GetVallidCoords(float halfWidth)
     {
-        Vector3 v =transform.position;
-        v.z = -100;
+        Vector3 v = SpawnerCanvasRect.position;
         bool valid = false;
         while (!valid)
         {
-            v.x = Random.Range(-SpawnerCanvasRect.rect.width / 2, SpawnerCanvasRect.rect.width / 2);
-            v.y = Random.Range(-SpawnerCanvasRect.rect.height / 2, SpawnerCanvasRect.rect.height / 2);
-            valid = Physics2D.OverlapCircleAll(v, 100).Length == 0;
+            v.x += Random.Range(-SpawnerCanvasRect.rect.width / 2, SpawnerCanvasRect.rect.width / 2);
+            v.y += Random.Range(-SpawnerCanvasRect.rect.height / 2, SpawnerCanvasRect.rect.height / 2);
+            valid = Physics2D.OverlapCircle(v, halfWidth * 0.0092f) == null;
         }
 
         return v;

@@ -15,7 +15,10 @@ public class MainMenuManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-
+#if DEBUG
+        string debugClientID = "debugtestclientid";
+        ServerManager.Instance.Client.Start(debugClientID);
+#endif
     }
 
     // Update is called once per frame
@@ -34,9 +37,7 @@ public class MainMenuManager : MonoBehaviour {
         if (sceneName == "Multiplayer")
         {
 #if DEBUG
-            string debugClientID = "debugtestclientid";
-            ServerManager.Instance.SetClientID(debugClientID);
-            ServerManager.Instance.Send(TouchItFasterContentType.Handshake, new Handshake(), HandshakeReply, 5000);
+            ServerManager.Instance.Client.Send(URI.CreateUser, null, HandshakeReply, null /* TODO*/, 50000);
 #else
             Authenticate();
 #endif
@@ -47,24 +48,17 @@ public class MainMenuManager : MonoBehaviour {
         }
     }
 
-    private void HandshakeReply(JsonPacket p, ServerManager.ReplyResult result)
+    private void HandshakeReply(JsonPacket p)
     {
-        if(result == ServerManager.ReplyResult.Success)
+        if (p.ReplyStatus == ReplyStatus.OK)
         {
-            if (p.ContentType == (byte)TouchItFasterContentType.PlayerInfo)
-            {
-                PlayerInfo pi = p.DeserializeContent<PlayerInfo>();
-                PlayerContainer.Instance.Info = pi;
-                changeToMultiplayer = true;
-            }
-            else
-            {
-                Debug.Log("Unexpected Content Type: " + p.ContentType);
-            }         
+            PlayerInfo pi = p.DeserializeContent<PlayerInfo>();
+            PlayerContainer.Instance.Info = pi;
+            changeToMultiplayer = true;
         }
         else
         {
-            Debug.Log("Server failed: " + result); // TODO Say to user that there's problems with the server
+            Debug.Log("Server failed: " + p.ReplyStatus); // TODO Say to user that there's problems with the server
         }
 
     }
@@ -79,8 +73,8 @@ public class MainMenuManager : MonoBehaviour {
 
         Debug.Log(userInfo);
 
-        ServerManager.Instance.SetClientID(Social.localUser.id);
-        ServerManager.Instance.Send(TouchItFasterContentType.Handshake, new Handshake(), HandshakeReply, 5000);
+        ServerManager.Instance.Client.Start(Social.localUser.id);
+        ServerManager.Instance.Client.Send(URI.Handshake, new Handshake(), HandshakeReply, null, 5000);
     }
 
     private void Authenticate()

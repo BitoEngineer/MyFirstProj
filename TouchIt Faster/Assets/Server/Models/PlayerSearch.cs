@@ -5,13 +5,10 @@ using System.Text;
 
 namespace Assets.Server.Models
 {
-    public enum RequestType
+    public class PlayerSearch
     {
-        Friends
-    }
+        public string Key { get; set; }
 
-    public class Request
-    {
-        public RequestType ReqType;
+        public PlayerSearch() { }
     }
 }

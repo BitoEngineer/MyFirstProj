@@ -12,164 +12,38 @@ public class ServerManager : MonoBehaviour {
 
     public static ServerManager Instance { set; get; }
 
-    public string ServerName { get; set; }
-    public int ServerPort { get; set; }
-    public string ClientId { get; set; }
-
-    private TcpClient socket;
-    private const int MAX_BYTES = 1024 * 5;
-    private byte[] bufferCallback = new byte[MAX_BYTES];
-    private List<byte> buffer = new List<byte>();
-
-    public enum ReplyResult { Timedout, ServerUnavailable, Success }
-    public delegate void ReplyReceived(JsonPacket p, ReplyResult result);
-
-    private Dictionary<int, ReplyReceived> waitingReply = new Dictionary<int, ReplyReceived>();
-    private Dictionary<int, Timer> waitingTimers = new Dictionary<int, Timer>();
-    public ReplyReceived PacketReceivedEvent { get; set; }
-
+    public readonly MyServClient Client = new MyServClient("192.168.1.70", 2222);
 
     // Use this for initialization
     void Start () {
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        ClientId = SystemInfo.deviceUniqueIdentifier;
-        ServerName = "192.168.1.6";
-        ServerPort = 2222;
-
-        socket = new TcpClient(ServerName, ServerPort);
-
-        startReceiving();
+        Client.OnConnectivityChange += connectivityChanged;
+        Client.LogDebugEvent += logDebug;
+        Client.LogErrorEvent += errorDebug;
     }
 
-    public void SetClientID(string clientID)
+    private void errorDebug(Exception e, string message, object[] args)
     {
-        this.ClientId = clientID;
+        Console.WriteLine("Preloader ERROR: "+ string.Format(message, args));
+        Console.WriteLine("Preloader ERROR: " + e);
     }
 
-    DateTime lastRetry = DateTime.UtcNow;
-    private void Send(object obj)
+    private void logDebug(string message, object[] args)
     {
-        JsonPacket jpacket = (JsonPacket)obj;
-        byte[] packet = jpacket.GetPacket();
-
-        bool retryConnect = false;
-
-        try
-        {
-            if ((socket != null) && socket.Connected)
-                socket.Client.Send(packet, 0, packet.Length, SocketFlags.None);
-            else
-                retryConnect = true;
-        }
-        catch (SocketException e)
-        {
-            Console.Write("ERROR: " + e.Message);
-            retryConnect = true;
-        }
-
-        if (retryConnect)
-        {
-            Process(jpacket, ReplyResult.ServerUnavailable);
-
-            if ((DateTime.UtcNow - lastRetry).TotalSeconds > 10)
-            {
-                socket = new TcpClient(ServerName, ServerPort);
-                socket.Connect(ServerName, ServerPort);
-            }
-        }
+        Console.WriteLine("Preloader: " + string.Format(message, args));
     }
 
-    private void Send(JsonPacket p)
+    private void connectivityChanged(bool connected)
     {
-        ThreadPool.QueueUserWorkItem(Send, p);
-    }
-
-    public void Send(TouchItFasterContentType contentType, object o, ReplyReceived callback = null, int timeoutMs = 0)
-    {
-        JsonPacket p = new JsonPacket(ClientId, (byte)contentType, JsonUtility.ToJson(o));
-
-        if (callback != null)
+        if (!connected)
         {
-            waitingReply.Add(p.PacketID, callback);
+            // TODO - connection to server lost
         }
-        
-        if(timeoutMs > 0)
+        else
         {
-            Timer t = new Timer(timeElapsed, p, timeoutMs, timeoutMs);
-            waitingTimers.Add(p.PacketID, t);
+            Console.WriteLine("Preloader INFO: Connected to server");
         }
-
-        ThreadPool.QueueUserWorkItem(Send, p);
-    }
-
-    private void timeElapsed(object state)
-    {
-        JsonPacket p = (JsonPacket)state;
-        if (waitingReply.ContainsKey(p.PacketID))
-        {
-            ReplyReceived r = waitingReply[p.PacketID];
-            waitingReply.Remove(p.PacketID);
-            r(p, ReplyResult.Timedout);
-        }
-        waitingTimers[p.PacketID].Dispose();
-    }
-
-    private void startReceiving()
-    {
-        socket.Client.BeginReceive(bufferCallback, 0, bufferCallback.Length, SocketFlags.None, new AsyncCallback(receiveCallback), this);
-    }
-
-    private void receiveCallback(IAsyncResult ar)
-    {
-        int bytesRead = socket.Client.EndReceive(ar);
-
-        if (bytesRead > 0)
-        {
-            byte[] data = new byte[bytesRead];
-
-            Array.Copy(bufferCallback, data, bytesRead);
-
-            buffer.AddRange(data);
-
-            while (ProcessReceivedData()) ;
-
-        }
-
-        startReceiving();
-    }
-
-    private bool ProcessReceivedData()
-    {
-        JsonPacket p;
-
-        if (JsonPacket.DeserializePacket(buffer, out p))
-        {
-            if (!string.IsNullOrEmpty(p.ContentJson))
-                Task.Run(()=>Process(p));
-            return true;
-        }
-
-        return false;
-    }
-
-    private void Process(JsonPacket p, ReplyResult result = ReplyResult.Success)
-    {
-        if (waitingReply.ContainsKey(p.PacketID))
-        {
-            ReplyReceived r = waitingReply[p.PacketID];
-            waitingReply.Remove(p.PacketID);
-            r(p, result);
-            return;
-        }
-
-        if (waitingTimers.ContainsKey(p.PacketID))
-        {
-            waitingTimers[p.PacketID].Dispose();
-        }
-
-        if(PacketReceivedEvent!=null)
-            PacketReceivedEvent(p, result);
     }
 }

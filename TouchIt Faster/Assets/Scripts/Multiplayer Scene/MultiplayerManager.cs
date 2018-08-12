@@ -51,7 +51,7 @@ public class MultiplayerManager : MonoBehaviour {
                         RequesterID = PlayerContainer.Instance.Info.ID,
                         RequestedID = f.ID
                     };
-                    ServerManager.Instance.Send(TouchItFasterContentType.ChallengeRequest, cr, ChallengeRequestReply);
+                    ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, ChallengeRequestReply);
                 });
                 FriendsGO.Add(go);
             }
@@ -77,95 +77,58 @@ public class MultiplayerManager : MonoBehaviour {
         }
 	}
 
-    private void ChallengeRequestReply(JsonPacket p, ServerManager.ReplyResult result)
+    private void ChallengeRequestReply(JsonPacket p)
     {
-        if (result == ServerManager.ReplyResult.Success)
+        if (p.ReplyStatus == ReplyStatus.OK)
         {
-            if (p.ContentType == (int)TouchItFasterContentType.ChallengeReply)
-            {
-                var reply = p.DeserializeContent<ChallengeReply>();
+            var reply = p.DeserializeContent<ChallengeReply>();
 
-                if (reply.Reply == ChallengeReplyType.Waiting)
-                {
-                    ServerManager.Instance.PacketReceivedEvent += GamePacketReceived;
-                }
-            }
-            else
+            if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
             {
-                //invalid content type
+                ChangeScene("MultiplayerInGame");
             }
-
         }
-    }
-
-    private void GamePacketReceived(JsonPacket p, ServerManager.ReplyResult result)
-    {
-        if (result == ServerManager.ReplyResult.Success)
+        else if (p.ReplyStatus == ReplyStatus.Forbidden)
         {
-            if (p.ContentType == (int)TouchItFasterContentType.ChallengeReply)
-            {
-                var reply = p.DeserializeContent<ChallengeReply>();
-
-                if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
-                {
-                    ChangeScene("MultiplayerInGame");
-                }
-            }
-            else
-            {
-                //invalid content type
-            }
-
+            /*TODO*/
         }
     }
 
     public void UpdateFriends()
     {
-        Request r = new Request()
-        {
-            ReqType = RequestType.Friends
-        };
-        ServerManager.Instance.Send(TouchItFasterContentType.Request, r, RequestFriendsNamesReply);
+        ServerManager.Instance.Client.Send(URI.Friends, null, RequestFriendsNamesReply);
     }
 
-    private void RequestFriendsNamesReply(JsonPacket p, ServerManager.ReplyResult result)
+    private void RequestFriendsNamesReply(JsonPacket p)
     {
-        if (result ==ServerManager.ReplyResult.Success){
-            if (p.ContentType == (int)TouchItFasterContentType.Friends)
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            Friends.Clear();
+            try
             {
-                Friends.Clear();
-                try
-                {
-                    ArrayWrapper mi = p.DeserializeContent<ArrayWrapper>();
-                    Friends.AddRange(mi.GetArray<PlayerInfo>());
-                    FriendsUpdated = true;
-                }
-                catch(Exception e)
-                {
-                    Debug.Log("Fódeu gerau");
-                }               
-
+                ArrayWrapper mi = p.DeserializeContent<ArrayWrapper>();
+                Friends.AddRange(mi.GetArray<PlayerInfo>());
+                FriendsUpdated = true;
             }
-            else
+            catch (Exception e)
             {
-                //invalid content type
+                Debug.Log("Fódeu gerau");
             }
 
         }
-
     }
 
     public void SearchPlayers(string value)
     {
-        //ServerManager.Instance.Send((byte)TouchItFasterContentType.SearchPlayer, new PlayerSearch() { Key = value }, PlayerSearchResult);
+        ServerManager.Instance.Client.Send(URI.SearchPlayer, new PlayerSearch() { Key = value }, PlayerSearchResult);
     }
 
 
-    private void PlayerSearchResult(JsonPacket p, ServerManager.ReplyResult result)
+    private void PlayerSearchResult(JsonPacket p)
     {
-        if (result == ServerManager.ReplyResult.Success)
+        if (p.ReplyStatus == ReplyStatus.OK)
         {
-            //ps = p.DeserializeContent<PlayerSearch>();
+            p.DeserializeContent<PlayerSearch>();
             SearchedPlayers = true;
         }
     }

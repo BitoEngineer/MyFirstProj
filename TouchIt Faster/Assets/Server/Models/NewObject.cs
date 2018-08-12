@@ -18,8 +18,8 @@ namespace MyFirstServ.Models.TouchItFaster
     public class NewObject
     {
         public int ID;
-        public double X;
-        public double Y;
+        public float X;
+        public float Y;
         public double Size;
         public ObjectType Type;
     }

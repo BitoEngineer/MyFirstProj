@@ -561,7 +561,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 442824814}
-  - component: {fileID: 442824816}
   - component: {fileID: 442824815}
   - component: {fileID: 442824817}
   m_Layer: 0
@@ -597,59 +596,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timerText: {fileID: 1695545758}
   startTime: 0
---- !u!114 &442824816
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 442824813}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2aad2fa6bbef0344a8c90f6acd07bf69, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Circle_Black_GO: {fileID: 1076049213178290, guid: 2d5281af18bfc9c4d9dacd239ddf9694,
-    type: 2}
-  Circle_Red_GO: {fileID: 1409913503063234, guid: c1ad1143e1f71eb469797769142e5e35,
-    type: 2}
-  Circle_Blue_GO: {fileID: 1584132395221892, guid: 6da932fc14d84134ba90e6964dcd984a,
-    type: 2}
-  ScaleCircle: 10
-  PointsText: {fileID: 1511296164}
-  CIRCLE_SPAWN_s: 2
-  CIRCLE_SPAWN_LIMIT_s: 0.3
-  DEC_CIRCLE_SPAWN_s: 0.1
-  MAX_CIRCLES: 5
-  CIRCLE_LIFETIME_s: 1
-  BombExplosion: {fileID: 1204053438869924, guid: 8660ffa91dc69b046908640d7b5535ca,
-    type: 2}
-  ScaleBomb: 10
-  BombGO: {fileID: 1797299000780716, guid: 4a6b0efe7b2f038438df965c6a14aa8f, type: 2}
-  Bomb_Spawn_s: 1
-  HitBombDamage_percentage: 0.2
-  BombLifeTime_s: 2
-  Prob_Bomb: 0.3
-  Bomb_Spawn_Inc_probability: 0.05
-  MAX_BOMB_SPAWN_probability: 0.8
-  SpecialCircleGO: {fileID: 1712286596921222, guid: c833637685e07e5458e19adc64b7da32,
-    type: 2}
-  SpecialCircleLifeTime_s: 0.8
-  Prob_SpecialCircle: 0.5
-  Life1: {fileID: 1504718010}
-  Life2: {fileID: 1689846685}
-  Life3: {fileID: 636354417}
-  GameOverPanel: {fileID: 1104453770}
-  GameOverPointsText: {fileID: 1908435585}
-  OnPause: 0
-  canvas: {fileID: 772151693}
-  SpawnerCanvas: {fileID: 650473513}
-  SpecialCircleHittedText: {fileID: 455737898}
-  SpecialCircleTextLifeTime_s: 1
-  CircleSound: {fileID: 8300000, guid: db71a7a4ae4459d4ba74060ff7469dc6, type: 3}
-  SquareSound: {fileID: 8300000, guid: 733f04b4e99025c48ac0b5ff67b20d34, type: 3}
-  BombSound: {fileID: 8300000, guid: 0dab4bca616430f4e908efbffbff183c, type: 3}
-  CountDown: {fileID: 70066220}
-  CD: {fileID: 0}
 --- !u!114 &442824817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1909,7 +1855,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 442824816}
+      - m_Target: {fileID: 0}
         m_MethodName: ContinueOnClick
         m_Mode: 1
         m_Arguments:
@@ -2031,7 +1977,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 442824816}
+      - m_Target: {fileID: 0}
         m_MethodName: Restart
         m_Mode: 1
         m_Arguments:
@@ -2576,7 +2522,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 442824816}
+      - m_Target: {fileID: 0}
         m_MethodName: JumpMenu
         m_Mode: 1
         m_Arguments:

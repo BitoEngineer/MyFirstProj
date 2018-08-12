@@ -119,7 +119,7 @@ namespace Assets.Server.Protocol
             return crc == BinaryContentCRC.Instance.ComputeChecksum(values);
         }
 
-        public bool ReadAndVerifyLongCRC(long value, int nrBytes =8)
+        public bool ReadAndVerifyLongCRC(long value, int nrBytes = 8)
         {
             byte[] vals = new byte[nrBytes];
 

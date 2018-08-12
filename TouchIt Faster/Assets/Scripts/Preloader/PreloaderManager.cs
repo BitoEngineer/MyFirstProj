@@ -48,7 +48,7 @@ public class PreloaderManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (t)
+        if (t )
         {
             t = false;
             SceneManager.LoadScene("Main Menu");

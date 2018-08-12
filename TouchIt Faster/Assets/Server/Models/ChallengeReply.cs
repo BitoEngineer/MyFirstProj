@@ -8,9 +8,6 @@ namespace MyFirstServ.Models.TouchItFaster
 {
     public enum ChallengeReplyType
     {
-        RequestedIsOffline,
-        RequesterIsOffline,
-        Waiting,
         ChallengeRefused,
         ChallengeAccepted,
         GameOver
