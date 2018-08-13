@@ -8,6 +8,7 @@ namespace MyFirstServ.Models.TouchItFaster
 {
     public class DeleteObject
     {
-        public int ID;
+        public int ChallengeID;
+        public int ObjectID;
     }
 }

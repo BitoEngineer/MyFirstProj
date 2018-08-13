@@ -65,7 +65,7 @@ namespace Assets.Server.Protocol
 
         public void Send(URI contentType, object o, ReplyReceivedCallback callback = null, FailureCallback fail = null, int timeoutMs = 0)
         {
-            JsonPacket p = new JsonPacket(ClientId, contentType.ToString(), JsonConvert.SerializeObject(o));
+            JsonPacket p = new JsonPacket(ClientId, contentType.ToString(), o);
 
             if (callback != null || fail != null)
             {

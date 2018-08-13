@@ -1,5 +1,6 @@
 ﻿using Assets.Server.Models;
 using Assets.Server.Protocol;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,12 +8,15 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ServerManager : MonoBehaviour {
 
     public static ServerManager Instance { set; get; }
 
     public readonly MyServClient Client = new MyServClient("192.168.1.70", 2222);
+
+    public string NextScene { get; set; }
 
     // Use this for initialization
     void Start () {
@@ -22,6 +26,16 @@ public class ServerManager : MonoBehaviour {
         Client.OnConnectivityChange += connectivityChanged;
         Client.LogDebugEvent += logDebug;
         Client.LogErrorEvent += errorDebug;
+    }
+
+    private void Update()
+    {
+        if (!string.IsNullOrEmpty(NextScene))
+        {
+            string scene = NextScene;
+            NextScene = null;
+            ChangeScene(scene);
+        }
     }
 
     private void errorDebug(Exception e, string message, object[] args)
@@ -45,5 +59,10 @@ public class ServerManager : MonoBehaviour {
         {
             Console.WriteLine("Preloader INFO: Connected to server");
         }
+    }
+
+    public void ChangeScene(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
     }
 }

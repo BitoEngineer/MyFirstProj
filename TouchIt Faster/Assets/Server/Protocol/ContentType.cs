@@ -13,7 +13,8 @@ namespace Assets.Server.Protocol
         ChallengeUpdate,
         NewObject,
         DeleteObject,
-        SearchPlayer
+        SearchPlayer,
+        Start
     }
 }
 

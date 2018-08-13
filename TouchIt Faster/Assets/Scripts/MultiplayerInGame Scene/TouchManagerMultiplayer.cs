@@ -29,8 +29,6 @@ public class TouchManagerMultiplayer : MonoBehaviour
     public AudioClip SquareSound;
     public AudioClip BombSound;
     private AudioSource source { get { return GetComponent<AudioSource>(); } }
-    public Text CountDown;
-    public CountDown CD;
     private bool AdSeen = false;
     private Vector3 CircleSize, BombSize;
 
@@ -40,14 +38,16 @@ public class TouchManagerMultiplayer : MonoBehaviour
 
     private Dictionary<int, GameObject> AliveObjects = new Dictionary<int, GameObject>();
 
+    private Queue<NewObject> objectsToAdd = new Queue<NewObject>();
+    private Queue<int> objectsToDelete = new Queue<int>();
+
     public static TouchManagerMultiplayer Instance;
 
     // Use this for initialization
     void Start()
     {
         Instance = this;
-        CD = CountDown.GetComponent<CountDown>();
-        CD.StartCountDown();
+        CountDown.Instance.StartCountDown(true);
         gameObject.AddComponent<AudioSource>();
         source.clip = CircleSound;
         source.playOnAwake = false;
@@ -67,7 +67,14 @@ public class TouchManagerMultiplayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        while(objectsToAdd.Count > 0)
+        {
+            SpawnObject(objectsToAdd.Dequeue());
+        }
+        while (objectsToDelete.Count > 0)
+        {
+            DeleteById(objectsToDelete.Dequeue());
+        }
     }
 
     void OnObjectDeletion(JsonPacket p)
@@ -75,7 +82,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             var obj = p.DeserializeContent<DeleteObject>();
-            DeleteById(obj.ID);
+            objectsToDelete.Enqueue(obj.ObjectID);
         }
     }
 
@@ -84,7 +91,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
         if(p.ReplyStatus == ReplyStatus.OK)
         {
             var obj = p.DeserializeContent<NewObject>();
-            SpawnObject(obj);
+            objectsToAdd.Enqueue(obj);
         }
     }
 
@@ -109,18 +116,19 @@ public class TouchManagerMultiplayer : MonoBehaviour
     private void SpawnObject(NewObject obj)
     {
         Vector3 v = transform.position;
-        v.x = obj.X;
-        v.y = obj.Y;
+        v.x = obj.X * SpawnerCanvasRect.rect.width;
+        v.y = obj.Y * SpawnerCanvasRect.rect.height * -2;
+        v.z = -100;
         switch (obj.Type)
         {
             case ObjectType.Circle1:
-                SpawnCircle(v, 1, obj.ID);
+                SpawnCircle(v, 0, obj.ID);
                 break;
             case ObjectType.Circle2:
-                SpawnCircle(v, 2, obj.ID);
+                SpawnCircle(v, 1, obj.ID);
                 break;
             case ObjectType.Circle3:
-                SpawnCircle(v, 3, obj.ID);
+                SpawnCircle(v, 2, obj.ID);
                 break;
             case ObjectType.Special:
                 SpawnSpecial(v, obj.ID);

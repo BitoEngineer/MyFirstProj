@@ -64,8 +64,7 @@ public class TouchManager : MonoBehaviour
     public AudioClip SquareSound;
     public AudioClip BombSound;
     private AudioSource source { get { return GetComponent<AudioSource>(); } }
-    public Text CountDown;
-    public CountDown CD;
+
     private bool AdSeen = false;
     private Vector3 CircleSize, BombSize;
 
@@ -82,8 +81,7 @@ public class TouchManager : MonoBehaviour
         Circles[0] = Circle_Black_GO;
         Circles[1] = Circle_Red_GO;
         Circles[2] = Circle_Blue_GO;
-        CD = CountDown.GetComponent<CountDown>();
-        CD.StartCountDown();
+        CountDown.Instance.StartCountDown(false);
         gameObject.AddComponent<AudioSource>();
         source.clip = CircleSound;
         source.playOnAwake = false;
@@ -107,7 +105,7 @@ public class TouchManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!OnPause && !CD.counting)
+        if (!OnPause && !CountDown.Instance.Counting)
         {
             if(CheckGameOver()) return;
 
@@ -379,7 +377,7 @@ public class TouchManager : MonoBehaviour
             Life3.enabled = false;
             OnPause = false;
             Lifes = 3;
-            CD.StartCountDown();
+            CountDown.Instance.StartCountDown(false);
         }
         else
         {

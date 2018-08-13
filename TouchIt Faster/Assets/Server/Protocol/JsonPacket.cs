@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,12 +20,18 @@ namespace Assets.Server.Protocol
         public string ContentType { get; set; }
         public string ContentJson { get; set; }
 
+        private static JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
 
-        public JsonPacket(string clientId, string contentType, string contentJson)
+        static JsonPacket()
+        {
+            jsonSettings.Converters.Add(new StringEnumConverter() { CamelCaseText = true });
+        }
+
+        public JsonPacket(string clientId, string contentType, object contentJson)
         {
             ClientID = clientId;
             ContentType = contentType;
-            ContentJson = contentJson;
+            ContentJson = JsonConvert.SerializeObject(contentJson, jsonSettings);
             PacketID = (int)(DateTime.UtcNow - DateTime.UtcNow.Date).TotalMilliseconds;
         }
 
@@ -41,7 +48,7 @@ namespace Assets.Server.Protocol
         {
             //return JsonMapper.ToObject<T>(ContentJson);
             //return JsonUtility.FromJson<T>(ContentJson);
-            return JsonConvert.DeserializeObject<T>(ContentJson);
+            return JsonConvert.DeserializeObject<T>(ContentJson, jsonSettings);
         }
 
         public byte[] GetPacket()

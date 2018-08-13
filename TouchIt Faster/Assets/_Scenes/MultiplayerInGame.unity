@@ -236,7 +236,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   countdown: {fileID: 70066220}
   startTime: 0
-  counting: 1
+  Counting: 1
 --- !u!114 &70066220
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -607,21 +607,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36be99e2403f26e44b7c7d2861079ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Circle_Black_GO: {fileID: 0}
-  Circle_Red_GO: {fileID: 0}
-  Circle_Blue_GO: {fileID: 0}
-  BombExplosion: {fileID: 0}
-  BombGO: {fileID: 0}
-  SpecialCircleGO: {fileID: 0}
-  GameOverPanel: {fileID: 0}
-  GameOverPointsText: {fileID: 0}
-  canvas: {fileID: 0}
-  SpawnerCanvas: {fileID: 0}
-  CircleSound: {fileID: 0}
-  SquareSound: {fileID: 0}
-  BombSound: {fileID: 0}
-  CountDown: {fileID: 0}
-  CD: {fileID: 0}
+  BombExplosion: {fileID: 1204053438869924, guid: 8660ffa91dc69b046908640d7b5535ca,
+    type: 2}
+  BombGO: {fileID: 1017391833068530, guid: f3fee952f3e009c4aa7d5eb0704416e2, type: 2}
+  SpecialCircleGO: {fileID: 1082499723521058, guid: 6cb94c81acae01146821dfcb06a4509c,
+    type: 2}
+  GameOverPanel: {fileID: 1104453770}
+  GameOverPointsText: {fileID: 1908435585}
+  canvas: {fileID: 772151693}
+  SpawnerCanvas: {fileID: 650473513}
+  CircleSound: {fileID: 8300000, guid: db71a7a4ae4459d4ba74060ff7469dc6, type: 3}
+  SquareSound: {fileID: 8300000, guid: 733f04b4e99025c48ac0b5ff67b20d34, type: 3}
+  BombSound: {fileID: 8300000, guid: 0dab4bca616430f4e908efbffbff183c, type: 3}
+  Circles:
+  - {fileID: 1099193321328920, guid: a568cb88cc4fe9d4998b5d8a21ab2fd7, type: 2}
+  - {fileID: 1296812505475592, guid: 004b168c1b3f01244aa3ca02c3d34c74, type: 2}
+  - {fileID: 1784284887366070, guid: 37ca6ab1a39e351419c83d0656fa8abe, type: 2}
 --- !u!1 &455737896
 GameObject:
   m_ObjectHideFlags: 0
@@ -1064,9 +1065,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -2.2, y: -95.5}
+  m_AnchoredPosition: {x: 84.50008, y: -262.15}
   m_SizeDelta: {x: -173.4, y: -333.3}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &650473511
 MonoBehaviour:
   m_ObjectHideFlags: 0

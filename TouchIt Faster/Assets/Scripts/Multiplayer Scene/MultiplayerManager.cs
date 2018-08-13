@@ -7,6 +7,7 @@ using Assets.Server.Protocol;
 using UnityEngine.UI;
 using System;
 using MyFirstServ.Models.TouchItFaster;
+using Assets.Scripts.Multiplayer_Scene;
 
 public class MultiplayerManager : MonoBehaviour {
 
@@ -23,7 +24,8 @@ public class MultiplayerManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         UpdateFriends();
-	}
+        ServerManager.Instance.Client.AddCallback(URI.ChallengeReply, ChallengeRequestReply);
+    }
 
 
     // Update is called once per frame
@@ -83,9 +85,14 @@ public class MultiplayerManager : MonoBehaviour {
         {
             var reply = p.DeserializeContent<ChallengeReply>();
 
-            if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
+            if (reply.Reply == ChallengeReplyType.Waiting)
             {
-                ChangeScene("MultiplayerInGame");
+                /*TODO Show txt*/
+            }
+            else if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
+            {
+                GameContainer.CurrentGameId = reply.ChallengeID;
+                ServerManager.Instance.NextScene = "MultiplayerInGame";
             }
         }
         else if (p.ReplyStatus == ReplyStatus.Forbidden)

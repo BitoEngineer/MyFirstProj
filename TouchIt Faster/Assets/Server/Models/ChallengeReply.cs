@@ -10,6 +10,8 @@ namespace MyFirstServ.Models.TouchItFaster
     {
         ChallengeRefused,
         ChallengeAccepted,
+        Waiting,
+        Start,
         GameOver
     }
 
