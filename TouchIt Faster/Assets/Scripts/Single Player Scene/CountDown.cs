@@ -23,13 +23,16 @@ public class CountDown : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+    {
         float t = Time.time - startTime;
         if (Counting)
         {
-            int seconds = 4- int.Parse((t % 60).ToString("f0"));
-            if(seconds!=4)
+            int seconds = 4 - (int)(t % 60);
+            if (seconds != 4)
+            {
                 countdown.text = seconds.ToString();
+            }
         }
         else
         {

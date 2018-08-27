@@ -1,20 +1,30 @@
 fileFormatVersion: 2
 guid: 2aad2fa6bbef0344a8c90f6acd07bf69
-timeCreated: 1506778438
-licenseType: Free
 MonoImporter:
+  externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - circle: {fileID: 1781901291123880, guid: 5fb2760c308234d4e95197f30f7fa299, type: 2}
-  - pointsText: {instanceID: 0}
+  - Circle_Black_GO: {fileID: 1206287648406006, guid: 45c4e199976b3214f9474ed0a8730851,
+      type: 2}
+  - Circle_Red_GO: {fileID: 1409913503063234, guid: c1ad1143e1f71eb469797769142e5e35,
+      type: 2}
+  - Circle_Blue_GO: {fileID: 1933694485990444, guid: 2eaef4b61c728864081a51a18c764ead,
+      type: 2}
+  - PointsText: {instanceID: 0}
   - BombExplosion: {instanceID: 0}
-  - bomb: {instanceID: 0}
-  - HitBombText: {instanceID: 0}
-  - square: {instanceID: 0}
+  - BombGO: {instanceID: 0}
+  - SpecialCircleGO: {instanceID: 0}
+  - Life1: {instanceID: 0}
+  - Life2: {instanceID: 0}
+  - Life3: {instanceID: 0}
   - GameOverPanel: {instanceID: 0}
   - GameOverPointsText: {instanceID: 0}
   - canvas: {instanceID: 0}
-  - HitSquare: {instanceID: 0}
+  - SpawnerCanvas: {instanceID: 0}
+  - SpecialCircleHittedText: {instanceID: 0}
+  - CircleSound: {instanceID: 0}
+  - SquareSound: {instanceID: 0}
+  - BombSound: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

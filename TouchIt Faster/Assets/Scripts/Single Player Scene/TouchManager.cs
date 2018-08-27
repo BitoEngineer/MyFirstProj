@@ -315,7 +315,7 @@ public class TouchManager : MonoBehaviour
             v.y += Random.Range(-SpawnerCanvasRect.rect.height / 2, SpawnerCanvasRect.rect.height / 2);
             valid = Physics2D.OverlapCircle(v, halfWidth * 0.0092f) == null;
         }
-
+        v.z = -100;
         return v;
     }
 
