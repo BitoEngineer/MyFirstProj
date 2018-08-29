@@ -37,7 +37,7 @@ public class MainMenuManager : MonoBehaviour {
         if (sceneName == "Multiplayer")
         {
 #if DEBUG
-            ServerManager.Instance.Client.Send(URI.CreateUser, null, HandshakeReply, null /* TODO*/, 50000);
+            ServerManager.Instance.Client.Send(URI.Login, null, LoginReply, null /* TODO*/, 50000);
 #else
             Authenticate();
 #endif
@@ -48,7 +48,7 @@ public class MainMenuManager : MonoBehaviour {
         }
     }
 
-    private void HandshakeReply(JsonPacket p)
+    private void LoginReply(JsonPacket p)
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
@@ -74,7 +74,7 @@ public class MainMenuManager : MonoBehaviour {
         Debug.Log(userInfo);
 
         ServerManager.Instance.Client.Start(Social.localUser.id);
-        ServerManager.Instance.Client.Send(URI.Handshake, new Handshake(), HandshakeReply, null, 5000);
+        ServerManager.Instance.Client.Send(URI.Handshake, new Handshake(), LoginReply, null, 5000);
     }
 
     private void Authenticate()

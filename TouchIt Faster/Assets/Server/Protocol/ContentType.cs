@@ -5,7 +5,7 @@ namespace Assets.Server.Protocol
 	public enum URI
 	{
         Handshake,
-        CreateUser,
+        Login,
         Request,
         Friends,
         ChallengeRequest,

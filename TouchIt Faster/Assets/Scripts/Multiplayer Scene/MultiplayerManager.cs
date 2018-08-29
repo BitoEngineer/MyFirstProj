@@ -14,6 +14,15 @@ public class MultiplayerManager : MonoBehaviour {
     public GameObject FriendGO;
     public GameObject FriendsContainer;
     public GameObject SearchContainer;
+    public GameObject OnFriendClickPanel;
+    public Button FightButton;
+    public Button UnfriendButton;
+    public Text NameText;
+    public Text HighestScoreText;
+    public Text WinsText;
+    public Text LosesText;
+    public Text TotalTimeText;
+    public Button QuitButton;
 
     private List<PlayerInfo> Friends = new List<PlayerInfo>();
     private List<GameObject> FriendsGO = new List<GameObject>();
@@ -32,7 +41,6 @@ public class MultiplayerManager : MonoBehaviour {
     void Update () {
         if (FriendsUpdated)
         {
-
             FriendsUpdated = false;
             foreach(GameObject go in FriendsGO)
             {
@@ -46,15 +54,23 @@ public class MultiplayerManager : MonoBehaviour {
                 GameObject go=Instantiate(FriendGO, FriendsContainer.transform) as GameObject;
                 go.GetComponentInChildren<Text>().text = f.PlayerName;
                 Button b=go.GetComponent<Button>();
-                b.onClick.AddListener(()=>
+
+                Color32 color;
+                if(f.CurrentState == PlayerState.Offline)
                 {
-                    ChallengeRequest cr = new ChallengeRequest()
-                    {
-                        RequesterID = PlayerContainer.Instance.Info.ID,
-                        RequestedID = f.ID
-                    };
-                    ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, ChallengeRequestReply);
+                     color = new Color32(170, 36, 41, 255);
+                }
+                else
+                {
+                    color = new Color32(36, 129, 41, 255);               
+                }
+                b.GetComponent<Image>().color = color;
+
+                b.onClick.AddListener(() =>
+                {
+                    FillProfilePanel(f);
                 });
+
                 FriendsGO.Add(go);
             }
         }
@@ -78,6 +94,31 @@ public class MultiplayerManager : MonoBehaviour {
             }*/
         }
 	}
+
+    private void FillProfilePanel(PlayerInfo f)
+    {
+        NameText.text = f.PlayerName;
+        HighestScoreText.text = "Highest Score: "+f.HighestScore.ToString();
+        WinsText.text= "Wins: "+f.Wins.ToString();
+        LosesText.text = "Loses: "+f.Loses.ToString();
+
+        FightButton.onClick.AddListener(() =>
+        {
+            ChallengeRequest(f.ID);
+        });
+
+        QuitButton.onClick.AddListener(() =>
+        {
+            OnFriendClickPanel.SetActive(false);
+        });
+
+        UnfriendButton.onClick.AddListener(() =>
+        {
+            /*TODO*/
+        });
+
+        OnFriendClickPanel.SetActive(true);
+    }
 
     private void ChallengeRequestReply(JsonPacket p)
     {
@@ -143,5 +184,15 @@ public class MultiplayerManager : MonoBehaviour {
     public void ChangeScene(string sceneName)
     {
         SceneManager.LoadScene(sceneName);
+    }
+
+    public void ChallengeRequest(long requestedId)
+    {
+        ChallengeRequest cr = new ChallengeRequest()
+        {
+            RequesterID = PlayerContainer.Instance.Info.ID,
+            RequestedID = requestedId
+        };
+        ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, ChallengeRequestReply);
     }
 }

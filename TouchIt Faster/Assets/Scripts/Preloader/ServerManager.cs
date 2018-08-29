@@ -14,7 +14,7 @@ public class ServerManager : MonoBehaviour {
 
     public static ServerManager Instance { set; get; }
 
-    public readonly MyServClient Client = new MyServClient("192.168.1.70", 2222);
+    public readonly MyServClient Client = new MyServClient("MyFirstDomain.cloudapp.net", 2222);
 
     public string NextScene { get; set; }
 

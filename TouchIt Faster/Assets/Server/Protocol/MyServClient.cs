@@ -167,7 +167,7 @@ namespace Assets.Server.Protocol
         private void startConnect()
         {
             if (LogDebugEvent != null) LogDebugEvent.Invoke("Connecting to {0}:{1}...", ServerName, ServerPort);
-            socket = new TcpClient();
+            socket = new TcpClient() { ReceiveTimeout = 1000, SendTimeout = 1000 };
 
             Task.Run(() =>
             {
