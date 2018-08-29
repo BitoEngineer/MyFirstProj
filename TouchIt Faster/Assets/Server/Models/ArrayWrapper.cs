@@ -16,6 +16,9 @@ namespace Assets.Server.Models
         {
             List<T> ret = new List<T>();
 
+            if (string.IsNullOrEmpty(ArrayString))
+                return ret.ToArray();
+
             foreach (var item in ArrayString.Split(new string[] { separator }, StringSplitOptions.None))
             {
                 ret.Add(JsonUtility.FromJson<T>(item));
