@@ -119,7 +119,7 @@ public class MultiplayerManager : MonoBehaviour {
             }
         }
     }
-
+    /*CORRIGIR*/
     private void FillUnfriendProfilePanel(PlayerInfo f)
     {
         NameText.text = f.PlayerName;
