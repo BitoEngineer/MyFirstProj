@@ -14,7 +14,9 @@ namespace Assets.Server.Protocol
         NewObject,
         DeleteObject,
         SearchPlayer,
-        Start
-    }
+        Start,
+        AddFriend,
+	    Unfriend
+	}
 }
 

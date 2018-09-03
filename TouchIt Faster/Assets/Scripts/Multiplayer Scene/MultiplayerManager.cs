@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using System;
 using MyFirstServ.Models.TouchItFaster;
 using Assets.Scripts.Multiplayer_Scene;
+using Assets.Scripts.Preloader;
 
 public class MultiplayerManager : MonoBehaviour {
 
@@ -15,7 +16,6 @@ public class MultiplayerManager : MonoBehaviour {
     public GameObject FriendsContainer;
     public GameObject SearchContainer;
     public GameObject OnFriendClickPanel;
-    public GameObject OnNonFriendClickPanel;
     public Button FightButton;
     public Button UnfriendButton;
     public Button AddfriendButton;
@@ -26,6 +26,7 @@ public class MultiplayerManager : MonoBehaviour {
     public Text TotalTimeText;
     public Button QuitButton;
     public GameObject NoResults;
+    public GameObject MessagePanel;
 
     private Color32 Red = new Color32(170, 36, 41, 255);
     private Color32 Green = new Color32(36, 129, 41, 255);
@@ -78,7 +79,7 @@ public class MultiplayerManager : MonoBehaviour {
 
             b.onClick.AddListener(() =>
             {
-                FillProfilePanel(f);
+                FillProfilePanel(f, true);
             });
 
             FriendsGO.Add(go);
@@ -114,56 +115,31 @@ public class MultiplayerManager : MonoBehaviour {
 
                 b.onClick.AddListener(() =>
                 {
-                    FillUnfriendProfilePanel(pi);
+                    FillProfilePanel(pi, false);
                 });
             }
         }
     }
-    /*CORRIGIR*/
-    private void FillUnfriendProfilePanel(PlayerInfo f)
+
+    private void FillProfilePanel(PlayerInfo f, bool friend)
     {
         NameText.text = f.PlayerName;
         HighestScoreText.text = "Highest Score: " + f.HighestScore.ToString();
         WinsText.text = "Wins: " + f.Wins.ToString();
         LosesText.text = "Loses: " + f.Loses.ToString();
-
-        AddfriendButton.onClick.AddListener(() =>
-        {
-            /*TODO*/
-        });
-
-        QuitButton.onClick.AddListener(() =>
-        {
-            OnNonFriendClickPanel.SetActive(false);
-        });
-
-        OnNonFriendClickPanel.SetActive(true);
-    }
-
-    private void FillProfilePanel(PlayerInfo f)
-    {
-        NameText.text = f.PlayerName;
-        HighestScoreText.text = "Highest Score: "+f.HighestScore.ToString();
-        WinsText.text= "Wins: "+f.Wins.ToString();
-        LosesText.text = "Loses: "+f.Loses.ToString();
-
-        FightButton.onClick.AddListener(() =>
-        {
-            ChallengeRequest(f.ID);
-        });
+        BuildProfilePanelButtons(f, friend);
 
         QuitButton.onClick.AddListener(() =>
         {
             OnFriendClickPanel.SetActive(false);
         });
 
-        UnfriendButton.onClick.AddListener(() =>
-        {
-            /*TODO*/
-        });
+        OnFriendClickPanel.transform.position = Input.mousePosition;
 
         OnFriendClickPanel.SetActive(true);
     }
+
+    
 
     private void ChallengeRequestReply(JsonPacket p)
     {
@@ -245,5 +221,73 @@ public class MultiplayerManager : MonoBehaviour {
             RequestedID = requestedId
         };
         ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, ChallengeRequestReply);
+    }
+
+    private void BuildProfilePanelButtons(PlayerInfo f, bool friend)
+    {
+        if (friend)
+        {
+            AddfriendButton.gameObject.SetActive(false);
+            FightButton.gameObject.SetActive(true);
+            UnfriendButton.gameObject.SetActive(true);
+            FightButton.onClick.AddListener(() =>
+            {
+                ChallengeRequest(f.ID);
+            });
+
+            UnfriendButton.onClick.AddListener(() =>
+            {
+                ServerManager.Instance.Client.Send(URI.Unfriend, f.ClientID, UnfriendReply);
+            });
+        }
+        else
+        {
+            AddfriendButton.gameObject.SetActive(true);
+            FightButton.gameObject.SetActive(false);
+            UnfriendButton.gameObject.SetActive(false);
+            AddfriendButton.onClick.AddListener(() =>
+            {
+                ServerManager.Instance.Client.Send(URI.AddFriend, f.ClientID, AddFriendReply);
+            });
+        }
+    }
+
+    private void UnfriendReply(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            PlayerInfo removed = p.DeserializeContent<PlayerInfo>();
+            Friends.RemoveAll(pl => pl.ClientID.Equals(removed.ClientID));
+            FriendsUpdated = true;
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(ShowMessage("Ye that boy was kicked out!", 3f)));
+        }
+        else
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(ShowMessage("Couldn't delete user.", 3f)));
+        }
+    }
+
+    private void AddFriendReply(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            PlayerInfo added = p.DeserializeContent<PlayerInfo>();
+            Friends.Add(added);
+            FriendsUpdated = true;
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(ShowMessage("Uuuuuh so needy.", 2f)));
+        }
+        else
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(ShowMessage("Couldn't add user.", 2f)));
+        }
+
+    }
+
+    IEnumerator ShowMessage(string message, float delay)
+    {
+        MessagePanel.SetActive(true);
+        MessagePanel.GetComponentInChildren<Text>().text = message;
+        yield return new WaitForSeconds(delay);
+        MessagePanel.SetActive(false);
     }
 }
