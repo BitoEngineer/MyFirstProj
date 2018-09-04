@@ -1,24 +1,42 @@
 ﻿
 using Assets.Server.Models;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using Assets.Scripts.Preloader;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Assets.Server.Protocol;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
+using UnityEngine.Networking;
 
 public class MainMenuManager : MonoBehaviour {
 
     public Button SinglePlayerButton;
     public Button MultiplayerButton;
+    public Text JokeText;
+
     private bool changeToMultiplayer = false;
 
     private readonly string ClientID = "574776742495-hkkjt0av75rdb3ipceh6iefugrikuldm.apps.googleusercontent.com";
+    private readonly string Jokes_API_URL = "http://geek-jokes.sameerkumar.website/api";
 
 
     // Use this for initialization
     void Start () {
+        StartCoroutine(GetRequest(Jokes_API_URL, (joke) =>
+            {
+                UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                {
+                    JokeText.gameObject.SetActive(true);
+                    if (joke != null)
+                    {
+                        JokeText.text = joke.Substring(1, joke.Length-2);
+                    }                        
+                });
+            }));
 #if DEBUG
         string debugClientID = "debugtestclientid";
         ServerManager.Instance.Client.Start(debugClientID);
@@ -104,6 +122,23 @@ public class MainMenuManager : MonoBehaviour {
             Debug.Log("Server failed: " + p.ReplyStatus); // TODO Say to user that there's problems with the server
         }
 
+    }
+
+    IEnumerator GetRequest(string uri, Action<string> action)
+    {
+        UnityWebRequest uwr = UnityWebRequest.Get(uri);
+        yield return uwr.SendWebRequest();
+
+        if (uwr.isNetworkError)
+        {
+            Debug.Log("Error While Sending: " + uwr.error);
+            action(null);
+        }
+        else
+        {
+            Debug.Log("Received: " + uwr.downloadHandler.text);
+            action(uwr.downloadHandler.text);
+        }
     }
 
     private void OnDestroy()

@@ -16,7 +16,8 @@ namespace Assets.Server.Protocol
         SearchPlayer,
         Start,
         AddFriend,
-	    Unfriend
+	    Unfriend,
+	    RandomChallengeRequest
 	}
 }
 

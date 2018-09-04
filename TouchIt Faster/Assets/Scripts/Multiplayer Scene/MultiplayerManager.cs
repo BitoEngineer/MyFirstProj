@@ -283,6 +283,34 @@ public class MultiplayerManager : MonoBehaviour {
 
     }
 
+    public void RandomChallenge()
+    {
+        ServerManager.Instance.Client.Send(URI.RandomChallengeRequest, null, OnRandomChallenge);
+        StartCoroutine(ShowMessage("Searching players...", 10f));
+    }
+
+    private void OnRandomChallenge(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            var reply = p.DeserializeContent<ChallengeReply>();
+
+            if (reply.Reply == ChallengeReplyType.Waiting)
+            {
+                /*TODO Show txt*/
+            }
+            else if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
+            {
+                GameContainer.CurrentGameId = reply.ChallengeID;
+                ServerManager.Instance.NextScene = "MultiplayerInGame";
+            }
+        }
+        else if (p.ReplyStatus == ReplyStatus.Forbidden)
+        {
+            /*TODO*/
+        }
+    }
+
     IEnumerator ShowMessage(string message, float delay)
     {
         MessagePanel.SetActive(true);
