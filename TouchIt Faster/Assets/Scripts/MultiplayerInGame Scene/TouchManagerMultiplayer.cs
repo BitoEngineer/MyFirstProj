@@ -2,6 +2,7 @@
 using MyFirstServ.Models.TouchItFaster;
 using System;
 using System.Collections.Generic;
+using Assets.Server.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -24,7 +25,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
     public Canvas SpawnerCanvas;
     private RectTransform CanvasRect;
     private RectTransform SpawnerCanvasRect;
-    private float Points;
+
     public AudioClip CircleSound;
     public AudioClip SquareSound;
     public AudioClip BombSound;
@@ -32,8 +33,6 @@ public class TouchManagerMultiplayer : MonoBehaviour
     private bool AdSeen = false;
     private Vector3 CircleSize, BombSize;
 
-    private readonly float MAX_POINTS_CIRCLE = 15F;
-    private readonly float POINTS_SQUARE = 30F;
     public GameObject[] Circles = new GameObject[3]; /*Black, Red, Blue*/
 
     private Dictionary<int, GameObject> AliveObjects = new Dictionary<int, GameObject>();
@@ -55,13 +54,12 @@ public class TouchManagerMultiplayer : MonoBehaviour
         CanvasRect = canvas.GetComponent<RectTransform>();
         SpawnerCanvasRect = SpawnerCanvas.GetComponent<RectTransform>();
 
-        Points = 0;
-
         CircleSize = new Vector3(CanvasRect.rect.width/32, CanvasRect.rect.width / 32, 0);
         BombSize = new Vector3(CanvasRect.rect.width/30, CanvasRect.rect.width / 30, 0);
 
         ServerManager.Instance.Client.AddCallback(URI.NewObject, OnObjectReceived);
         ServerManager.Instance.Client.AddCallback(URI.DeleteObject, OnObjectDeletion);
+        ServerManager.Instance.Client.AddCallback(URI.GameOver, OnGameOver);
     }
 
     // Update is called once per frame
@@ -90,14 +88,13 @@ public class TouchManagerMultiplayer : MonoBehaviour
     {
         if(p.ReplyStatus == ReplyStatus.OK)
         {
+            if (!MultiplayerTimerCounter.Instance.IsActive())
+            {
+                MultiplayerTimerCounter.Instance.ResumeTimer();
+            }
             var obj = p.DeserializeContent<NewObject>();
             objectsToAdd.Enqueue(obj);
         }
-    }
-
-    private void OnDestroy()
-    {
-        PlayerPrefs.SetFloat("points", Points);
     }
 
     public void DeleteById(int id)
@@ -162,7 +159,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
         scaled.x = CircleSize.x / 2;
         scaled.y = CircleSize.y / 2;
         s.Square_GO.transform.localScale = scaled;
-        square_go.GetComponent<SpecialMultiplayer>().Id = id;
+        square_go.GetComponent<SpecialCircleMultiplayer>().Id = id;
 
         AliveObjects.Add(id, square_go);
     }
@@ -184,17 +181,13 @@ public class TouchManagerMultiplayer : MonoBehaviour
     }
 
 
-    private void GameOver()
+    private void OnGameOver(JsonPacket p)
     {
-        TimerCounter.Instance.StopTimer();
-        GameOverPanel.SetActive(true);
-        GameOverPointsText.text = "Points: "+Points.ToString("f0");
-
-    }
-
-    public void Restart()
-    {
-        SceneManager.LoadScene("Single Player");
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            GameOver gameOverObj = p.DeserializeContent<GameOver>();
+            GameOverUIController.Instance.GameOverUpdate(gameOverObj);
+        }
     }
 
     public void JumpMenu()
