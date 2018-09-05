@@ -32,8 +32,8 @@ namespace Assets.Scripts.MultiplayerInGame_Scene
         }
 
 
-        private int MaxTapsInARow;
-        private int CurrTapsInARow;
+        public int MaxTapsInARow;
+        public int CurrTapsInARow;
 
 
         private static PlayerInGameContainer _instance = null;
