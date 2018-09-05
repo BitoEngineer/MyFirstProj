@@ -45,7 +45,7 @@ public class CountDown : MonoBehaviour {
                     ChallengeID = GameContainer.CurrentGameId,
                     Reply = ChallengeReplyType.Start
                 };
-                ServerManager.Instance.Client.Send(URI.ChallengeReply, cr);
+                ServerManager.Instance.Client.Send(URI.ChallengeReply, cr, OnStartMatch);
             }
         }
 
@@ -67,5 +67,14 @@ public class CountDown : MonoBehaviour {
         countdown.enabled = true;
 
         Counting = true;
+    }
+
+    public void OnStartMatch(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            ChallengeReply reply = p.DeserializeContent<ChallengeReply>();
+            GameContainer.OpponentID = reply.OpponentID;
+        }
     }
 }

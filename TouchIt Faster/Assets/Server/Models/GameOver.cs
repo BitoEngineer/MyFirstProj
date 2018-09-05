@@ -8,8 +8,13 @@ namespace Assets.Server.Models
     public class GameOver
     {
         public int Points;
-        public int OpponentPoints;
+        public float TimeLeft;
+        public int TimePoints;
         public int TapsInARow;
+
+        public int OpponentPoints;
         public int OpponentTapsInARow;
+        public float OpponentTimeLeft;
+        public int OpponentTimePoints;
     }
 }

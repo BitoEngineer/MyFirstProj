@@ -18,7 +18,8 @@ namespace Assets.Server.Protocol
         AddFriend,
 	    Unfriend,
 	    RandomChallengeRequest,
-	    GameOver
+	    GameOver,
+	    Revenge
 	}
 }
 

@@ -8,5 +8,6 @@ namespace Assets.Scripts.Multiplayer_Scene
     public static class GameContainer
     {
         public static int CurrentGameId { get; set; }
+        public static long OpponentID;
     }
 }

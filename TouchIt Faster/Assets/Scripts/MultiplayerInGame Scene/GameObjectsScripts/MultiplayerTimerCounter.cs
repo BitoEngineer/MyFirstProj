@@ -31,6 +31,16 @@ public class MultiplayerTimerCounter : MonoBehaviour
             sec = sec.Length > 1 ? sec : "0" + sec;
             string ms = seconds.Split('.')[1];
             ms = ms.Length > 1 ? ms : "0" + ms;
+
+            if (t < 10f)
+            {
+                TimerText.color = new Color32(170, 36, 41, 255); /*Red*/
+            }
+            else
+            {
+                TimerText.color = Color.white;
+            }
+
             TimerText.text = minutes + ":" + sec + "." + ms;
         }
 

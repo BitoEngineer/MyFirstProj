@@ -9,6 +9,7 @@ using System;
 using MyFirstServ.Models.TouchItFaster;
 using Assets.Scripts.Multiplayer_Scene;
 using Assets.Scripts.Preloader;
+using Assets.Scripts.Utils;
 
 public class MultiplayerManager : MonoBehaviour {
 
@@ -274,11 +275,11 @@ public class MultiplayerManager : MonoBehaviour {
             PlayerInfo added = p.DeserializeContent<PlayerInfo>();
             Friends.Add(added);
             FriendsUpdated = true;
-            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(ShowMessage("Uuuuuh so needy.", 2f)));
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessage("Uuuuuh so needy.", 2f, MessagePanel)));
         }
         else
         {
-            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(ShowMessage("Couldn't add user.", 2f)));
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessage("Couldn't add user.", 2f, MessagePanel)));
         }
 
     }
@@ -286,7 +287,7 @@ public class MultiplayerManager : MonoBehaviour {
     public void RandomChallenge()
     {
         ServerManager.Instance.Client.Send(URI.RandomChallengeRequest, null, OnRandomChallenge);
-        StartCoroutine(ShowMessage("Searching players...", 10f));
+        StartCoroutine(UIUtils.ShowMessage("Searching players...", 10f, MessagePanel));
     }
 
     private void OnRandomChallenge(JsonPacket p)
@@ -309,13 +310,5 @@ public class MultiplayerManager : MonoBehaviour {
         {
             /*TODO*/
         }
-    }
-
-    IEnumerator ShowMessage(string message, float delay)
-    {
-        MessagePanel.SetActive(true);
-        MessagePanel.GetComponentInChildren<Text>().text = message;
-        yield return new WaitForSeconds(delay);
-        MessagePanel.SetActive(false);
     }
 }

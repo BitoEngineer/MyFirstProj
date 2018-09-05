@@ -18,6 +18,7 @@ namespace MyFirstServ.Models.TouchItFaster
     public class ChallengeReply
     {
         public int ChallengeID;
+        public long OpponentID;
         public ChallengeReplyType Reply;
     }
 }
