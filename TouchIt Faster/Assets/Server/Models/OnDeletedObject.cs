@@ -11,5 +11,6 @@ namespace Assets.Server.Models
         public int MaxTapsInARow;
         public int CurrTapsInARow;
         public float Time;
+        public float ExtraTime;
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Assets.Server.Models;
+using UnityEngine.iOS;
 
 namespace Assets.Scripts.MultiplayerInGame_Scene
 {
@@ -31,6 +32,19 @@ namespace Assets.Scripts.MultiplayerInGame_Scene
             }
         }
 
+        private float _ExtraTime;
+        public float ExtraTime
+        {
+            get { return _ExtraTime; }
+            set
+            {
+                _ExtraTime = value;
+                if (_ExtraTime != 0)
+                {
+                    MultiplayerTimerCounter.Instance.ExtraTime(_ExtraTime);
+                }
+            }
+        }
 
         public int MaxTapsInARow;
         public int CurrTapsInARow;
@@ -56,6 +70,7 @@ namespace Assets.Scripts.MultiplayerInGame_Scene
             MaxTapsInARow = deletedObj.MaxTapsInARow;
             CurrTapsInARow = deletedObj.CurrTapsInARow;
             Time = deletedObj.Time;
+            ExtraTime = deletedObj.ExtraTime;
         }
     }
 }

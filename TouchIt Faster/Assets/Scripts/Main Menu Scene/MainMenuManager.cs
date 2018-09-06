@@ -33,7 +33,7 @@ public class MainMenuManager : MonoBehaviour {
                     JokeText.gameObject.SetActive(true);
                     if (joke != null)
                     {
-                        JokeText.text = joke.Substring(1, joke.Length-2);
+                        JokeText.text = joke.Substring(1, joke.Length-3);
                     }                        
                 });
             }));

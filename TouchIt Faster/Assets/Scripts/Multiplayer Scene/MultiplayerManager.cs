@@ -260,11 +260,11 @@ public class MultiplayerManager : MonoBehaviour {
             PlayerInfo removed = p.DeserializeContent<PlayerInfo>();
             Friends.RemoveAll(pl => pl.ClientID.Equals(removed.ClientID));
             FriendsUpdated = true;
-            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(ShowMessage("Ye that boy was kicked out!", 3f)));
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Ye that boy was kicked out!", 3f, MessagePanel)));
         }
         else
         {
-            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(ShowMessage("Couldn't delete user.", 3f)));
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Couldn't delete user.", 3f, MessagePanel)));
         }
     }
 
@@ -275,11 +275,11 @@ public class MultiplayerManager : MonoBehaviour {
             PlayerInfo added = p.DeserializeContent<PlayerInfo>();
             Friends.Add(added);
             FriendsUpdated = true;
-            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessage("Uuuuuh so needy.", 2f, MessagePanel)));
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Uuuuuh so needy.", 2f, MessagePanel)));
         }
         else
         {
-            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessage("Couldn't add user.", 2f, MessagePanel)));
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Couldn't add user.", 2f, MessagePanel)));
         }
 
     }
@@ -287,7 +287,7 @@ public class MultiplayerManager : MonoBehaviour {
     public void RandomChallenge()
     {
         ServerManager.Instance.Client.Send(URI.RandomChallengeRequest, null, OnRandomChallenge);
-        StartCoroutine(UIUtils.ShowMessage("Searching players...", 10f, MessagePanel));
+        StartCoroutine(UIUtils.ShowMessageInPanel("Searching players...", 10f, MessagePanel));
     }
 
     private void OnRandomChallenge(JsonPacket p)

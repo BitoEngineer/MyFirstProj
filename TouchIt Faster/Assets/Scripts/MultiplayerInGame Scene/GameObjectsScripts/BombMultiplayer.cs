@@ -26,7 +26,7 @@ public class BombMultiplayer : MonoBehaviour
         {
             PatxauText.fontSize = 20 + ((PlayerInGameContainer.Instance.CurrTapsInARow - 6) * 2);
             PatxauText.gameObject.transform.position = transform.position;
-            UIUtils.ShowMessage("PATXXAU", 1f, PatxauText.gameObject);
+            UIUtils.ShowMessageInPanel("PATXXAU", 1f, PatxauText.gameObject);
         }
         ServerManager.Instance.Client.Send(URI.DeleteObject, new DeleteObject() { ChallengeID = GameContainer.CurrentGameId, ObjectID = Id }, OnObjectDeletion);
     }

@@ -70,11 +70,11 @@ public class GameOverUIController : MonoBehaviour
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             PlayerInfo added = p.DeserializeContent<PlayerInfo>();
-            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessage("Uuuuuh so needy.", 2f, MessagePanel)));
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Uuuuuh so needy.", 2f, MessagePanel)));
         }
         else
         {
-            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessage("Couldn't add user.", 2f, MessagePanel)));
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Couldn't add user.", 2f, MessagePanel)));
         }
     }
 
@@ -96,7 +96,7 @@ public class GameOverUIController : MonoBehaviour
 
             if (reply.Reply == ChallengeReplyType.Waiting)
             {
-                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessage("Hmmm let's see if he is capable...", 2f, MessagePanel)));
+                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Hmmm let's see if he is capable...", 2f, MessagePanel)));
             }
             else if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
             {

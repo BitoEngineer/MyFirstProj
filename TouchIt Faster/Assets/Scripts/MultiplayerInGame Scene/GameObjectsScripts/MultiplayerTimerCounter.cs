@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Assets.Scripts.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,7 @@ public class MultiplayerTimerCounter : MonoBehaviour
 {
 
     public Text TimerText;
+    public Text ExtraTimeText;
 
     private float StartTime = 60f;
     private bool Active = false;
@@ -64,5 +66,22 @@ public class MultiplayerTimerCounter : MonoBehaviour
     public bool IsActive()
     {
         return Active;
+    }
+
+    public void ExtraTime(float extratime)
+    {
+        string msg;
+        if (extratime > 0)
+        {
+            msg = "+" + extratime.ToString("#.##");
+            ExtraTimeText.color = Color.green;
+        }
+        else
+        {
+            msg = "-" + extratime.ToString("#.##");
+            ExtraTimeText.color = Color.red;
+        }
+
+        UIUtils.ShowMessageInText(msg, 0.5f, ExtraTimeText);
     }
 }
