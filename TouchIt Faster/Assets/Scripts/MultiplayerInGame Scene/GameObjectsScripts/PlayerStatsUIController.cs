@@ -14,6 +14,7 @@ public class PlayerStatsUIController : MonoBehaviour
     void Start ()
     {
         Instance = this;
+        points = 0;
     }
 	
 	

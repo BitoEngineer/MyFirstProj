@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using Assets.Server.Protocol;
 using UnityEngine.UI;
 using System;
+using System.Linq;
 using MyFirstServ.Models.TouchItFaster;
 using Assets.Scripts.Multiplayer_Scene;
 using Assets.Scripts.Preloader;
@@ -28,6 +29,9 @@ public class MultiplayerManager : MonoBehaviour {
     public Button QuitButton;
     public GameObject NoResults;
     public GameObject MessagePanel;
+    public GameObject ChallengRequestPanel;
+    public GameObject AcceptButton;
+    public GameObject DeclineButton;
 
     private Color32 Red = new Color32(170, 36, 41, 255);
     private Color32 Green = new Color32(36, 129, 41, 255);
@@ -40,14 +44,13 @@ public class MultiplayerManager : MonoBehaviour {
 
     private bool FriendsUpdated = false, SearchedPlayers = false;
 
-	// Use this for initialization
+
 	void Start () {
         UpdateFriends();
         ServerManager.Instance.Client.AddCallback(URI.ChallengeReply, ChallengeRequestReply);
+	    ServerManager.Instance.Client.AddCallback(URI.ChallengeRequest, OnFriendsChallengeRequest);
     }
-
-
-    // Update is called once per frame
+    
     void Update () {
         if (FriendsUpdated)
         {
@@ -150,12 +153,17 @@ public class MultiplayerManager : MonoBehaviour {
 
             if (reply.Reply == ChallengeReplyType.Waiting)
             {
-                /*TODO Show txt*/
+                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Let's see if he have enough courage...", 3f, MessagePanel)));
             }
             else if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
             {
+                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("You got a challenge!", 0.5f, MessagePanel)));
                 GameContainer.CurrentGameId = reply.ChallengeID;
                 ServerManager.Instance.NextScene = "MultiplayerInGame";
+            }
+            else if (reply.Reply == ChallengeReplyType.ChallengeRefused)
+            {
+                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Ahah he's scared as sh*t", 3f, MessagePanel)));
             }
         }
         else if (p.ReplyStatus == ReplyStatus.Forbidden)
@@ -310,5 +318,39 @@ public class MultiplayerManager : MonoBehaviour {
         {
             /*TODO*/
         }
+    }
+
+    private void OnFriendsChallengeRequest(JsonPacket p)
+    {
+        Debug.Log("Multiplayer Menu: Friend's challenge request received");
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            ChallengeRequest cr = p.DeserializeContent<ChallengeRequest>();
+            BuildChallengeRequestPanel(cr);
+        }
+    }
+
+    private void BuildChallengeRequestPanel(ChallengeRequest cr)
+    {
+        PlayerInfo opponent = Friends.FirstOrDefault(f => f.ID == cr.RequestedID);
+
+        Text t = ChallengRequestPanel.GetComponentInChildren<Text>();
+        t.text = t.text.Replace("NAME", opponent.PlayerName);
+        AcceptButton.GetComponent<Button>().onClick.AddListener(()=>
+        {
+            Debug.Log("Multiplayer Menu: Accepting friend's challenge");
+            ChallengeRequest(opponent.ID);
+        });
+        DeclineButton.GetComponent<Button>().onClick.AddListener(()=>
+        {
+            Debug.Log("Multiplayer Menu: Declining friend's challenge");
+            ChallengeReply creply = new ChallengeReply()
+            {
+                ChallengeID = cr.ID,
+                Reply = ChallengeReplyType.ChallengeRefused
+            };
+            ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
+        });
+        ChallengRequestPanel.SetActive(true);
     }
 }
