@@ -10,10 +10,9 @@ public class TimerCounter : MonoBehaviour {
     private TouchManager touchM;
     private bool active = true;
     private float t;
-    public static TimerCounter Instance { get; set; }
+
 	// Use this for initialization
 	void Start () {
-        Instance = this;
         startTime = Time.realtimeSinceStartup;
         touchM = GameObject.Find("Touch").GetComponent<TouchManager>();
     }

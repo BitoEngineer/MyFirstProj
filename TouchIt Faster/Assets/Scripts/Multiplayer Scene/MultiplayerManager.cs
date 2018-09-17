@@ -27,6 +27,7 @@ public class MultiplayerManager : MonoBehaviour {
     public Text LosesText;
     public Text TotalTimeText;
     public Button QuitButton;
+    public Text ChallengeRequestText;
     public GameObject NoResults;
     public GameObject MessagePanel;
     public GameObject ChallengRequestPanel;
@@ -228,6 +229,7 @@ public class MultiplayerManager : MonoBehaviour {
         {
             RequesterID = PlayerContainer.Instance.Info.ID,
             RequestedID = requestedId
+            
         };
         ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, ChallengeRequestReply);
     }
@@ -239,11 +241,12 @@ public class MultiplayerManager : MonoBehaviour {
             AddfriendButton.gameObject.SetActive(false);
             FightButton.gameObject.SetActive(true);
             UnfriendButton.gameObject.SetActive(true);
+            FightButton.onClick.RemoveAllListeners();
             FightButton.onClick.AddListener(() =>
             {
                 ChallengeRequest(f.ID);
             });
-
+            UnfriendButton.onClick.RemoveAllListeners();
             UnfriendButton.onClick.AddListener(() =>
             {
                 ServerManager.Instance.Client.Send(URI.Unfriend, f.ClientID, UnfriendReply);
@@ -254,6 +257,7 @@ public class MultiplayerManager : MonoBehaviour {
             AddfriendButton.gameObject.SetActive(true);
             FightButton.gameObject.SetActive(false);
             UnfriendButton.gameObject.SetActive(false);
+            AddfriendButton.onClick.RemoveAllListeners();
             AddfriendButton.onClick.AddListener(() =>
             {
                 ServerManager.Instance.Client.Send(URI.AddFriend, f.ClientID, AddFriendReply);
@@ -332,25 +336,38 @@ public class MultiplayerManager : MonoBehaviour {
 
     private void BuildChallengeRequestPanel(ChallengeRequest cr)
     {
-        PlayerInfo opponent = Friends.FirstOrDefault(f => f.ID == cr.RequestedID);
+        PlayerInfo opponent = Friends.FirstOrDefault(f => f.ID == cr.RequesterID);
 
-        Text t = ChallengRequestPanel.GetComponentInChildren<Text>();
-        t.text = t.text.Replace("NAME", opponent.PlayerName);
-        AcceptButton.GetComponent<Button>().onClick.AddListener(()=>
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
         {
-            Debug.Log("Multiplayer Menu: Accepting friend's challenge");
-            ChallengeRequest(opponent.ID);
-        });
-        DeclineButton.GetComponent<Button>().onClick.AddListener(()=>
-        {
-            Debug.Log("Multiplayer Menu: Declining friend's challenge");
-            ChallengeReply creply = new ChallengeReply()
+            ChallengeRequestText.text = ChallengeRequestText.text.Replace("NAME", opponent.PlayerName);
+            AcceptButton.GetComponent<Button>().onClick.AddListener(() =>
             {
-                ChallengeID = cr.ID,
-                Reply = ChallengeReplyType.ChallengeRefused
-            };
-            ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
+                Debug.Log("Multiplayer Menu: Accepting friend's challenge");
+                ChallengeReply creply = new ChallengeReply()
+                {
+                    ChallengeID = cr.ID,
+                    Reply = ChallengeReplyType.ChallengeAccepted
+                };
+                ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
+
+                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("You got a challenge!", 0.5f, MessagePanel)));
+                GameContainer.CurrentGameId = creply.ChallengeID;
+                ServerManager.Instance.NextScene = "MultiplayerInGame";
+
+            });
+            DeclineButton.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                Debug.Log("Multiplayer Menu: Declining friend's challenge");
+                ChallengeReply creply = new ChallengeReply()
+                {
+                    ChallengeID = cr.ID,
+                    Reply = ChallengeReplyType.ChallengeRefused
+                };
+                ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
+            });
+            ChallengRequestPanel.SetActive(true);
         });
-        ChallengRequestPanel.SetActive(true);
+        
     }
 }

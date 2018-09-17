@@ -26,6 +26,8 @@ public class TouchManagerMultiplayer : MonoBehaviour
     private RectTransform CanvasRect;
     private RectTransform SpawnerCanvasRect;
 
+    public GameObject CountDownGO;
+
     public AudioClip CircleSound;
     public AudioClip SquareSound;
     public AudioClip BombSound;
@@ -46,7 +48,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
     void Start()
     {
         Instance = this;
-        CountDown.Instance.StartCountDown(true);
+        CountDownGO.GetComponent<CountDown>().StartCountDown(true);
         gameObject.AddComponent<AudioSource>();
         source.clip = CircleSound;
         source.playOnAwake = false;

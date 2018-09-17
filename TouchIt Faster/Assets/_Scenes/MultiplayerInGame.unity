@@ -238,6 +238,7 @@ MonoBehaviour:
   countdown: {fileID: 70066220}
   startTime: 0
   Counting: 1
+  TimerCounterGO: {fileID: 1695545756}
 --- !u!114 &70066220
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -327,6 +328,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ExitPopup: {fileID: 1976054930}
+  TimerCounterGO: {fileID: 0}
 --- !u!114 &108984796
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -913,7 +915,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TimerText: {fileID: 1695545758}
-  ExtraTimeText: {fileID: 0}
+  ExtraTimeText: {fileID: 1602908398}
 --- !u!114 &442824817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -934,6 +936,7 @@ MonoBehaviour:
   GameOverPointsText: {fileID: 0}
   canvas: {fileID: 772151693}
   SpawnerCanvas: {fileID: 650473513}
+  CountDownGO: {fileID: 70066217}
   CircleSound: {fileID: 8300000, guid: db71a7a4ae4459d4ba74060ff7469dc6, type: 3}
   SquareSound: {fileID: 8300000, guid: 733f04b4e99025c48ac0b5ff67b20d34, type: 3}
   BombSound: {fileID: 8300000, guid: 0dab4bca616430f4e908efbffbff183c, type: 3}
@@ -3501,6 +3504,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ExitPopup: {fileID: 1976054930}
+  TimerCounterGO: {fileID: 0}
 --- !u!212 &2138313067
 SpriteRenderer:
   m_ObjectHideFlags: 0

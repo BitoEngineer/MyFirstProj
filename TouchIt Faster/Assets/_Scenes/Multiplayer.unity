@@ -3440,11 +3440,12 @@ MonoBehaviour:
   LosesText: {fileID: 2101446226}
   TotalTimeText: {fileID: 2116389764}
   QuitButton: {fileID: 1990373764}
+  ChallengeRequestText: {fileID: 1072275514}
   NoResults: {fileID: 427577492}
   MessagePanel: {fileID: 51681850}
   ChallengRequestPanel: {fileID: 1640033788}
-  AcceptButton: {fileID: 0}
-  DeclineButton: {fileID: 0}
+  AcceptButton: {fileID: 1368745188}
+  DeclineButton: {fileID: 1884859921}
 --- !u!4 &2059944536
 Transform:
   m_ObjectHideFlags: 0

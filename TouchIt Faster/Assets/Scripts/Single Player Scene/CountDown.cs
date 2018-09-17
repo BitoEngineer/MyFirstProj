@@ -13,11 +13,10 @@ public class CountDown : MonoBehaviour {
     public float startTime;
     private bool mp = false;
     public bool Counting = true;
-    public static CountDown Instance { set; get; }
+    public GameObject TimerCounterGO;
 
     // Use this for initialization
     void Start () {
-        Instance = this;
         startTime = Time.time;
         countdown.enabled = true;
     }
@@ -52,7 +51,7 @@ public class CountDown : MonoBehaviour {
         if (t > 3f)
         {
             if (Counting)
-                TimerCounter.Instance.ResumeTimer();
+                TimerCounterGO.GetComponent<TimerCounter>().ResumeTimer();
             Counting = false;
             
         }
@@ -61,7 +60,7 @@ public class CountDown : MonoBehaviour {
     public void StartCountDown(bool mp)
     {
         this.mp = mp;
-        TimerCounter.Instance.StopTimer();
+        TimerCounterGO.GetComponent<TimerCounter>().StopTimer();
         startTime = Time.time;
         countdown.text = "";
         countdown.enabled = true;

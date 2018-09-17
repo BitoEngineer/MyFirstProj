@@ -73,6 +73,8 @@ public class TouchManager : MonoBehaviour
     private GameObject[] Circles = new GameObject[3];
     public LayerMask mask;
 
+    public GameObject CountDownGO;
+    public GameObject TimerCounterGO;
 
 
     // Use this for initialization
@@ -81,7 +83,7 @@ public class TouchManager : MonoBehaviour
         Circles[0] = Circle_Black_GO;
         Circles[1] = Circle_Red_GO;
         Circles[2] = Circle_Blue_GO;
-        CountDown.Instance.StartCountDown(false);
+        CountDownGO.GetComponent<CountDown>().StartCountDown(false);
         gameObject.AddComponent<AudioSource>();
         source.clip = CircleSound;
         source.playOnAwake = false;
@@ -105,7 +107,7 @@ public class TouchManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!OnPause && !CountDown.Instance.Counting)
+        if (!OnPause && !CountDownGO.GetComponent<CountDown>().Counting)
         {
             if(CheckGameOver()) return;
 
@@ -346,7 +348,7 @@ public class TouchManager : MonoBehaviour
 
     private void GameOver()
     {
-        TimerCounter.Instance.StopTimer();
+        TimerCounterGO.GetComponent<TimerCounter>().StopTimer();
         OnPause = true;
         GameOverPanel.SetActive(true);
         GameOverPointsText.text = "Points: "+Points.ToString("f0");
@@ -377,7 +379,7 @@ public class TouchManager : MonoBehaviour
             Life3.enabled = false;
             OnPause = false;
             Lifes = 3;
-            CountDown.Instance.StartCountDown(false);
+            CountDownGO.GetComponent<CountDown>().StartCountDown(false);
         }
         else
         {

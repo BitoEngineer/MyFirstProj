@@ -7,6 +7,7 @@ public class ReturnBack : MonoBehaviour {
 
     public GameObject ExitPopup;
     private TouchManager touchM;
+    public GameObject TimerCounterGO;
 
     private void Start()
     {
@@ -18,7 +19,7 @@ public class ReturnBack : MonoBehaviour {
     public void OnMouseDown()
     {
         touchM.OnPause = true;
-        TimerCounter.Instance.StopTimer();
+        //TimerCounter.Instance.StopTimer(); TODO
         ExitPopup.SetActive(true);
     }
 
@@ -31,7 +32,7 @@ public class ReturnBack : MonoBehaviour {
     {
         ExitPopup.SetActive(false);
         touchM.OnPause = false;
-        TimerCounter.Instance.ResumeTimer();
+        TimerCounterGO.GetComponent<TimerCounter>().ResumeTimer();
 
     }
 }
