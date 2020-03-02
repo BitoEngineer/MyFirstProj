@@ -1,12 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+﻿using Firebase;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
-using UnityEngine.SocialPlatforms;
-using System;
-using Firebase;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PreloaderManager : MonoBehaviour
 {
@@ -79,7 +75,7 @@ public class PreloaderManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (t )
+        if (t)
         {
             t = false;
             SceneManager.LoadScene("Main Menu");
