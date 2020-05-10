@@ -1,5 +1,5 @@
-lastUpgrade=00950
-proj.pluginVersion=0.9.50
+lastUpgrade=01009
+proj.pluginVersion=0.10.09
 proj.AppId=574776742495
 and.BundleId=com.inout.touchitfaster
 proj.classDir=Assets
