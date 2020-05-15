@@ -305,8 +305,8 @@ GameObject:
   - component: {fileID: 108984794}
   - component: {fileID: 108984797}
   - component: {fileID: 108984796}
-  - component: {fileID: 108984795}
   - component: {fileID: 108984798}
+  - component: {fileID: 108984795}
   m_Layer: 5
   m_Name: BackButton
   m_TagString: Untagged
@@ -342,11 +342,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 108984793}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c9fd8988e26bd54b8052df7e49806ba, type: 3}
+  m_Script: {fileID: 11500000, guid: 6c0eb5346d944004cbe64f6df95c85e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ExitPopup: {fileID: 1976054930}
-  TimerCounterGO: {fileID: 0}
+  TimerCounterGO: {fileID: 1695545756}
 --- !u!114 &108984796
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -611,7 +611,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &212998515
 RectTransform:
   m_ObjectHideFlags: 0
@@ -652,10 +652,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 9d49b8459f2b89144a44a174222028c5, type: 3}
-    m_FontSize: 20
+    m_FontSize: 1
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 1
     m_MaxSize: 64
     m_Alignment: 4
     m_AlignByGeometry: 0
@@ -1232,7 +1232,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 108984795}
+      - m_Target: {fileID: 0}
         m_MethodName: Resume
         m_Mode: 1
         m_Arguments:
@@ -3025,7 +3025,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 323, y: -103.54999}
+  m_AnchoredPosition: {x: 356, y: -103.55}
   m_SizeDelta: {x: 184.3, y: 90.29901}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1602908398
@@ -3294,7 +3294,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 9d49b8459f2b89144a44a174222028c5, type: 3}
-    m_FontSize: 147
+    m_FontSize: 125
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -3305,7 +3305,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 0:0.00
+  m_Text: 0:0
 --- !u!222 &1695545759
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3493,7 +3493,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 108984795}
+      - m_Target: {fileID: 0}
         m_MethodName: Leave
         m_Mode: 1
         m_Arguments:

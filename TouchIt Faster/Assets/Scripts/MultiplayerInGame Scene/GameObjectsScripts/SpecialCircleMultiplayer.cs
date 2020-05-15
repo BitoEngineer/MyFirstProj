@@ -8,26 +8,30 @@ using Assets.Scripts.Utils;
 using Assets.Server.Models;
 using UnityEngine;
 using UnityEngine.UI;
+using Assets.Scripts.Preloader;
 
 public class SpecialCircleMultiplayer : MonoBehaviour {
 
     public int Id { get; set; }
-    private Text PatxauText;
+    //private Text PatxauText;
 
     void Start()
     {
-        PatxauText = GameObject.Find("PatxauText").GetComponent<Text>();
+        //PatxauText = GameObject.Find("PatxauText").GetComponent<Text>();
     }
 
     private void OnMouseDown()
     {
         TouchManagerMultiplayer.Instance.DeleteById(Id);
-        if (PlayerInGameContainer.Instance.CurrTapsInARow > 5)
-        {
-            PatxauText.fontSize = 20 + ((PlayerInGameContainer.Instance.CurrTapsInARow - 6) * 2);
-            PatxauText.gameObject.transform.position = transform.position;
-            UIUtils.ShowMessageInText("PATXXAU", 1f, PatxauText);
-        }
+        //if (PlayerInGameContainer.Instance.CurrTapsInARow > 5)
+        //{
+        //    UnityMainThreadDispatcher.Instance().Enqueue(() => 
+        //    {
+        //        PatxauText.fontSize = 20 + ((PlayerInGameContainer.Instance.CurrTapsInARow - 6) * 2);
+        //        PatxauText.gameObject.transform.position = transform.position;
+        //        StartCoroutine(UIUtils.ShowMessageInText("Hell Yeah!!", 0.5f, PatxauText));
+        //    });
+        //}
         ServerManager.Instance.Client.Send(URI.DeleteObject, new DeleteObject() { ChallengeID = GameContainer.CurrentGameId, ObjectID = Id }, OnObjectDeletion);
     }
 
@@ -36,7 +40,7 @@ public class SpecialCircleMultiplayer : MonoBehaviour {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             OnDeletedObject deletedObj = p.DeserializeContent<OnDeletedObject>();
-            PlayerInGameContainer.Instance.Build(deletedObj);
+            PlayerInGameContainer.Instance.UpdateGameStats(deletedObj);
         }
     }
 }

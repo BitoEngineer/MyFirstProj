@@ -1,12 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Assets.Scripts.Preloader;
 using Assets.Scripts.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MultiplayerTimerCounter : MonoBehaviour
 {
-
     public Text TimerText;
     public Text ExtraTimeText;
 
@@ -25,16 +25,16 @@ public class MultiplayerTimerCounter : MonoBehaviour
     {
         if (Active)
         {
-            float t = StartTime - Time.deltaTime;
+            StartTime -= Time.deltaTime;
 
-            string minutes = ((int)t / 60).ToString();
-            string seconds = (t % 60).ToString("f2");
+            string minutes = ((int)StartTime / 60).ToString();
+            string seconds = (StartTime % 60).ToString("f1");
             string sec = seconds.Split('.')[0];
             sec = sec.Length > 1 ? sec : "0" + sec;
             string ms = seconds.Split('.')[1];
             ms = ms.Length > 1 ? ms : "0" + ms;
 
-            if (t < 10f)
+            if (StartTime < 10f)
             {
                 TimerText.color = new Color32(170, 36, 41, 255); /*Red*/
             }
@@ -70,18 +70,21 @@ public class MultiplayerTimerCounter : MonoBehaviour
 
     public void ExtraTime(float extratime)
     {
-        string msg;
-        if (extratime > 0)
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
         {
-            msg = "+" + extratime.ToString("#.##");
-            ExtraTimeText.color = Color.green;
-        }
-        else
-        {
-            msg = "-" + extratime.ToString("#.##");
-            ExtraTimeText.color = Color.red;
-        }
+            string msg;
+            if (extratime > 0)
+            {
+                msg = "+" + extratime.ToString("#.##");
+                ExtraTimeText.color = Color.green;
+            }
+            else
+            {
+                msg = extratime.ToString("#.##");
+                ExtraTimeText.color = Color.red;
+            }
 
-        UIUtils.ShowMessageInText(msg, 0.5f, ExtraTimeText);
+            StartCoroutine(UIUtils.ShowMessageInText(msg, 1f, ExtraTimeText));
+        });
     }
 }

@@ -144,8 +144,6 @@ public class MultiplayerManager : MonoBehaviour {
         OnFriendClickPanel.SetActive(true);
     }
 
-    
-
     private void ChallengeRequestReply(JsonPacket p)
     {
         if (p.ReplyStatus == ReplyStatus.OK)
@@ -201,7 +199,6 @@ public class MultiplayerManager : MonoBehaviour {
     {
         ServerManager.Instance.Client.Send(URI.SearchPlayer, value, PlayerSearchResult);
     }
-
 
     private void PlayerSearchResult(JsonPacket p)
     {

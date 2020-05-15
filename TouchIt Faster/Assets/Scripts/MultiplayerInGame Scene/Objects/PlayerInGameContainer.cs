@@ -63,7 +63,7 @@ namespace Assets.Scripts.MultiplayerInGame_Scene
             }
         }
 
-        public void Build(OnDeletedObject deletedObj)
+        public void UpdateGameStats(OnDeletedObject deletedObj)
         {
             CurrentPoints = deletedObj.CurrentPoints;
             MaxTapsInARow = deletedObj.MaxTapsInARow;

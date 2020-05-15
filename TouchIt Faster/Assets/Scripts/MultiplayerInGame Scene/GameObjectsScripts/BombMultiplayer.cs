@@ -8,26 +8,29 @@ using Assets.Scripts.Utils;
 using Assets.Server.Models;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 
 public class BombMultiplayer : MonoBehaviour
 {
     public int Id { get; set; }
-    private Text PatxauText;
+    //private Text PatxauText;
+
+    private string[] BOMB_TOUCH_TEXT = new string[] { "Ooops", "Arrssh", "Duck" };
+    private System.Random random = new System.Random();
 
     void Start()
     {
-        PatxauText = GameObject.Find("PatxauText").GetComponent<Text>();
+        //PatxauText = GameObject.Find("PatxauText").GetComponent<Text>();
     }
 
     private void OnMouseDown()
     {
         TouchManagerMultiplayer.Instance.DeleteById(Id);
-        if (PlayerInGameContainer.Instance.CurrTapsInARow > 5)
-        {
-            PatxauText.fontSize = 20 + ((PlayerInGameContainer.Instance.CurrTapsInARow - 6) * 2);
-            PatxauText.gameObject.transform.position = transform.position;
-            UIUtils.ShowMessageInPanel("PATXXAU", 1f, PatxauText.gameObject);
-        }
+
+        //PatxauText.fontSize = 25;
+        //PatxauText.gameObject.transform.position = transform.position;
+        //StartCoroutine(UIUtils.ShowMessageInText(BOMB_TOUCH_TEXT[random.Next(0, 3)], 0.5f, PatxauText));
+
         ServerManager.Instance.Client.Send(URI.DeleteObject, new DeleteObject() { ChallengeID = GameContainer.CurrentGameId, ObjectID = Id }, OnObjectDeletion);
     }
 
@@ -36,9 +39,17 @@ public class BombMultiplayer : MonoBehaviour
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             OnDeletedObject deletedObj = p.DeserializeContent<OnDeletedObject>();
-            PlayerInGameContainer.Instance.Build(deletedObj);
+            PlayerInGameContainer.Instance.UpdateGameStats(deletedObj);
         }
     }
+    /*
+    private void OnDestroy()
+    {
+        Task.Delay(500).ContinueWith(t =>
+        {
+            PatxauText.fontSize = 1;
+        });
+    }*/
 }
 
 

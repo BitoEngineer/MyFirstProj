@@ -6,7 +6,9 @@ using Assets.Server.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
+using Assets.Scripts.Multiplayer_Scene;
+using Assets.Scripts.Preloader;
+using Assets.Scripts.Utils;
 
 public class TouchManagerMultiplayer : MonoBehaviour
 {
@@ -61,6 +63,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
 
         ServerManager.Instance.Client.AddCallback(URI.NewObject, OnObjectReceived);
         ServerManager.Instance.Client.AddCallback(URI.DeleteObject, OnObjectDeletion);
+        ServerManager.Instance.Client.AddCallback(URI.PlayerLeft, OnPlayerLeft);
         ServerManager.Instance.Client.AddCallback(URI.GameOver, OnGameOver);
     }
 
@@ -75,6 +78,12 @@ public class TouchManagerMultiplayer : MonoBehaviour
         {
             DeleteById(objectsToDelete.Dequeue());
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        var dto = new PlayerLeftGame() { Reason = "Arrrsh, that coward left the game", ChallengeID = GameContainer.CurrentGameId, OpponentID = GameContainer.OpponentID };
+        ServerManager.Instance.Client.Send(URI.PlayerLeft, dto);
     }
 
     void OnObjectDeletion(JsonPacket p)
@@ -166,7 +175,6 @@ public class TouchManagerMultiplayer : MonoBehaviour
         AliveObjects.Add(id, square_go);
     }
 
-
     private void SpawnCircle(Vector3 v, int index, int id)
     {
         Circle add = new Circle
@@ -182,13 +190,32 @@ public class TouchManagerMultiplayer : MonoBehaviour
         AliveObjects.Add(id, add.Circle_Prefab);
     }
 
-
     private void OnGameOver(JsonPacket p)
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             GameOver gameOverObj = p.DeserializeContent<GameOver>();
             GameOverUIController.Instance.GameOverUpdate(gameOverObj);
+        }
+    }
+
+    private void OnPlayerLeft(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            var dto = p.DeserializeContent<PlayerLeftGame>();
+            //TODO 
+            GameOverUIController.Instance.GameOverUpdate(new GameOver()
+            {
+                OpponentPoints = 0,
+                OpponentTapsInARow = 0,
+                OpponentTimeLeft = 0,
+                OpponentTimePoints = 0,
+                Points = 999,
+                TapsInARow = 999,
+                TimeLeft = 99,
+                TimePoints = 99
+            });
         }
     }
 
