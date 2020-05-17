@@ -52,12 +52,7 @@ public class MultiplayerCountDown : MonoBehaviour
 
         if (t > 3f)
         {
-            if (Counting)
-            {
-                TimerCounterGO.GetComponent<MultiplayerTimerCounter>().ResumeTimer();
-            }
             Counting = false;
-
         }
     }
 
@@ -78,6 +73,9 @@ public class MultiplayerCountDown : MonoBehaviour
         {
             ChallengeReply reply = p.DeserializeContent<ChallengeReply>();
             GameContainer.OpponentID = reply.OpponentID;
+            GameContainer.OpponentName = reply.OpponentName;
+
+            TimerCounterGO.GetComponent<MultiplayerTimerCounter>().ResumeTimer();
         }
     }
 }

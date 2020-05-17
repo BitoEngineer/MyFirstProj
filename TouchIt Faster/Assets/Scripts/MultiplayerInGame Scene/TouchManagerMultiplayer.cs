@@ -25,6 +25,8 @@ public class TouchManagerMultiplayer : MonoBehaviour
     public Text GameOverPointsText;
     public Canvas canvas;
     public Canvas SpawnerCanvas;
+    public GameObject OpponentNameText;
+    public GameObject OpponentPointsText;
     private RectTransform CanvasRect;
     private RectTransform SpawnerCanvasRect;
 
@@ -67,10 +69,16 @@ public class TouchManagerMultiplayer : MonoBehaviour
         ServerManager.Instance.Client.AddCallback(URI.GameOver, OnGameOver);
     }
 
-    // Update is called once per frame
+    private bool _isOpponentNameFilled = false;
     void Update()
     {
-        while(objectsToAdd.Count > 0)
+        if(!_isOpponentNameFilled && GameContainer.HaveStarted)
+        {
+            OpponentNameText.GetComponent<Text>().text = GameContainer.OpponentName;
+            _isOpponentNameFilled = false;
+        }
+
+        while (objectsToAdd.Count > 0)
         {
             SpawnObject(objectsToAdd.Dequeue());
         }
@@ -90,8 +98,12 @@ public class TouchManagerMultiplayer : MonoBehaviour
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
-            var obj = p.DeserializeContent<DeleteObject>();
+            var obj = p.DeserializeContent<OnDeletedObject>();
             objectsToDelete.Enqueue(obj.ObjectID);
+            UnityMainThreadDispatcher.Instance().Enqueue(() => 
+            {
+                OpponentPointsText.GetComponent<Text>().text = ""+obj.CurrentPoints;
+            });
         }
     }
 
@@ -195,7 +207,11 @@ public class TouchManagerMultiplayer : MonoBehaviour
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             GameOver gameOverObj = p.DeserializeContent<GameOver>();
-            GameOverUIController.Instance.GameOverUpdate(gameOverObj);
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                GameOverUIController.Instance.GameOverUpdate(gameOverObj);
+            });
         }
     }
 
@@ -205,16 +221,19 @@ public class TouchManagerMultiplayer : MonoBehaviour
         {
             var dto = p.DeserializeContent<PlayerLeftGame>();
             //TODO 
-            GameOverUIController.Instance.GameOverUpdate(new GameOver()
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                OpponentPoints = 0,
-                OpponentTapsInARow = 0,
-                OpponentTimeLeft = 0,
-                OpponentTimePoints = 0,
-                Points = 999,
-                TapsInARow = 999,
-                TimeLeft = 99,
-                TimePoints = 99
+                GameOverUIController.Instance.GameOverUpdate(new GameOver()
+                {
+                    OpponentPoints = 0,
+                    OpponentTapsInARow = 0,
+                    OpponentTimeLeft = 0,
+                    OpponentTimePoints = 0,
+                    Points = 999,
+                    TapsInARow = 999,
+                    TimeLeft = 99,
+                    TimePoints = 99
+                });
             });
         }
     }

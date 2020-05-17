@@ -11,7 +11,7 @@ public class MultiplayerReturnBack : MonoBehaviour {
 
     private void Start()
     {
-        touchM = GameObject.Find("TouchManagerMultiplayer").GetComponent<TouchManagerMultiplayer>();
+        touchM = GameObject.Find("Touch").GetComponent<TouchManagerMultiplayer>();
 
     }
 

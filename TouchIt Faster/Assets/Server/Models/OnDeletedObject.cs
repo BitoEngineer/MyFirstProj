@@ -12,5 +12,6 @@ namespace Assets.Server.Models
         public int CurrTapsInARow;
         public float Time;
         public float ExtraTime;
+        public int ObjectID;
     }
 }

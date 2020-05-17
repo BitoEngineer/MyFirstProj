@@ -8,9 +8,10 @@ namespace MyFirstServ.Models.TouchItFaster
 {
     public enum ChallengeReplyType
     {
+        RequestedOffline,
+        Waiting,
         ChallengeRefused,
         ChallengeAccepted,
-        Waiting,
         Start,
         GameOver
     }
@@ -20,5 +21,6 @@ namespace MyFirstServ.Models.TouchItFaster
         public int ChallengeID;
         public long OpponentID;
         public ChallengeReplyType Reply;
+        public string OpponentName;
     }
 }
