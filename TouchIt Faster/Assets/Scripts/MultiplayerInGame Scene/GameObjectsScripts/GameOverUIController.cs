@@ -33,7 +33,6 @@ public class GameOverUIController : MonoBehaviour
 
     public void GameOverUpdate(GameOver gameOver)
     {
-
         MultiplayerTimerCounter.Instance.StopTimer();
         PlayerStatsText.text = FillStatsString(gameOver, PlayerStatsText.text, false);
         PlayerStatsText.text = FillStatsString(gameOver, OpponentStatsText.text, true);

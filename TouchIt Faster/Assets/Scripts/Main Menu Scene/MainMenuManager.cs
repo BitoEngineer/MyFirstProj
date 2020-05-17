@@ -32,13 +32,13 @@ public class MainMenuManager : MonoBehaviour {
     private bool IsSettings = false;
 
     private readonly string ClientID = "574776742495-hkkjt0av75rdb3ipceh6iefugrikuldm.apps.googleusercontent.com";
-    private readonly string Jokes_API_URL = "http://geek-jokes.sameerkumar.website/api";
+    //private readonly string Jokes_API_URL = "http://geek-jokes.sameerkumar.website/api";
 
 
     // Use this for initialization
     void Start () {
 
-        StartCoroutine(GetRequest(Jokes_API_URL, (joke) =>
+        /*StartCoroutine(GetRequest(Jokes_API_URL, (joke) =>
             {
                 UnityMainThreadDispatcher.Instance().Enqueue(() =>
                 {
@@ -48,7 +48,7 @@ public class MainMenuManager : MonoBehaviour {
                         JokeText.text = joke.Substring(1, joke.Length-3);
                     }                        
                 });
-            }));
+            }));*/
 #if DEBUG
         string debugClientID = "debugtestclientid";
         ServerManager.Instance.Client.Start(debugClientID);

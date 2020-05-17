@@ -16,7 +16,6 @@ public class MultiplayerManager : MonoBehaviour {
 
     public GameObject FriendGO;
     public GameObject FriendsContainer;
-    public GameObject SearchContainer;
     public GameObject OnFriendClickPanel;
     public Button FightButton;
     public Button UnfriendButton;
@@ -25,7 +24,6 @@ public class MultiplayerManager : MonoBehaviour {
     public Text HighestScoreText;
     public Text WinsText;
     public Text LosesText;
-    public Text TotalTimeText;
     public Button QuitButton;
     public Text ChallengeRequestText;
     public GameObject NoResults;
@@ -34,8 +32,12 @@ public class MultiplayerManager : MonoBehaviour {
     public GameObject AcceptButton;
     public GameObject DeclineButton;
 
-    private Color32 Red = new Color32(170, 36, 41, 255);
-    private Color32 Green = new Color32(36, 129, 41, 255);
+    //Stats panel
+    public GameObject PlayerNameText;
+    public GameObject PlayerHighestScoreText;
+    public GameObject PlayerWinsText;
+    public GameObject PlayerLosesText;
+    public GameObject PlayerTapsText;
 
     private List<PlayerInfo> Friends = new List<PlayerInfo>();
     private List<GameObject> FriendsGO = new List<GameObject>();
@@ -48,10 +50,20 @@ public class MultiplayerManager : MonoBehaviour {
 
 	void Start () {
         UpdateFriends();
+        BuildStatsPanel();
         ServerManager.Instance.Client.AddCallback(URI.ChallengeReply, ChallengeRequestReply);
 	    ServerManager.Instance.Client.AddCallback(URI.ChallengeRequest, OnFriendsChallengeRequest);
     }
-    
+
+    private void BuildStatsPanel()
+    {
+        PlayerNameText.GetComponent<Text>().text = PlayerContainer.Instance.Info.PlayerName;
+        PlayerHighestScoreText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.HighestScore;
+        PlayerWinsText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.Wins + " wins";
+        PlayerLosesText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.Loses + " loses";
+        PlayerTapsText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.TapsInRow + " taps in a row";
+    }
+
     void Update () {
         if (FriendsUpdated)
         {
@@ -80,7 +92,8 @@ public class MultiplayerManager : MonoBehaviour {
             go.GetComponentInChildren<Text>().text = f.PlayerName;
             Button b = go.GetComponent<Button>();
 
-            b.GetComponent<Image>().color = f.CurrentState == PlayerState.Offline ? Red : Green;
+            string playerState = f.CurrentState == PlayerState.Offline ? "OfflineImage" : "OnlineImage";
+            go.transform.Find(playerState).gameObject.SetActive(true);
 
             b.onClick.AddListener(() =>
             {
@@ -111,12 +124,13 @@ public class MultiplayerManager : MonoBehaviour {
         {
             foreach (PlayerInfo pi in SearchedUsers.ToArray())
             {
-                GameObject go = Instantiate(FriendGO, SearchContainer.transform) as GameObject;
+                GameObject go = Instantiate(FriendGO, FriendsContainer.transform) as GameObject;
                 go.GetComponentInChildren<Text>().text = pi.PlayerName;
                 SearchedGO.Add(go);
                 Button b = go.GetComponent<Button>();
 
-                b.GetComponent<Image>().color = pi.CurrentState == PlayerState.Offline ? Red : Green;
+                string playerState = pi.CurrentState == PlayerState.Offline ? "OfflineImage" : "OnlineImage";
+                go.transform.Find(playerState).gameObject.SetActive(true);
 
                 b.onClick.AddListener(() =>
                 {
@@ -129,9 +143,9 @@ public class MultiplayerManager : MonoBehaviour {
     private void FillProfilePanel(PlayerInfo f, bool friend)
     {
         NameText.text = f.PlayerName;
-        HighestScoreText.text = "Highest Score: " + f.HighestScore.ToString();
-        WinsText.text = "Wins: " + f.Wins.ToString();
-        LosesText.text = "Loses: " + f.Loses.ToString();
+        HighestScoreText.text = f.HighestScore.ToString();
+        WinsText.text = f.Wins.ToString() + " wins";
+        LosesText.text = f.Loses.ToString() + " loses";
         BuildProfilePanelButtons(f, friend);
 
         QuitButton.onClick.AddListener(() =>

@@ -75,12 +75,12 @@ public class MultiplayerTimerCounter : MonoBehaviour
             string msg;
             if (extratime > 0)
             {
-                msg = "+" + extratime.ToString("#.##");
+                msg = "+" + extratime.ToString("0.##");
                 ExtraTimeText.color = Color.green;
             }
             else
             {
-                msg = extratime.ToString("#.##");
+                msg = extratime.ToString("0.##");
                 ExtraTimeText.color = Color.red;
             }
 

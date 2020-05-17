@@ -210,7 +210,8 @@ public class TouchManagerMultiplayer : MonoBehaviour
 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                GameOverUIController.Instance.GameOverUpdate(gameOverObj);
+                GameOverPanel.SetActive(true);
+                GameOverPanel.GetComponent<GameOverUIController>().GameOverUpdate(gameOverObj);
             });
         }
     }

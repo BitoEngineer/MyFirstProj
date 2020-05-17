@@ -14,5 +14,6 @@ namespace Assets.Server.Models
         public int HighestScore;
         public int Wins;
         public int Loses;
+        public int TapsInRow;
     }
 }
