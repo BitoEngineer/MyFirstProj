@@ -26,7 +26,6 @@ public class MultiplayerManager : MonoBehaviour {
     public Text LosesText;
     public Button QuitButton;
     public Text ChallengeRequestText;
-    public GameObject NoResults;
     public GameObject MessagePanel;
     public GameObject ChallengRequestPanel;
     public GameObject AcceptButton;
@@ -79,12 +78,8 @@ public class MultiplayerManager : MonoBehaviour {
     private void FriendsContainerUpdate()
     {
         FriendsUpdated = false;
-        foreach (GameObject go in FriendsGO)
-        {
-            Destroy(go);
-        }
-
-        FriendsGO.Clear();
+        ClearFriendsList();
+        ClearSearchedPlayersList();
 
         foreach (PlayerInfo f in Friends.ToArray())
         {
@@ -104,21 +99,26 @@ public class MultiplayerManager : MonoBehaviour {
         }
     }
 
-    private void SearchPlayersUpdate()
+    private void ClearFriendsList()
     {
-        SearchedPlayers = false;
-        NoResults.SetActive(false);
-
-        foreach (GameObject go in SearchedGO)
+        foreach (GameObject go in FriendsGO)
         {
             Destroy(go);
         }
 
-        SearchedGO.Clear();
+        FriendsGO.Clear();
+    }
+
+    private void SearchPlayersUpdate()
+    {
+        SearchedPlayers = false;
+        ClearFriendsList();
+        ClearSearchedPlayersList();
+        //NoResults.SetActive(false);
 
         if (SearchedUsers.Count == 0)
         {
-            NoResults.SetActive(true);
+            //NoResults.SetActive(true);
         }
         else
         {
@@ -138,6 +138,16 @@ public class MultiplayerManager : MonoBehaviour {
                 });
             }
         }
+    }
+
+    private void ClearSearchedPlayersList()
+    {
+        foreach (GameObject go in SearchedGO)
+        {
+            Destroy(go);
+        }
+
+        SearchedGO.Clear();
     }
 
     private void FillProfilePanel(PlayerInfo f, bool friend)
@@ -211,7 +221,14 @@ public class MultiplayerManager : MonoBehaviour {
 
     public void SearchPlayers(string value)
     {
-        ServerManager.Instance.Client.Send(URI.SearchPlayer, value, PlayerSearchResult);
+        if(value.Length >= 3)
+        {
+            ServerManager.Instance.Client.Send(URI.SearchPlayer, value, PlayerSearchResult);
+        }
+        else
+        {
+            FriendsUpdated = true;
+        }
     }
 
     private void PlayerSearchResult(JsonPacket p)
@@ -220,7 +237,7 @@ public class MultiplayerManager : MonoBehaviour {
         {
             SearchedUsers.Clear();
             ArrayWrapper mi = p.DeserializeContent<ArrayWrapper>();
-            SearchedUsers.AddRange(mi.GetArray<PlayerInfo>());
+            SearchedUsers.AddRange(mi.GetArray<PlayerInfo>().OrderBy(pi => pi.PlayerName));
             SearchedPlayers = true;
         }
         else
@@ -250,7 +267,7 @@ public class MultiplayerManager : MonoBehaviour {
         if (friend)
         {
             AddfriendButton.gameObject.SetActive(false);
-            FightButton.gameObject.SetActive(true);
+            FightButton.gameObject.SetActive(f.CurrentState == PlayerState.Online);
             UnfriendButton.gameObject.SetActive(true);
             FightButton.onClick.RemoveAllListeners();
             FightButton.onClick.AddListener(() =>
@@ -261,17 +278,19 @@ public class MultiplayerManager : MonoBehaviour {
             UnfriendButton.onClick.AddListener(() =>
             {
                 ServerManager.Instance.Client.Send(URI.Unfriend, f.ClientID, UnfriendReply);
+                OnFriendClickPanel.SetActive(false);
             });
         }
         else
         {
             AddfriendButton.gameObject.SetActive(true);
-            FightButton.gameObject.SetActive(false);
+            FightButton.gameObject.SetActive(f.CurrentState == PlayerState.Online);
             UnfriendButton.gameObject.SetActive(false);
             AddfriendButton.onClick.RemoveAllListeners();
             AddfriendButton.onClick.AddListener(() =>
             {
                 ServerManager.Instance.Client.Send(URI.AddFriend, f.ClientID, AddFriendReply);
+                OnFriendClickPanel.SetActive(false);
             });
         }
     }
