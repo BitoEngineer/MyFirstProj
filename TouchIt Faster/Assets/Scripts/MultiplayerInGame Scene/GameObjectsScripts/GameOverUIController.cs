@@ -14,50 +14,38 @@ public class GameOverUIController : MonoBehaviour
 {
     public static GameOverUIController Instance;
 
+    public GameObject DisableAllPanel;
     public GameObject GameOverPanel;
     public GameObject MessagePanel;
-    public Text PlayerStatsText;
-    public Text OpponentStatsText;
     public Button MainMenuBtn;
-    public Button AddOpponentBtn;
     public Button RevengeBtn;
 
 
-	void Start ()
-	{
-        AddOpponentBtn.onClick.AddListener(AddOpponentListener);
+    void Start()
+    {
+        DisableAllPanel.SetActive(true);
         RevengeBtn.onClick.AddListener(RevengeListener);
         MainMenuBtn.onClick.AddListener(MainMenuListener);
-	    Instance = this;
-	}
+        Instance = this;
+    }
 
     public void GameOverUpdate(GameOver gameOver)
     {
-        MultiplayerTimerCounter.Instance.StopTimer();
-        PlayerStatsText.text = FillStatsString(gameOver, PlayerStatsText.text, false);
-        PlayerStatsText.text = FillStatsString(gameOver, OpponentStatsText.text, true);
+        var winnerpanel = transform.Find("WinnerPanel");
+        var loserpanel = transform.Find("LoserPanel");
 
-        GameOverPanel.SetActive(true);
+        bool playerLost = gameOver.OpponentPoints > gameOver.Points;
+
+        FillStatsPanel(playerLost ? winnerpanel : loserpanel, GameContainer.OpponentName, gameOver.OpponentPoints, gameOver.OpponentTimePoints, gameOver.OpponentTapsInARow);
+        FillStatsPanel(playerLost ? loserpanel : winnerpanel, PlayerContainer.Instance.Info.PlayerName, gameOver.Points, gameOver.TimePoints, gameOver.TapsInARow);
     }
 
-    private string FillStatsString(GameOver gameOver, string pst, bool opponent)
+    private void FillStatsPanel(Transform panel, string playername, int points, int extraPoints, int hitInRow)
     {
-        if (!opponent)
-        {
-            pst.Replace("PTS", gameOver.Points.ToString());
-            pst.Replace("TL", gameOver.TimeLeft.ToString());
-            pst.Replace("TLEP", gameOver.TimePoints.ToString());
-            pst.Replace("HR", gameOver.TapsInARow.ToString());
-        }
-        else
-        {
-            pst.Replace("PTS", gameOver.OpponentPoints.ToString());
-            pst.Replace("TL", gameOver.OpponentTimeLeft.ToString());
-            pst.Replace("TLEP", gameOver.OpponentTimePoints.ToString());
-            pst.Replace("HR", gameOver.OpponentTapsInARow.ToString());
-        }
-
-        return pst;
+        panel.Find("NameText").GetComponent<Text>().text = playername;
+        panel.Find("PointsText").GetComponent<Text>().text = "" + points;
+        panel.Find("ExtraPointsText").GetComponent<Text>().text = "+" + extraPoints;
+        panel.Find("TapsInRowText").GetComponent<Text>().text = "" + hitInRow;
     }
 
     public void AddOpponentListener()

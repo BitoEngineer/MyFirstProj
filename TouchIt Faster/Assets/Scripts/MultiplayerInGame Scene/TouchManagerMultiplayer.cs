@@ -22,7 +22,6 @@ public class TouchManagerMultiplayer : MonoBehaviour
 
     //DATA
     public GameObject GameOverPanel;
-    public Text GameOverPointsText;
     public Canvas canvas;
     public Canvas SpawnerCanvas;
     public GameObject OpponentNameText;
@@ -31,6 +30,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
     private RectTransform SpawnerCanvasRect;
 
     public GameObject CountDownGO;
+    public GameObject TimerCounterGO;
 
     public AudioClip CircleSound;
     public AudioClip SquareSound;
@@ -210,6 +210,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
+                TimerCounterGO.GetComponent<MultiplayerTimerCounter>().StopTimer();
                 GameOverPanel.SetActive(true);
                 GameOverPanel.GetComponent<GameOverUIController>().GameOverUpdate(gameOverObj);
             });
