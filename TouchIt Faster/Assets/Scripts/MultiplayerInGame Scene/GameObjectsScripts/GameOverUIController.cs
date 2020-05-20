@@ -14,6 +14,7 @@ public class GameOverUIController : MonoBehaviour
 {
     public static GameOverUIController Instance;
 
+    public GameObject SpawnerCanvas;
     public GameObject DisableAllPanel;
     public GameObject GameOverPanel;
     public GameObject MessagePanel;
@@ -23,6 +24,7 @@ public class GameOverUIController : MonoBehaviour
 
     void Start()
     {
+        SpawnerCanvas.SetActive(false);
         DisableAllPanel.SetActive(true);
         RevengeBtn.onClick.AddListener(RevengeListener);
         MainMenuBtn.onClick.AddListener(MainMenuListener);
@@ -42,10 +44,10 @@ public class GameOverUIController : MonoBehaviour
 
     private void FillStatsPanel(Transform panel, string playername, int points, int extraPoints, int hitInRow)
     {
-        panel.Find("NameText").GetComponent<Text>().text = playername;
-        panel.Find("PointsText").GetComponent<Text>().text = "" + points;
-        panel.Find("ExtraPointsText").GetComponent<Text>().text = "+" + extraPoints;
-        panel.Find("TapsInRowText").GetComponent<Text>().text = "" + hitInRow;
+        panel.Find("StatsAndNamePanel/NameText").GetComponent<Text>().text = playername.ToUpperInvariant();
+        panel.Find("StatsAndNamePanel/StatsPanel/PointsPanel/PointsText").GetComponent<Text>().text = "" + points;
+        panel.Find("StatsAndNamePanel/StatsPanel/PointsPanel/ExtraPointsText").GetComponent<Text>().text = "(+" + extraPoints + ")";
+        panel.Find("StatsAndNamePanel/StatsPanel/TapsInRowText").GetComponent<Text>().text = "" + hitInRow + " IN ROW";
     }
 
     public void AddOpponentListener()
@@ -100,7 +102,7 @@ public class GameOverUIController : MonoBehaviour
 
     public void MainMenuListener()
     {
-        SceneManager.LoadScene("Main Menu");
+        SceneManager.LoadScene("Multiplayer");
     }
 
 }

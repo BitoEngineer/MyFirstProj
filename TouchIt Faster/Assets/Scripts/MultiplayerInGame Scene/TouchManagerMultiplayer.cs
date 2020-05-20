@@ -45,6 +45,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
 
     private Queue<NewObject> objectsToAdd = new Queue<NewObject>();
     private Queue<int> objectsToDelete = new Queue<int>();
+    private bool gameEnded = false;
 
     public static TouchManagerMultiplayer Instance;
 
@@ -111,7 +112,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
     {
         if(p.ReplyStatus == ReplyStatus.OK)
         {
-            if (!MultiplayerTimerCounter.Instance.IsActive())
+            if (!MultiplayerTimerCounter.Instance.IsActive() && !gameEnded)
             {
                 MultiplayerTimerCounter.Instance.ResumeTimer();
             }
@@ -207,6 +208,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             GameOver gameOverObj = p.DeserializeContent<GameOver>();
+            gameEnded = true;
 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
