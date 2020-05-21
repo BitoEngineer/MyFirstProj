@@ -18,6 +18,7 @@ public class GameOverUIController : MonoBehaviour
     public GameObject DisableAllPanel;
     public GameObject GameOverPanel;
     public GameObject MessagePanel;
+    public GameObject ChallengeRequestPanel;
     public Button MainMenuBtn;
     public Button RevengeBtn;
 
@@ -29,6 +30,8 @@ public class GameOverUIController : MonoBehaviour
         RevengeBtn.onClick.AddListener(RevengeListener);
         MainMenuBtn.onClick.AddListener(MainMenuListener);
         Instance = this;
+
+        ServerManager.Instance.Client.AddCallback(URI.ChallengeRequest, OnChallengeRequest);
     }
 
     public void GameOverUpdate(GameOver gameOver)
@@ -86,12 +89,17 @@ public class GameOverUIController : MonoBehaviour
 
             if (reply.Reply == ChallengeReplyType.Waiting)
             {
-                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Hmmm let's see if he is capable...", 2f, MessagePanel)));
+                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Hmmm let's see if he has the balls..", 2f, MessagePanel)));
             }
             else if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
             {
+                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Be faster this time!", 2f, MessagePanel)));
                 GameContainer.CurrentGameId = reply.ChallengeID;
                 ServerManager.Instance.NextScene = "MultiplayerInGame";
+            }
+            else if (reply.Reply == ChallengeReplyType.ChallengeRefused || reply.Reply == ChallengeReplyType.ChallengeRefused)
+            {
+                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Ahah, that boy is affraid", 2f, MessagePanel)));
             }
         }
         else if (p.ReplyStatus == ReplyStatus.Forbidden)
@@ -105,4 +113,39 @@ public class GameOverUIController : MonoBehaviour
         SceneManager.LoadScene("Multiplayer");
     }
 
+    private void OnChallengeRequest(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            var cr = p.DeserializeContent<ChallengeRequest>();
+
+            ChallengeRequestPanel.transform.Find("ButtonsPanel/YesButton").GetComponent<Button>().onClick.AddListener(() =>
+            {
+                Debug.Log("Multiplayer Menu: Accepting friend's challenge");
+                ChallengeReply creply = new ChallengeReply()
+                {
+                    ChallengeID = cr.ID,
+                    Reply = ChallengeReplyType.ChallengeAccepted
+                };
+                ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
+
+                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Be faster this time!", 2f, MessagePanel)));
+                GameContainer.CurrentGameId = creply.ChallengeID;
+                ServerManager.Instance.NextScene = "MultiplayerInGame";
+            });
+
+            ChallengeRequestPanel.transform.Find("ButtonsPanel/NoButton").GetComponent<Button>().onClick.AddListener(() =>
+            {
+                Debug.Log("Multiplayer Menu: Declining friend's challenge");
+                ChallengeReply creply = new ChallengeReply()
+                {
+                    ChallengeID = cr.ID,
+                    Reply = ChallengeReplyType.ChallengeRefused
+                };
+                ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
+            });
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() => ChallengeRequestPanel.SetActive(true));
+        }
+    }
 }
