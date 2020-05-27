@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Reflection;
 
+using GoogleMobileAds;
 using GoogleMobileAds.Common;
 
 namespace GoogleMobileAds.Api
@@ -26,12 +26,7 @@ namespace GoogleMobileAds.Api
         // Creates a BannerView and adds it to the view hierarchy.
         public BannerView(string adUnitId, AdSize adSize, AdPosition position)
         {
-            Type googleMobileAdsClientFactory = Type.GetType(
-                "GoogleMobileAds.GoogleMobileAdsClientFactory,Assembly-CSharp");
-            MethodInfo method = googleMobileAdsClientFactory.GetMethod(
-                "BuildBannerClient",
-                BindingFlags.Static | BindingFlags.Public);
-            this.client = (IBannerClient)method.Invoke(null, null);
+            this.client = GoogleMobileAdsClientFactory.BuildBannerClient();
             client.CreateBannerView(adUnitId, adSize, position);
 
             ConfigureBannerEvents();
@@ -40,12 +35,7 @@ namespace GoogleMobileAds.Api
         // Creates a BannerView with a custom position.
         public BannerView(string adUnitId, AdSize adSize, int x, int y)
         {
-            Type googleMobileAdsClientFactory = Type.GetType(
-                "GoogleMobileAds.GoogleMobileAdsClientFactory,Assembly-CSharp");
-            MethodInfo method = googleMobileAdsClientFactory.GetMethod(
-                "BuildBannerClient",
-                BindingFlags.Static | BindingFlags.Public);
-            this.client = (IBannerClient)method.Invoke(null, null);
+            this.client = GoogleMobileAdsClientFactory.BuildBannerClient();
             client.CreateBannerView(adUnitId, adSize, x, y);
 
             ConfigureBannerEvents();
@@ -61,6 +51,9 @@ namespace GoogleMobileAds.Api
         public event EventHandler<EventArgs> OnAdClosed;
 
         public event EventHandler<EventArgs> OnAdLeavingApplication;
+
+        // Called when an ad is estimated to have earned money.
+        public event EventHandler<AdValueEventArgs> OnPaidEvent;
 
         // Loads an ad into the BannerView.
         public void LoadAd(AdRequest request)
@@ -84,6 +77,30 @@ namespace GoogleMobileAds.Api
         public void Destroy()
         {
             client.DestroyBannerView();
+        }
+
+        // Returns the height of the BannerView in pixels.
+        public float GetHeightInPixels()
+        {
+            return client.GetHeightInPixels();
+        }
+
+        // Returns the width of the BannerView in pixels.
+        public float GetWidthInPixels()
+        {
+            return client.GetWidthInPixels();
+        }
+
+        // Set the position of the BannerView using standard position.
+        public void SetPosition(AdPosition adPosition)
+        {
+            client.SetPosition(adPosition);
+        }
+
+        // Set the position of the BannerView using custom position.
+        public void SetPosition(int x, int y)
+        {
+            client.SetPosition(x, y);
         }
 
         private void ConfigureBannerEvents()
@@ -127,6 +144,21 @@ namespace GoogleMobileAds.Api
                     this.OnAdLeavingApplication(this, args);
                 }
             };
+
+            this.client.OnPaidEvent += (sender, args) =>
+            {
+                if (this.OnPaidEvent != null)
+                {
+                    this.OnPaidEvent(this, args);
+                }
+            };
+
+        }
+
+        // Returns the mediation adapter class name.
+        public string MediationAdapterClassName()
+        {
+            return this.client.MediationAdapterClassName();
         }
     }
 }

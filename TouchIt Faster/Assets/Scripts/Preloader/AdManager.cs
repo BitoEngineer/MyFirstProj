@@ -17,6 +17,7 @@ public class AdManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        Debug.Log("TouchItFaster - AdManager createad");
         Instance = this;
         DontDestroyOnLoad(gameObject);
         //showBannerAd();
@@ -27,6 +28,7 @@ public class AdManager : MonoBehaviour
 
     private void showBannerAd()
     {
+        Debug.Log("TouchItFaster - Show banner ad");
         return;
         string adID = "ca-app-pub-3940256099942544/6300978111";
 
@@ -45,14 +47,14 @@ public class AdManager : MonoBehaviour
 
     public void DestroyBanner()
     {
-        if(CurrBanner!=null)
+        Debug.Log("TouchItFaster - Destroy banner ad");
+        if (CurrBanner!=null)
             CurrBanner.Destroy();
     }
 
-
-
     public void showInterstitialAd()
     {
+        Debug.Log("TouchItFaster - Show interstitial ad");
         return;
         //Show Ad
         if (interstitial.IsLoaded())
@@ -70,6 +72,7 @@ public class AdManager : MonoBehaviour
     InterstitialAd interstitial;
     private void RequestInterstitialAds()
     {
+        Debug.Log("TouchItFaster - Request interstitial ad");
         return;
         string adID = "ca-app-pub-3940256099942544/1033173712";
 
@@ -106,7 +109,8 @@ public class AdManager : MonoBehaviour
     //Ad Close Event
     private void Interstitial_OnAdClosed(object sender, System.EventArgs e)
     {
-        //Resume Play Sound
+        Debug.Log("TouchItFaster - Intersitial ad finished");
+        //TODO Resume Play Sound
 
     }
 }

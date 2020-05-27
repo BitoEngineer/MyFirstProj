@@ -19,7 +19,10 @@ public class ServerManager : MonoBehaviour {
     public string NextScene { get; set; }
 
     // Use this for initialization
-    void Start () {
+    void Start ()
+    {
+        Debug.Log("TouchItFaster - ServerManager createad");
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
@@ -40,24 +43,25 @@ public class ServerManager : MonoBehaviour {
 
     private void errorDebug(Exception e, string message, object[] args)
     {
-        Console.WriteLine("Preloader ERROR: "+ string.Format(message, args));
-        Console.WriteLine("Preloader ERROR: " + e);
+        Debug.Log("TouchIt Faster - Preloader ERROR: "+ string.Format(message, args));
+        Debug.Log("TouchIt Faster - Preloader ERROR: " + e);
     }
 
     private void logDebug(string message, object[] args)
     {
-        Console.WriteLine("Preloader: " + string.Format(message, args));
+        Debug.Log("TouchIt Faster - Preloader: " + string.Format(message, args));
     }
 
     private void connectivityChanged(bool connected)
     {
+        Debug.Log("TouchItFaster - ServerManager connectivity changed");
         if (!connected)
         {
             // TODO - connection to server lost
         }
         else
         {
-            Console.WriteLine("Preloader INFO: Connected to server");
+            Debug.Log("TouchIt Faster - Preloader INFO: Connected to server");
         }
     }
 

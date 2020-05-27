@@ -13,6 +13,8 @@ public class PreloaderManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        Debug.Log("TouchItFaster - PreloaderManager createad");
+
         DontDestroyOnLoad(gameObject);
 
         CheckIfGooglePlayServicesIsUpToDate();
@@ -23,6 +25,7 @@ public class PreloaderManager : MonoBehaviour
 
     private void PlayGamesPlatformConfig()
     {
+        Debug.Log("TouchItFaster - Starting PlayGamesPlatformConfig");
         PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
                     // enables saving game progress.
                     //.EnableSavedGames()
@@ -47,15 +50,19 @@ public class PreloaderManager : MonoBehaviour
         PlayGamesPlatform.DebugLogEnabled = true;
         // Activate the Google Play Games platform
         PlayGamesPlatform.Activate();
+
+        Debug.Log("TouchItFaster - Ended PlayGamesPlatformConfig");
     }
 
     private void CheckIfGooglePlayServicesIsUpToDate()
     {
+        Debug.Log("TouchItFaster - Before CheckIfGooglePlayServicesIsUpToDate");
         Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
         {
             var dependencyStatus = task.Result;
             if (dependencyStatus == Firebase.DependencyStatus.Available)
             {
+                Debug.Log("TouchItFaster - CheckIfGooglePlayServicesIsUpToDate - dependency status is available");
                 // Create and hold a reference to your FirebaseApp, i.e.
                 app = Firebase.FirebaseApp.DefaultInstance;
                 // where app is a Firebase.FirebaseApp property of your application class.
@@ -66,7 +73,7 @@ public class PreloaderManager : MonoBehaviour
             else
             {
                 UnityEngine.Debug.LogError(System.String.Format(
-                  "Could not resolve all Firebase dependencies: {0}", dependencyStatus));
+                  "TouchItFaster - Could not resolve all Firebase dependencies: {0}", dependencyStatus));
                 // Firebase Unity SDK is not safe to use here.
             }
         });
