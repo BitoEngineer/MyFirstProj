@@ -5,34 +5,17 @@ using UnityEngine.SceneManagement;
 
 public class ReturnBack : MonoBehaviour {
 
-    public GameObject ExitPopup;
-    private TouchManager touchM;
-    public GameObject TimerCounterGO;
+    public GameObject PauseMenu;
 
     private void Start()
     {
-        touchM = GameObject.Find("Touch").GetComponent<TouchManager>();
-
+        PauseMenu.GetComponent<PauseMenu>();
     }
 
 
     public void OnMouseDown()
     {
-        touchM.OnPause = true;
-        //TimerCounter.Instance.StopTimer(); TODO
-        ExitPopup.SetActive(true);
-    }
-
-    public void Leave()
-    {
-        SceneManager.LoadScene("Main Menu");
-    }
-
-    public void Resume()
-    {
-        ExitPopup.SetActive(false);
-        touchM.OnPause = false;
-        TimerCounterGO.GetComponent<TimerCounter>().ResumeTimer();
-
+        PauseMenu.SetActive(true);
+        PauseMenu.GetComponent<PauseMenu>().Pause();        
     }
 }

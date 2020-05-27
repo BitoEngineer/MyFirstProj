@@ -7,14 +7,14 @@ public class TimerCounter : MonoBehaviour {
 
     public Text timerText;
     public float startTime;
-    private TouchManager touchM;
-    private bool active = true;
+    //private TouchManager touchM;
+    private bool active = false;
     private float t;
 
 	// Use this for initialization
 	void Start () {
-        startTime = Time.realtimeSinceStartup;
-        touchM = GameObject.Find("Touch").GetComponent<TouchManager>();
+        startTime = Time.time + 3f;
+        //touchM = GameObject.Find("Touch").GetComponent<TouchManager>();
     }
 	
 	// Update is called once per frame
@@ -22,15 +22,13 @@ public class TimerCounter : MonoBehaviour {
 
         if (active)
         {
-            t = Time.realtimeSinceStartup - (startTime ) ;
+            t = Time.time - startTime ;
 
             string minutes = ((int)t / 60).ToString();
             string seconds = (t % 60).ToString("f2");
             string sec= seconds.Split('.')[0];
             sec= sec.Length > 1 ? sec : "0" + sec;
-            string ms=seconds.Split('.')[1];
-            ms = ms.Length > 1 ? ms : "0" + ms;
-            timerText.text = minutes + ":" + sec + "."+ms;
+            timerText.text = minutes + ":" + sec;
         }
         
 	} 

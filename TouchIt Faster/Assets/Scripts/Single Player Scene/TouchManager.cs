@@ -43,7 +43,7 @@ public class TouchManager : MonoBehaviour
     List<TextTimer> TextDestroyedSpecialCircles = new List<TextTimer>();
 
     //DATA
-    private int Lifes = 3;
+    public int Lifes = 3;
     public Image Life1;
     public Image Life2;
     public Image Life3;
@@ -65,7 +65,7 @@ public class TouchManager : MonoBehaviour
     public AudioClip BombSound;
     private AudioSource source { get { return GetComponent<AudioSource>(); } }
 
-    private bool AdSeen = false;
+    public bool AdSeen = false;
     private Vector3 CircleSize, BombSize;
 
     private readonly float MAX_POINTS_CIRCLE = 15F;
@@ -75,9 +75,7 @@ public class TouchManager : MonoBehaviour
 
     public GameObject CountDownGO;
     public GameObject TimerCounterGO;
-
-
-    // Use this for initialization
+    
     void Start()
     {
         Circles[0] = Circle_Black_GO;
@@ -92,14 +90,14 @@ public class TouchManager : MonoBehaviour
         SpawnerCanvasRect = SpawnerCanvas.GetComponent<RectTransform>();
 
         Points = 0;
-      
+
         stageDimensions = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
         X_length = stageDimensions.x - (Circle_Black_GO.transform.localScale.x);
-        Y_length = stageDimensions.y - (Circle_Black_GO.transform.localScale.y * 4 );
+        Y_length = stageDimensions.y - (Circle_Black_GO.transform.localScale.y * 4);
 
-        CircleSize = new Vector3(CanvasRect.rect.width/32, CanvasRect.rect.width / 32, 0);
-        BombSize = new Vector3(CanvasRect.rect.width/30, CanvasRect.rect.width / 30, 0);
-        
+        CircleSize = new Vector3(CanvasRect.rect.width / 32, CanvasRect.rect.width / 32, 0);
+        BombSize = new Vector3(CanvasRect.rect.width / 30, CanvasRect.rect.width / 30, 0);
+
     }
 
 
@@ -109,7 +107,7 @@ public class TouchManager : MonoBehaviour
     {
         if (!OnPause && !CountDownGO.GetComponent<CountDown>().Counting)
         {
-            if(CheckGameOver()) return;
+            if (CheckGameOver()) return;
 
             float time = Time.time;
             SpawnObjects(time);
@@ -117,7 +115,7 @@ public class TouchManager : MonoBehaviour
             CheckBombsToDestroy(time);
             CheckCirclesToDestroy(time);
         }
-        
+
     }
 
     private void OnDestroy()
@@ -132,7 +130,7 @@ public class TouchManager : MonoBehaviour
             GenerateCircles();
             GenerateSquare();
         }
-        if(time - LastBombSpawn_s > Bomb_Spawn_s)
+        if (time - LastBombSpawn_s > Bomb_Spawn_s)
         {
             GenerateBomb();
         }
@@ -148,7 +146,8 @@ public class TouchManager : MonoBehaviour
         return false;
     }
 
-    private void CheckSquaresToDestroy(float time){
+    private void CheckSquaresToDestroy(float time)
+    {
         foreach (Square s in AliveSpecialCircles.Values)
         {
             if (time - s.Age_s > SpecialCircleLifeTime_s)
@@ -172,13 +171,13 @@ public class TouchManager : MonoBehaviour
 
     public void CheckCirclesToDestroy(float time)
     {
-        foreach(Circle c in AliveCircles.Values)
+        foreach (Circle c in AliveCircles.Values)
         {
-            if(time - c.Age_s > CIRCLE_LIFETIME_s)
+            if (time - c.Age_s > CIRCLE_LIFETIME_s)
             {
                 GameObject circle = c.Circle_Prefab;
                 AliveCircles.Remove(circle);
-                Destroy(circle);           
+                Destroy(circle);
                 GenerateBomb(c.Position);
             }
         }
@@ -205,7 +204,7 @@ public class TouchManager : MonoBehaviour
         if (randomBomb <= Prob_Bomb)
         {
             BoxCollider2D bc = BombGO.GetComponent<BoxCollider2D>();
-            Vector3 v = GetVallidCoords(bc.size.x*100);
+            Vector3 v = GetVallidCoords(bc.size.x * 100);
             GenerateBomb(v);
             return true;
         }
@@ -234,22 +233,21 @@ public class TouchManager : MonoBehaviour
 
         if (Prob_Bomb < MAX_BOMB_SPAWN_probability)
             Prob_Bomb += Bomb_Spawn_Inc_probability;
+
         source.PlayOneShot(BombSound);
         switch (Lifes--)
         {
             case 3:
-                Life1.enabled = true;
+                Life3.enabled = false;
                 break;
             case 2:
-                Life2.enabled = true;
+                Life2.enabled = false;
                 break;
             case 1:
-                Life3.enabled = true;
+                Life1.enabled = false;
                 GameOver();
                 break;
         }
-
-
     }
 
     private bool GenerateSquare()
@@ -258,12 +256,12 @@ public class TouchManager : MonoBehaviour
         if (randomSquare <= Prob_SpecialCircle)
         {
             BoxCollider2D bc = SpecialCircleGO.GetComponent<BoxCollider2D>();
-            Vector3 v = GetVallidCoords(bc.size.x*100);
+            Vector3 v = GetVallidCoords(bc.size.x * 100);
             GameObject square_go = Instantiate(SpecialCircleGO, v, Quaternion.identity) as GameObject;
             square_go.transform.SetParent(SpawnerCanvas.transform, false);
             Square s = new Square { Square_GO = square_go, Age_s = Time.time };
             Vector3 scaled = s.Square_GO.transform.localScale;
-            scaled.x = CircleSize.x /2;
+            scaled.x = CircleSize.x / 2;
             scaled.y = CircleSize.y / 2;
             s.Square_GO.transform.localScale = scaled;
             AliveSpecialCircles.Add(square_go, s);
@@ -304,7 +302,6 @@ public class TouchManager : MonoBehaviour
 
         AliveCircles.Add(add.Circle_Prefab, add);
         LastCircleSpawnAge_s = Time.time;
-        
     }
 
     private Vector3 GetVallidCoords(float halfWidth)
@@ -331,38 +328,28 @@ public class TouchManager : MonoBehaviour
         Destroy(AliveCircles[destroyedCircle].counter);
         AliveCircles.Remove(destroyedCircle);
 
-        if(CIRCLE_SPAWN_s > CIRCLE_SPAWN_LIMIT_s)
+        if (CIRCLE_SPAWN_s > CIRCLE_SPAWN_LIMIT_s)
         {
             CIRCLE_SPAWN_s -= DEC_CIRCLE_SPAWN_s;
-            DEC_CIRCLE_SPAWN_s -= DEC_CIRCLE_SPAWN_s/20;
+            DEC_CIRCLE_SPAWN_s -= DEC_CIRCLE_SPAWN_s / 20;
         }
-        
+
     }
 
     public Vector3 WorldToCanvasCoords(Vector3 v, RectTransform canvas)
     {
-        v.x= ((v.x * canvas.sizeDelta.x) / (stageDimensions.x * 2));
-        v.y= ((v.y * canvas.sizeDelta.y) / (stageDimensions.y * 2));
+        v.x = ((v.x * canvas.sizeDelta.x) / (stageDimensions.x * 2));
+        v.y = ((v.y * canvas.sizeDelta.y) / (stageDimensions.y * 2));
         return v;
     }
 
     private void GameOver()
     {
+        //Time.timeScale = 0f;
         TimerCounterGO.GetComponent<TimerCounter>().StopTimer();
         OnPause = true;
         GameOverPanel.SetActive(true);
-        GameOverPointsText.text = "Points: "+Points.ToString("f0");
-
-    }
-
-    public void Restart()
-    {
-        SceneManager.LoadScene("Single Player");
-    }
-
-    public void JumpMenu()
-    {
-        SceneManager.LoadScene("Main Menu");
+        GameOverPointsText.text = "Points: " + Points.ToString("f0");
     }
 
     public void ContinueOnClick()
@@ -385,16 +372,26 @@ public class TouchManager : MonoBehaviour
         {
             //Generate text saying that AD already was used
         }
-        
+
     }
 
-    private void CleanUpCircles()
+    public void CleanUpCircles()
     {
-        foreach(GameObject c in AliveCircles.Keys)
+        foreach (GameObject c in AliveCircles.Keys)
         {
             Destroy(c);
         }
 
         AliveCircles.Clear();
+    }
+
+    public void LoadMenu()
+    {
+        SceneManager.LoadScene("Main Menu");
+    }
+
+    public void Restart()
+    {
+        SceneManager.LoadScene("Single player");
     }
 }

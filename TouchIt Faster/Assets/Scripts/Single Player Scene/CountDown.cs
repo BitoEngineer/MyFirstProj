@@ -36,36 +36,26 @@ public class CountDown : MonoBehaviour {
         else
         {
             countdown.enabled = false;
-            if (mp)
-            {
-                mp = false;
-                ChallengeReply cr = new ChallengeReply()
-                {
-                    ChallengeID = GameContainer.CurrentGameId,
-                    Reply = ChallengeReplyType.Start
-                };
-                ServerManager.Instance.Client.Send(URI.ChallengeReply, cr, OnStartMatch);
-            }
+            this.enabled = false;
         }
 
-        if (t > 3f)
+        if (t >= 3.5f)
         {
             if (Counting)
                 TimerCounterGO.GetComponent<TimerCounter>().ResumeTimer();
-            Counting = false;
-            
+            Counting = false;            
         }
     }
 
     public void StartCountDown(bool mp)
     {
         this.mp = mp;
-        TimerCounterGO.GetComponent<TimerCounter>().StopTimer();
         startTime = Time.time;
         countdown.text = "";
         countdown.enabled = true;
-
         Counting = true;
+        this.enabled = true;
+        //Time.timeScale = 1f;
     }
 
     public void OnStartMatch(JsonPacket p)
