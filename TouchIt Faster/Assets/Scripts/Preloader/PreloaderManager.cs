@@ -36,7 +36,7 @@ public class PreloaderManager : MonoBehaviour
                     //.WithMatchDelegate((x, y) => Debug.Log("Match turn received"))
                     // requests the email address of the player be available.
                     // Will bring up a prompt for consent.
-                    //.RequestEmail()
+                    .RequestEmail()
                     // requests a server auth code be generated so it can be passed to an
                     //  associated back end server application and exchanged for an OAuth token.
                     //.RequestServerAuthCode(false)
@@ -84,8 +84,11 @@ public class PreloaderManager : MonoBehaviour
     {
         if (t)
         {
+            Debug.Log("--------------------------------YYYYYYYYYYYYYYYYYYYYYYYYY-------------------------------");
+            Debug.Log("TouchItFaster - PreloaderManager will load Main Menu scene");
             t = false;
             SceneManager.LoadScene("Main Menu");
+            Debug.Log("TouchItFaster - PreloaderManager after calling LoadScene(Main Menu)");
         }
     }
 

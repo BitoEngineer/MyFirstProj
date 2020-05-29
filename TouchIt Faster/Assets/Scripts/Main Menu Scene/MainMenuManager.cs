@@ -31,13 +31,18 @@ public class MainMenuManager : MonoBehaviour {
     private bool changeToMultiplayer = false;
     private bool IsSettings = false;
 
-    private readonly string ClientID = "574776742495-hkkjt0av75rdb3ipceh6iefugrikuldm.apps.googleusercontent.com";
+    public const string IP = "192.168.1.160";
+    public const int PORT = 2223; 
+
+    private readonly string ClientID = "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com";
     //private readonly string Jokes_API_URL = "http://geek-jokes.sameerkumar.website/api";
 
 
     // Use this for initialization
     void Start () {
 
+        Debug.Log("--------------------------------ZZZZZZZZZZZZZZZZZZZZZZZZZ-------------------------------");
+        Debug.Log("TouchItFaster - MainMenuManager starting");
         /*StartCoroutine(GetRequest(Jokes_API_URL, (joke) =>
             {
                 UnityMainThreadDispatcher.Instance().Enqueue(() =>
@@ -51,8 +56,9 @@ public class MainMenuManager : MonoBehaviour {
             }));*/
 #if DEBUG
         string debugClientID = "debugtestclientid";
-        ServerManager.Instance.Client.Start(debugClientID);
+        ServerManager.Instance.Client.Start(IP, PORT, debugClientID);
 #endif
+        Debug.Log("TouchItFaster - MainMenuManager ended Start");
     }
 
     // Update is called once per frame
@@ -68,12 +74,14 @@ public class MainMenuManager : MonoBehaviour {
 
     public void ChangeScene(string sceneName)
     {
+        Debug.Log("TouchItFaster - ChangeScene called with the scene name " + sceneName);
+
         if (sceneName == "Multiplayer")
         {
 #if DEBUG
-            ServerManager.Instance.Client.Send(URI.Login, null, LoginReply, null /* TODO*/, 50000);
+            ServerManager.Instance.Client.Send(URI.Login, null, LoginReply, null /* TODO*/, null, null, 50000);
 #else
-            Debug.Log("Starting authentication");
+            Debug.Log("TouchItFaster - Starting authentication");
             Authenticate();
 #endif
         }
@@ -87,7 +95,7 @@ public class MainMenuManager : MonoBehaviour {
     {
         if (PlayGamesPlatform.Instance.localUser.authenticated)
         {
-            Debug.Log("Already authenticated");
+            Debug.Log("TouchItFaster - Already authenticated");
             Authenticated();
         }
         else
@@ -96,12 +104,12 @@ public class MainMenuManager : MonoBehaviour {
             {
                 if (success)
                 {
-                    Debug.Log("Login succeded!");
+                    Debug.Log("TouchItFaster - Login succeded!");
                     Authenticated();
                 }
                 else
                 {
-                    Debug.Log("Login failed!"); // TODO Say to user that can't login with google
+                    Debug.Log("TouchItFaster - Login failed!"); // TODO Say to user that can't login with google
                 }
             });
         }
@@ -113,10 +121,10 @@ public class MainMenuManager : MonoBehaviour {
             "\nUser ID: " + PlayGamesPlatform.Instance.localUser.id +
             "\nIsUnderage: " + PlayGamesPlatform.Instance.localUser.underage;
 
-        Debug.Log(userInfo);
+        Debug.Log("TouchItFaster - " + userInfo);
 
-        ServerManager.Instance.Client.Start(PlayGamesPlatform.Instance.localUser.id);
-        ServerManager.Instance.Client.Send(URI.Handshake, new Handshake(), LoginReply, null, 5000);
+        ServerManager.Instance.Client.Start(IP, PORT, PlayGamesPlatform.Instance.localUser.id);
+        ServerManager.Instance.Client.Send(URI.Login, new Handshake(), LoginReply, null, null, null, 5000);
 
     }
 
@@ -124,7 +132,7 @@ public class MainMenuManager : MonoBehaviour {
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
-            Debug.Log("Start with Server done");
+            Debug.Log("TouchItFaster - Start with Server done");
             PlayerInfo pi = p.DeserializeContent<PlayerInfo>();
             PlayerContainer.Instance.Info = pi;
             if (IsSettings)
@@ -143,7 +151,7 @@ public class MainMenuManager : MonoBehaviour {
         else
         {
             UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Sh*ts happen, try again later", 3f, MessagePanel)));
-            Debug.Log("Server failed: " + p.ReplyStatus); // TODO Say to user that there's problems with the server
+            Debug.Log("TouchItFaster - Server failed: " + p.ReplyStatus); // TODO Say to user that there's problems with the server
         }
 
     }
@@ -155,12 +163,12 @@ public class MainMenuManager : MonoBehaviour {
 
         if (uwr.isNetworkError)
         {
-            Debug.Log("Error While Sending: " + uwr.error);
+            Debug.Log("TouchItFaster - Error While Sending: " + uwr.error);
             action(null);
         }
         else
         {
-            Debug.Log("Received: " + uwr.downloadHandler.text);
+            Debug.Log("TouchItFaster - Received: " + uwr.downloadHandler.text);
             action(uwr.downloadHandler.text);
         }
     }
@@ -179,7 +187,7 @@ public class MainMenuManager : MonoBehaviour {
     public void SettingsListener()
     {
         IsSettings = true;
-        ServerManager.Instance.Client.Send(URI.Handshake, new Handshake(), LoginReply, null, 5000);
+        ServerManager.Instance.Client.Send(URI.Login, new Handshake(), LoginReply, null, null, null, 5000);
     }
 
     public void ChangeNameListener()

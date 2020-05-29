@@ -14,7 +14,7 @@ public class ServerManager : MonoBehaviour {
 
     public static ServerManager Instance { set; get; }
 
-    public readonly MyServClient Client = new MyServClient("192.168.1.160", 2223);// new MyServClient("MyFirstDomain.cloudapp.net", 2222);
+    public readonly MyServClient Client = new MyServClient();// new MyServClient("MyFirstDomain.cloudapp.net", 2222);
 
     public string NextScene { get; set; }
 
@@ -29,6 +29,8 @@ public class ServerManager : MonoBehaviour {
         Client.OnConnectivityChange += connectivityChanged;
         Client.LogDebugEvent += logDebug;
         Client.LogErrorEvent += errorDebug;
+
+        Debug.Log("TouchItFaster - ServerManager finished start");
     }
 
     private void Update()

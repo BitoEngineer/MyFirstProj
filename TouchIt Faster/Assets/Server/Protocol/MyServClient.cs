@@ -26,6 +26,7 @@ namespace Assets.Server.Protocol
         public string ServerName { get; private set; }
         public int ServerPort { get; private set; }
         public string ClientId { get; set; }
+        public int RequestTimeout { get; set; }
 
         public enum CallResult { Timedout, ServerUnavailable, Success }
         public delegate void ReplyReceivedCallback(JsonPacket p);
@@ -37,24 +38,37 @@ namespace Assets.Server.Protocol
         private bool? lastConnectivityState = null;
         public Action<bool> OnConnectivityChange;
 
-        public MyServClient(string ip, int port)
+
+        private TcpClient socket;
+        private const int MAX_BYTES = 1024 * 5;
+        private byte[] bufferCallback = new byte[MAX_BYTES];
+        private List<byte> buffer = new List<byte>();
+
+        private FuckinDictionary<int, ReplyHandler> waitingReply = new FuckinDictionary<int, ReplyHandler>();
+        private FuckinDictionary<int, Timer> waitingTimers = new FuckinDictionary<int, Timer>();
+        private FuckinDictionary<URI, PacketCallback> callbacks = new FuckinDictionary<URI, PacketCallback>();
+
+        public MyServClient()
+        {
+            RequestTimeout = 5000;
+        }
+
+        public virtual void Start(string ip, int port, string clientId)
         {
             ServerName = ip;
             ServerPort = port;
-        }
-
-        public void Start(string clientId)
-        {
             ClientId = clientId;
+
             startConnect();
-            if (LogDebugEvent != null) LogDebugEvent.Invoke("Starting client \"{0}\" on {1}:{2}", clientId, ServerName, ServerPort);
+            if (LogDebugEvent != null) LogDebugEvent.Invoke("Starting client \"{0}\" on {1}:{2}", clientId, ip, port);
         }
 
-        public void Stop()
+        public virtual void Stop()
         {
             try
             {
-                socket.Close();
+                socket?.Close();
+                socket = null;
                 if (LogDebugEvent != null) LogDebugEvent.Invoke("Client closed");
             }
             catch (Exception e)
@@ -63,17 +77,39 @@ namespace Assets.Server.Protocol
             }
         }
 
-        public void Send(URI contentType, object o, ReplyReceivedCallback callback = null, FailureCallback fail = null, int timeoutMs = 0)
+        /// <summary>
+        /// Send data to server.
+        /// </summary>
+        /// <param name="contentType">Server endpoint URI</param>
+        /// <param name="o">Request content object</param>
+        /// <param name="okCallback">Reply callback when result code is Ok</param>
+        /// <param name="okResults">Collection of result codes to be considered for <paramref name="okCallback"/>, only <see cref="ContentResult.Ok"/> will be considered in case of null</param>
+        /// <param name="nokCallback">Reply callback when result code is not Ok, or not present in the <paramref name="okResults"/></param>
+        /// <param name="fail">Fail callback, when the request is not even reaching the server</param>
+        /// <param name="timeoutMs">Request timeout in milliseconds. If negative, the <see cref="MyServClient.RequestTimeout"/> will be used instead. If 0, it will never call <paramref name="fail"/> by timeout.</param>
+        public void Send(
+            URI contentType,
+            object o,
+            ReplyReceivedCallback okCallback = null,
+            ICollection<ReplyStatus> okResults = null,
+            ReplyReceivedCallback nokCallback = null,
+            FailureCallback fail = null,
+            int timeoutMs = -1)
         {
-            JsonPacket p = new JsonPacket(ClientId, contentType.ToString(), o);
+            JsonPacket p = new JsonPacket(ClientId, contentType.ToString(), JsonConvert.SerializeObject(o));
 
-            if (callback != null || fail != null)
+            if (okCallback != null || fail != null)
             {
-                var handler = new ReplyHandler(callback, fail);
+                var handler = new ReplyHandler(okCallback, nokCallback, okResults, fail);
                 waitingReply.AddOrUpdate(p.PacketID, handler, (x, y) => handler);
 
-                if (timeoutMs > 0)
+                if (timeoutMs != 0)
                 {
+                    if (timeoutMs < 0)
+                    {
+                        timeoutMs = RequestTimeout;
+                    }
+
                     Timer t = new Timer(timeElapsed, p, timeoutMs, timeoutMs);
                     waitingTimers.AddOrUpdate(p.PacketID, t, (x, y) => t);
                 }
@@ -87,28 +123,58 @@ namespace Assets.Server.Protocol
             callbacks.AddOrUpdate(contentType, callback, (ct, c) => callback);
         }
 
+        public void RemoveCallback(URI contentType)
+        {
+            PacketCallback callback;
+            callbacks.TryRemove(contentType, out callback);
+        }
+
         #region Private
 
         private class ReplyHandler
         {
-            public ReplyReceivedCallback SuccessCallback;
-            public FailureCallback FailureCallback;
-            public ReplyHandler(ReplyReceivedCallback SuccessCallback, FailureCallback FailureCallback)
+            private ICollection<ReplyStatus> OkResults;
+            private ReplyReceivedCallback OkCallback;
+            private ReplyReceivedCallback NokCallback;
+            private FailureCallback FailureCallback;
+            public ReplyHandler(ReplyReceivedCallback okCallback, ReplyReceivedCallback nokCallback,
+                ICollection<ReplyStatus> okResults, FailureCallback failureCallback)
             {
-                this.SuccessCallback = SuccessCallback;
-                this.FailureCallback = FailureCallback;
+                OkResults = okResults ?? (new ReplyStatus[] { ReplyStatus.OK });
+                OkCallback = okCallback;
+                NokCallback = nokCallback;
+                FailureCallback = failureCallback;
+            }
+
+            internal void OnFail(JsonPacket p, CallResult reason)
+            {
+                if (FailureCallback != null)
+                {
+                    FailureCallback.Invoke(p, reason);
+                }
+            }
+
+            internal void OnCallback(JsonPacket p)
+            {
+                bool isOk = (OkResults == null && p.ReplyStatus == ReplyStatus.OK);
+                isOk = isOk || OkResults.Contains(p.ReplyStatus);
+
+                if (isOk)
+                {
+                    if (OkCallback != null)
+                    {
+                        OkCallback.Invoke(p);
+                    }
+                }
+                else
+                {
+                    if (NokCallback != null)
+                    {
+                        NokCallback.Invoke(p);
+                    }
+                }
             }
         }
-
-        private TcpClient socket;
-        private const int MAX_BYTES = 1024 * 5;
-        private byte[] bufferCallback = new byte[MAX_BYTES];
-        private List<byte> buffer = new List<byte>();
-
-        private FuckinDictionary<int, ReplyHandler> waitingReply = new FuckinDictionary<int, ReplyHandler>();
-        private FuckinDictionary<int, Timer> waitingTimers = new FuckinDictionary<int, Timer>();
-        private FuckinDictionary<URI, PacketCallback> callbacks = new FuckinDictionary<URI, PacketCallback>();
-
 
         private void onEndSending(object op, SocketAsyncEventArgs args)
         {
@@ -118,8 +184,9 @@ namespace Assets.Server.Protocol
             }
         }
 
-        private void startSending(JsonPacket p)
+        protected virtual void startSending(JsonPacket p)
         {
+            if (LogDebugEvent != null) LogDebugEvent.Invoke("Packet sent: {0}", p.ToString());
             var data = p.GetPacket();
             var args = new SocketAsyncEventArgs();
 
@@ -141,10 +208,7 @@ namespace Assets.Server.Protocol
 
             if (waitingReply.TryRemove(p.PacketID, out r))
             {
-                if (r.FailureCallback != null)
-                {
-                    r.FailureCallback(p, CallResult.Timedout);
-                }
+                r.OnFail(p, CallResult.Timedout);
             }
 
             Timer t;
@@ -155,9 +219,9 @@ namespace Assets.Server.Protocol
             }
         }
 
-        private void notifyConnectivityState(bool newState)
+        protected void notifyConnectivityState(bool newState, bool force = false)
         {
-            if (OnConnectivityChange != null && lastConnectivityState != newState)
+            if (OnConnectivityChange != null && (force || lastConnectivityState != newState))
             {
                 OnConnectivityChange(newState);
                 lastConnectivityState = newState;
@@ -166,37 +230,65 @@ namespace Assets.Server.Protocol
 
         private void startConnect()
         {
-            if (LogDebugEvent != null) LogDebugEvent.Invoke("Connecting to {0}:{1}...", ServerName, ServerPort);
-            socket = new TcpClient() { ReceiveTimeout = 1000, SendTimeout = 1000 };
+            if (LogDebugEvent != null) LogDebugEvent.Invoke("Start connection to {0}:{1}...", ServerName, ServerPort);
 
-            Task.Run(() =>
-            {
-                try
+            socket = new TcpClient();
+            socket.ReceiveTimeout = RequestTimeout;
+            socket.SendTimeout = RequestTimeout;
+
+            Task.Factory.StartNew(connectAction)
+                .ContinueWith(t =>
                 {
-                    socket.Connect(ServerName, ServerPort);
-
-                    if (socket.Connected)
+                    if (t.Result)
                     {
-                        if (LogDebugEvent != null) LogDebugEvent.Invoke("Connected to {0}:{1}", ServerName, ServerPort);
-
-                        notifyConnectivityState(true);
-
-                        startReceiving();
+                        Task.Delay(TimeSpan.FromSeconds(10)).Wait();
+                        if ((socket != null) && !IsConnected) { startConnect(); }
                     }
-                    else
-                    {
-                        notifyConnectivityState(false);
-                    }
-                }
-                catch (Exception)
-                {
-                    notifyConnectivityState(false);
-                    Task.Delay(TimeSpan.FromMilliseconds(1000));
-                    startConnect();
-                }
-
-            });
+                });
         }
+
+        private bool connectAction()
+        {
+            if (!Monitor.TryEnter(this))
+            {
+                return false;
+            }
+
+            try
+            {
+                if (LogDebugEvent != null) LogDebugEvent.Invoke("Connecting to {0}:{1}...", ServerName, ServerPort);
+
+                socket.Connect(ServerName, ServerPort);
+
+                if (socket.Connected)
+                {
+                    if (LogDebugEvent != null) LogDebugEvent.Invoke("Connected to {0}:{1}", ServerName, ServerPort);
+
+                    notifyConnectivityState(true, true);
+                    startReceiving();
+                }
+                else
+                {
+                    if (LogDebugEvent != null) LogDebugEvent.Invoke("Can't connect to {0}:{1}", ServerName, ServerPort);
+                    notifyConnectivityState(false);
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                if (LogDebugEvent != null) LogDebugEvent.Invoke("Can't connect to {0}:{1} - {2}", ServerName, ServerPort, e.Message);
+
+                notifyConnectivityState(false);
+
+                return true;
+            }
+            finally
+            {
+                Monitor.Exit(this);
+            }
+        }
+
 
         private void startReceiving()
         {
@@ -262,7 +354,7 @@ namespace Assets.Server.Protocol
             return false;
         }
 
-        private void process(JsonPacket p, CallResult result = CallResult.Success)
+        protected void process(JsonPacket p, CallResult result = CallResult.Success)
         {
             if (LogDebugEvent != null) LogDebugEvent.Invoke("Packet received: {0}", p.ToString());
 
@@ -276,9 +368,13 @@ namespace Assets.Server.Protocol
 
             if (waitingReply.TryRemove(p.PacketID, out r))
             {
-                if (r.SuccessCallback != null)
+                try
                 {
-                    r.SuccessCallback(p);
+                    r.OnCallback(p);
+                }
+                catch (Exception e)
+                {
+                    LogErrorEvent?.Invoke(e, $"Error on callback: {p.PacketID} - {p.ContentType}");
                 }
                 return;
             }
@@ -287,7 +383,14 @@ namespace Assets.Server.Protocol
 
             if (callbacks.TryGetValue((URI)Enum.Parse(typeof(URI), p.ContentType), out c))
             {
-                c(p);
+                try
+                {
+                    c(p);
+                }
+                catch (Exception e)
+                {
+                    LogErrorEvent?.Invoke(e, $"Error on callback: {p.PacketID} - {p.ContentType}");
+                }
             }
         }
 

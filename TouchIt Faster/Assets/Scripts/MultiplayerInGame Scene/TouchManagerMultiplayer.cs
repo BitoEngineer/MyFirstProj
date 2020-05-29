@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Assets.Scripts.Multiplayer_Scene;
 using Assets.Scripts.Preloader;
-using Assets.Scripts.Utils;
+using GameOverDTO = Assets.Server.Models.GameOver;
 
 public class TouchManagerMultiplayer : MonoBehaviour
 {
@@ -207,7 +207,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
-            GameOver gameOverObj = p.DeserializeContent<GameOver>();
+            var gameOverObj = p.DeserializeContent<GameOverDTO>();
             gameEnded = true;
 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
@@ -227,7 +227,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
             //TODO 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                GameOverUIController.Instance.GameOverUpdate(new GameOver()
+                GameOverUIController.Instance.GameOverUpdate(new GameOverDTO()
                 {
                     OpponentPoints = 0,
                     OpponentTapsInARow = 0,

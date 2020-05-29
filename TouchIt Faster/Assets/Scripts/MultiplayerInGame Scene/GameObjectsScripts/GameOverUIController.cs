@@ -9,6 +9,7 @@ using MyFirstServ.Models.TouchItFaster;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using GameOverDTO = Assets.Server.Models.GameOver;
 
 public class GameOverUIController : MonoBehaviour
 {
@@ -34,7 +35,7 @@ public class GameOverUIController : MonoBehaviour
         ServerManager.Instance.Client.AddCallback(URI.ChallengeRequest, OnChallengeRequest);
     }
 
-    public void GameOverUpdate(GameOver gameOver)
+    public void GameOverUpdate(GameOverDTO gameOver)
     {
         var winnerpanel = transform.Find("WinnerPanel");
         var loserpanel = transform.Find("LoserPanel");

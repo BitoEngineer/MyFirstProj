@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "574776742495",
+    "firebase_url": "https://touchit-faster-55097583.firebaseio.com",
+    "project_id": "touchit-faster-55097583",
+    "storage_bucket": "touchit-faster-55097583.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:574776742495:android:14fc75192cb7a93e",
+        "android_client_info": {
+          "package_name": "com.inout.touchitfaster"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "574776742495-1u10pdfjn9f8trqq2ci3a4pmai53sdkd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.inout.touchitfaster",
+            "certificate_hash": "33ba008c8a6a64b65dc060c2328f721fac83bacf"
+          }
+        },
+        {
+          "client_id": "574776742495-s4enmc7ufrtm0dv3dc6fhqrhtnk1o1ug.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.inout.touchitfaster",
+            "certificate_hash": "d3f0f5f2c0ef4eab2ae0b9300343e7e740e024ff"
+          }
+        },
+        {
+          "client_id": "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_aRv4kbu_PllgC4j_hnnSQIB1EOB2F38"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
