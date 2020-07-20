@@ -96,7 +96,7 @@ namespace Assets.Server.Protocol
             FailureCallback fail = null,
             int timeoutMs = -1)
         {
-            JsonPacket p = new JsonPacket(ClientId, contentType.ToString(), JsonConvert.SerializeObject(o));
+            JsonPacket p = new JsonPacket(ClientId, contentType.ToString(), o);
 
             if (okCallback != null || fail != null)
             {
@@ -277,7 +277,7 @@ namespace Assets.Server.Protocol
             }
             catch (Exception e)
             {
-                if (LogDebugEvent != null) LogDebugEvent.Invoke("Can't connect to {0}:{1} - {2}", ServerName, ServerPort, e.Message);
+                if (LogDebugEvent != null) LogDebugEvent.Invoke("Can't connect to {0}:{1} - {2}", ServerName, ServerPort, e.ToString());
 
                 notifyConnectivityState(false);
 
