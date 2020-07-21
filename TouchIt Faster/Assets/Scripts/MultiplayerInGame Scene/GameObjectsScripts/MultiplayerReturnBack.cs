@@ -32,7 +32,6 @@ public class MultiplayerReturnBack : MonoBehaviour {
     {
         ExitPopup.SetActive(false);
         //touchM.OnPause = false;
-        TimerCounterGO.GetComponent<TimerCounter>().ResumeTimer();
 
     }
 }

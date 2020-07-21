@@ -31,7 +31,7 @@ public class MultiplayerTimerCounter : MonoBehaviour
             string seconds = (StartTime % 60).ToString("f1");
             string sec = seconds.Split('.')[0];
             sec = sec.Length > 1 ? sec : "0" + sec;
-            string ms = seconds.Split('.')[1];
+            string ms = seconds.Split(',')[1];
             ms = ms.Length > 1 ? ms : "0" + ms;
 
             if (StartTime < 10f)
