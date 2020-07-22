@@ -57,10 +57,10 @@ public class MultiplayerManager : MonoBehaviour {
     private void BuildStatsPanel()
     {
         PlayerNameText.GetComponent<Text>().text = PlayerContainer.Instance.Info.PlayerName;
-        PlayerHighestScoreText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.HighestScore;
+        PlayerHighestScoreText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.MultiplayerHighestScore;
         PlayerWinsText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.Wins + " wins";
         PlayerLosesText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.Loses + " loses";
-        PlayerTapsText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.TapsInRow + " taps in a row";
+        PlayerTapsText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.MaxHitsInRowMultiplayer + " taps in a row";
     }
 
     void Update () {
@@ -153,7 +153,7 @@ public class MultiplayerManager : MonoBehaviour {
     private void FillProfilePanel(PlayerInfo f, bool friend)
     {
         NameText.text = f.PlayerName;
-        HighestScoreText.text = f.HighestScore.ToString();
+        HighestScoreText.text = f.MultiplayerHighestScore.ToString();
         WinsText.text = f.Wins.ToString() + " wins";
         LosesText.text = f.Loses.ToString() + " loses";
         BuildProfilePanelButtons(f, friend);

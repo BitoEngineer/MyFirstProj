@@ -37,6 +37,11 @@ public class MultiplayerTimerCounter : MonoBehaviour
             if (StartTime < 10f)
             {
                 TimerText.color = new Color32(170, 36, 41, 255); /*Red*/
+
+                if(StartTime <= 0f)
+                {
+                    StopTimer();
+                }
             }
             else
             {

@@ -11,9 +11,13 @@ namespace Assets.Server.Models
         public string ClientID;
         public string PlayerName;
         public PlayerState CurrentState;
-        public int HighestScore;
+
+        public int SinglePlayerHighestScore;
+        public int MaxHitsInRowSinglPlayer;
+
+        public int MultiplayerHighestScore;
         public int Wins;
         public int Loses;
-        public int TapsInRow;
+        public int MaxHitsInRowMultiplayer;
     }
 }
