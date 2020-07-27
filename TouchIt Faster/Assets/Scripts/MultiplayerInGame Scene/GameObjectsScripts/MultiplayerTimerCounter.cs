@@ -43,10 +43,6 @@ public class MultiplayerTimerCounter : MonoBehaviour
                     StopTimer();
                 }
             }
-            else
-            {
-                TimerText.color = Color.white;
-            }
 
             TimerText.text = minutes + ":" + sec;// + "." + ms;
         }
@@ -60,7 +56,7 @@ public class MultiplayerTimerCounter : MonoBehaviour
 
     public void StopTimer()
     {
-        var secs = int.Parse(TimerText.text.Split(':')[1]);
+        var secs = double.Parse(TimerText.text.Split(':')[1]);
         TimerText.text = secs < 0 ? "0:00" : TimerText.text;
         Active = false;
     }

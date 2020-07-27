@@ -120,33 +120,36 @@ public class GameOverUIController : MonoBehaviour
         {
             var cr = p.DeserializeContent<ChallengeRequest>();
 
-            ChallengeRequestPanel.transform.Find("ButtonsPanel/YesButton").GetComponent<Button>().onClick.AddListener(() =>
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                Debug.Log("Multiplayer Menu: Accepting friend's challenge");
-                ChallengeReply creply = new ChallengeReply()
+                ChallengeRequestPanel.transform.Find("ButtonsPanel/YesButton").GetComponent<Button>().onClick.AddListener(() =>
                 {
-                    ChallengeID = cr.ID,
-                    Reply = ChallengeReplyType.ChallengeAccepted
-                };
-                ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
+                    Debug.Log("Multiplayer Menu: Accepting friend's challenge");
+                    ChallengeReply creply = new ChallengeReply()
+                    {
+                        ChallengeID = cr.ID,
+                        Reply = ChallengeReplyType.ChallengeAccepted
+                    };
+                    ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
 
-                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Be faster this time!", 2f, MessagePanel)));
-                GameContainer.CurrentGameId = creply.ChallengeID;
-                ServerManager.Instance.NextScene = "MultiplayerInGame";
-            });
+                    UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Be faster this time!", 2f, MessagePanel)));
+                    GameContainer.CurrentGameId = creply.ChallengeID;
+                    ServerManager.Instance.NextScene = "MultiplayerInGame";
+                });
 
-            ChallengeRequestPanel.transform.Find("ButtonsPanel/NoButton").GetComponent<Button>().onClick.AddListener(() =>
-            {
-                Debug.Log("Multiplayer Menu: Declining friend's challenge");
-                ChallengeReply creply = new ChallengeReply()
+                ChallengeRequestPanel.transform.Find("ButtonsPanel/NoButton").GetComponent<Button>().onClick.AddListener(() =>
                 {
-                    ChallengeID = cr.ID,
-                    Reply = ChallengeReplyType.ChallengeRefused
-                };
-                ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
-            });
+                    Debug.Log("Multiplayer Menu: Declining friend's challenge");
+                    ChallengeReply creply = new ChallengeReply()
+                    {
+                        ChallengeID = cr.ID,
+                        Reply = ChallengeReplyType.ChallengeRefused
+                    };
+                    ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
+                });
 
-            UnityMainThreadDispatcher.Instance().Enqueue(() => ChallengeRequestPanel.SetActive(true));
+                ChallengeRequestPanel.SetActive(true);
+            });
         }
     }
 }
