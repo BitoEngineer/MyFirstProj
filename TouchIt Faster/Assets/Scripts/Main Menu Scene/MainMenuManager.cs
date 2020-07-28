@@ -31,7 +31,7 @@ public class MainMenuManager : MonoBehaviour {
     private bool changeToMultiplayer = false;
     private bool IsSettings = false;
 
-    public const string IP = "192.168.1.160";
+    public const string IP = "192.168.1.171";
     public const int PORT = 2223; 
 
     private readonly string ClientID = "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com";
@@ -123,9 +123,10 @@ public class MainMenuManager : MonoBehaviour {
 
         Debug.Log("TouchItFaster - " + userInfo);
 
-        ServerManager.Instance.Client.Start(IP, PORT, PlayGamesPlatform.Instance.localUser.id);
-        ServerManager.Instance.Client.Send(URI.Login, new Handshake(), LoginReply, null, null, null, 5000);
-
+        ServerManager.Instance.Client.Start(IP, PORT, PlayGamesPlatform.Instance.localUser.id, () =>
+        {
+            ServerManager.Instance.Client.Send(URI.Login, new Handshake(), LoginReply, null, null, null, 5000);
+        });
     }
 
     private void LoginReply(JsonPacket p)

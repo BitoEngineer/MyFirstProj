@@ -50,8 +50,8 @@ public class MultiplayerManager : MonoBehaviour {
 	void Start () {
         UpdateFriends();
         BuildStatsPanel();
+        ServerManager.Instance.Client.AddCallback(URI.ChallengeRequest, OnFriendsChallengeRequest);
         ServerManager.Instance.Client.AddCallback(URI.ChallengeReply, ChallengeRequestReply);
-	    ServerManager.Instance.Client.AddCallback(URI.ChallengeRequest, OnFriendsChallengeRequest);
     }
 
     private void BuildStatsPanel()

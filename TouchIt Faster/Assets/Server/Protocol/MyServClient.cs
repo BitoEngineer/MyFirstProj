@@ -53,13 +53,13 @@ namespace Assets.Server.Protocol
             RequestTimeout = 5000;
         }
 
-        public virtual void Start(string ip, int port, string clientId)
+        public virtual void Start(string ip, int port, string clientId, Action callback = null)
         {
             ServerName = ip;
             ServerPort = port;
             ClientId = clientId;
 
-            startConnect();
+            startConnect(callback);
             if (LogDebugEvent != null) LogDebugEvent.Invoke("Starting client \"{0}\" on {1}:{2}", clientId, ip, port);
         }
 
@@ -228,7 +228,7 @@ namespace Assets.Server.Protocol
             }
         }
 
-        private void startConnect()
+        private void startConnect(Action callback = null)
         {
             if (LogDebugEvent != null) LogDebugEvent.Invoke("Start connection to {0}:{1}...", ServerName, ServerPort);
 
@@ -241,8 +241,15 @@ namespace Assets.Server.Protocol
                 {
                     if (t.Result)
                     {
-                        Task.Delay(TimeSpan.FromSeconds(10)).Wait();
-                        if ((socket != null) && !IsConnected) { startConnect(); }
+                        //Task.Delay(TimeSpan.FromSeconds(10)).Wait();
+                        if ((socket != null) && !IsConnected) 
+                        { 
+                            startConnect(); 
+                        }
+                        else
+                        {
+                            if (callback != null) callback();
+                        }
                     }
                 });
         }
