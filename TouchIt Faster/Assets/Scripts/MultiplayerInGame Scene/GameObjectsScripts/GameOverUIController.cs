@@ -9,7 +9,7 @@ using MyFirstServ.Models.TouchItFaster;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using GameOverDTO = Assets.Server.Models.GameOver;
+using GameOverDTO = Assets.Server.Models.GameOverDTO;
 
 public class GameOverUIController : MonoBehaviour
 {

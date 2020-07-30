@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Assets.Server.Models
 {
-    public class GameOver
+    public class GameOverDTO
     {
         public int Points;
         public float TimeLeft;

@@ -1,4 +1,8 @@
-﻿using System.Collections;
+﻿using Assets.Scripts.Multiplayer_Scene;
+using Assets.Scripts.Preloader;
+using Assets.Server.Models;
+using Assets.Server.Protocol;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -18,14 +22,19 @@ public class MultiplayerReturnBack : MonoBehaviour {
 
     public void OnMouseDown()
     {
-        //touchM.OnPause = true;
-        //TimerCounter.Instance.StopTimer(); TODO
         ExitPopup.SetActive(true);
     }
 
     public void Leave()
     {
-        SceneManager.LoadScene("Main Menu");
+        var dto = new PlayerLeftGame() { Reason = "Arrrsh, that coward left the game", ChallengeID = GameContainer.CurrentGameId, OpponentID = GameContainer.OpponentID };
+        ServerManager.Instance.Client.Send(URI.PlayerLeft, dto, (p) => 
+        {
+            var gameOverObj = p.DeserializeContent<GameOverDTO>();
+            PlayerContainer.Instance.UpdateMultiplayerStats(gameOverObj.MultiplayerHighestScore, gameOverObj.MaxHitsInRowMultiplayer, gameOverObj.TotalWins, gameOverObj.TotalLoses);
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() => SceneManager.LoadScene("Multiplayer"));
+        });
     }
 
     public void Resume()

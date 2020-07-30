@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Assets.Scripts.Multiplayer_Scene;
 using Assets.Scripts.Preloader;
-using GameOverDTO = Assets.Server.Models.GameOver;
 
 public class TouchManagerMultiplayer : MonoBehaviour
 {
@@ -22,6 +21,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
 
     //DATA
     public GameObject GameOverPanel;
+    public GameObject PlayerLeftPanel;
     public Canvas canvas;
     public Canvas SpawnerCanvas;
     public GameObject OpponentNameText;
@@ -226,20 +226,16 @@ public class TouchManagerMultiplayer : MonoBehaviour
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             var dto = p.DeserializeContent<PlayerLeftGame>();
-            //TODO 
+            var gameOverObj = dto.GameOverDto;
+
+            PlayerContainer.Instance.UpdateMultiplayerStats(gameOverObj.MultiplayerHighestScore, gameOverObj.MaxHitsInRowMultiplayer, gameOverObj.TotalWins, gameOverObj.TotalLoses);
+            gameEnded = true;
+
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                GameOverUIController.Instance.GameOverUpdate(new GameOverDTO()
-                {
-                    OpponentPoints = 0,
-                    OpponentTapsInARow = 0,
-                    OpponentTimeLeft = 0,
-                    OpponentTimePoints = 0,
-                    Points = 999,
-                    TapsInARow = 999,
-                    TimeLeft = 99,
-                    TimePoints = 99
-                });
+                TimerCounterGO.GetComponent<MultiplayerTimerCounter>().StopTimer();
+                PlayerLeftPanel.SetActive(true);
+                PlayerLeftPanel.GetComponent<PlayerLeftUIController>().PlayerLeftUpdate(gameOverObj);
             });
         }
     }
