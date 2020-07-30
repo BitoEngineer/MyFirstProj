@@ -16,5 +16,10 @@ namespace Assets.Server.Models
         public int OpponentTapsInARow;
         public float OpponentTimeLeft;
         public int OpponentTimePoints;
+
+        public int MultiplayerHighestScore;
+        public int MaxHitsInRowMultiplayer;
+        public int TotalWins;
+        public int TotalLoses;
     }
 }

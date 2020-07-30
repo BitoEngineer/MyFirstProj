@@ -23,5 +23,13 @@ namespace Assets.Server.Models
 
 
         public PlayerInfo Info { get; set; }
+
+        internal void UpdateMultiplayerStats(int multiplayerHighestScore, int maxHitsInRowMultiplayer, int totalWins, int totalLoses)
+        {
+            Info.Wins = totalWins;
+            Info.Loses = totalLoses;
+            Info.MultiplayerHighestScore = multiplayerHighestScore;
+            Info.MaxHitsInRowMultiplayer = maxHitsInRowMultiplayer;
+        }
     }
 }

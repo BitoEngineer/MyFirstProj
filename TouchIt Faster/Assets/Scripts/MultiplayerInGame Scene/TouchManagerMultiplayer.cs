@@ -208,6 +208,8 @@ public class TouchManagerMultiplayer : MonoBehaviour
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             var gameOverObj = p.DeserializeContent<GameOverDTO>();
+
+            PlayerContainer.Instance.UpdateMultiplayerStats(gameOverObj.MultiplayerHighestScore, gameOverObj.MaxHitsInRowMultiplayer, gameOverObj.TotalWins, gameOverObj.TotalLoses);
             gameEnded = true;
 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
