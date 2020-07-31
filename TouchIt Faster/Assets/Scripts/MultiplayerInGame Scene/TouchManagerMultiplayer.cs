@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Assets.Scripts.Multiplayer_Scene;
 using Assets.Scripts.Preloader;
+using Assets.Scripts.Utils;
 
 public class TouchManagerMultiplayer : MonoBehaviour
 {
@@ -25,6 +26,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
     public Canvas SpawnerCanvas;
     public GameObject OpponentNameText;
     public GameObject OpponentPointsText;
+    public GameObject OnTouchOpponentPointsReceivedText;
     private RectTransform CanvasRect;
     private RectTransform SpawnerCanvasRect;
 
@@ -100,11 +102,33 @@ public class TouchManagerMultiplayer : MonoBehaviour
         {
             var obj = p.DeserializeContent<OnDeletedObject>();
             objectsToDelete.Enqueue(obj.ObjectID);
-            UnityMainThreadDispatcher.Instance().Enqueue(() => 
-            {
-                OpponentPointsText.GetComponent<Text>().text = ""+obj.CurrentPoints;
-            });
+            UpdateOpponentPointsOnUI(obj);
         }
+    }
+
+    private void UpdateOpponentPointsOnUI(OnDeletedObject obj)
+    {
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            var opponentPointsText = OpponentPointsText.GetComponent<Text>();
+
+            var pointsDifference = obj.CurrentPoints - int.Parse(opponentPointsText.text);
+            string pointsText = "";
+            var pointsReceivedText = OnTouchOpponentPointsReceivedText.GetComponent<Text>();
+            if (pointsDifference > 0)
+            {
+                pointsText = "+" + pointsDifference;
+                pointsReceivedText.color = Color.green;
+            }
+            else
+            {
+                pointsText = "" + pointsDifference;
+                pointsReceivedText.color = Color.red;
+            }
+
+            StartCoroutine(UIUtils.ShowMessageInText(pointsText, 1f, pointsReceivedText));
+            opponentPointsText.text = "" + obj.CurrentPoints;
+        });
     }
 
     void OnObjectReceived(JsonPacket p)

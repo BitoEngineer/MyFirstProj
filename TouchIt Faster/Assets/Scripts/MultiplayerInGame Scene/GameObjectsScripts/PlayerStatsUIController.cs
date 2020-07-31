@@ -1,4 +1,6 @@
-﻿using Assets.Server.Models;
+﻿using Assets.Scripts.Preloader;
+using Assets.Scripts.Utils;
+using Assets.Server.Models;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,6 +11,7 @@ public class PlayerStatsUIController : MonoBehaviour
 
     public GameObject NameText;
     public GameObject PointsText;
+    public GameObject OnTouchPointsReceivedText;
     private int points = -1;
 
     public static PlayerStatsUIController Instance;
@@ -19,18 +22,30 @@ public class PlayerStatsUIController : MonoBehaviour
         NameText.GetComponent<Text>().text = PlayerContainer.Instance.Info.PlayerName;
         points = 0;
     }
-	
-	
-	void Update () {
-	    if (points != -1)
-	    {
-	        PointsText.GetComponent<Text>().text = points.ToString();
-	        points = -1;
-	    }
-	}
 
-    public void UpdatePoints(int points)
+    public void UpdatePoints(int pointsUpdated)
     {
-        this.points = points;
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            var pointsDifference = pointsUpdated - this.points;
+            this.points = pointsUpdated;
+
+            PointsText.GetComponent<Text>().text = pointsUpdated.ToString();
+
+            string pointsText = "";
+            var pointsReceivedText = OnTouchPointsReceivedText.GetComponent<Text>();
+            if (pointsDifference > 0)
+            {
+                pointsText = "+" + pointsDifference;
+                pointsReceivedText.color = Color.green;
+            }
+            else
+            {
+                pointsText = "" + pointsDifference;
+                pointsReceivedText.color = Color.red;
+            }
+
+            StartCoroutine(UIUtils.ShowMessageInText(pointsText, 1f, pointsReceivedText));
+        });
     }
 }
