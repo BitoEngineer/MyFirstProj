@@ -12,14 +12,18 @@ using System.Threading.Tasks;
 
 public class BombMultiplayer : MonoBehaviour
 {
+    public GameObject BombExplosion;
+    public AudioClip BombSound;
     public int Id { get; set; }
     //private Text PatxauText;
 
     private string[] BOMB_TOUCH_TEXT = new string[] { "Ooops", "Arrssh", "Duck" };
     private System.Random random = new System.Random();
+    private AudioSource source { get { return GetComponent<AudioSource>(); } }
 
     void Start()
     {
+        gameObject.AddComponent<AudioSource>();
         //PatxauText = GameObject.Find("PatxauText").GetComponent<Text>();
     }
 
@@ -42,14 +46,15 @@ public class BombMultiplayer : MonoBehaviour
             PlayerInGameContainer.Instance.UpdateGameStats(deletedObj);
         }
     }
-    /*
+
     private void OnDestroy()
     {
-        Task.Delay(500).ContinueWith(t =>
-        {
-            PatxauText.fontSize = 1;
-        });
-    }*/
+        Vector3 v = gameObject.transform.position;
+        GameObject anim = Instantiate(BombExplosion, v, Quaternion.identity);
+        anim.transform.SetParent(transform.parent);
+        Destroy(anim, 0.8f);
+        source.PlayOneShot(BombSound);
+    }
 }
 
 

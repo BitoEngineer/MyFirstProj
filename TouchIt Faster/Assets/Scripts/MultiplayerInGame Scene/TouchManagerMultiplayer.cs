@@ -13,7 +13,6 @@ public class TouchManagerMultiplayer : MonoBehaviour
 {
 
     //BOMB
-    public GameObject BombExplosion;
     public GameObject BombGO;
 
     //SQUARE
@@ -127,8 +126,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
         AliveObjects.TryGetValue(id, out go);
         if (go == null)
         {
-            Console.WriteLine("ID of the object must be wrong, it doesn't exists");
-            /*TODO*/
+            Debug.Log("ID of the object must be wrong, it doesn't exists");
         }
         AliveObjects.Remove(id);
         Destroy(go);
@@ -159,7 +157,6 @@ public class TouchManagerMultiplayer : MonoBehaviour
                 break;
             default:
                 Console.WriteLine("Multiplayer ERROR: Object doesn't exists");
-                /*TODO*/
                 break;
         }
     }
