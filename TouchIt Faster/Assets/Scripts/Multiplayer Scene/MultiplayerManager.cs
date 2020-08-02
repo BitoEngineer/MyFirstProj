@@ -395,6 +395,8 @@ public class MultiplayerManager : MonoBehaviour {
                     Reply = ChallengeReplyType.ChallengeRefused
                 };
                 ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
+
+                UnityMainThreadDispatcher.Instance().Enqueue(() => ChallengRequestPanel.SetActive(false));
             });
             ChallengRequestPanel.SetActive(true);
         });
