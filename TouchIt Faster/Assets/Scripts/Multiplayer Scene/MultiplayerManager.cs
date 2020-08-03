@@ -51,7 +51,8 @@ public class MultiplayerManager : MonoBehaviour {
         UpdateFriends();
         BuildStatsPanel();
         ServerManager.Instance.Client.AddCallback(URI.ChallengeRequest, OnFriendsChallengeRequest);
-        ServerManager.Instance.Client.AddCallback(URI.ChallengeReply, ChallengeRequestReply);
+        ServerManager.Instance.Client.AddCallback(URI.ChallengeReply, OnChallengeRequest);
+        ServerManager.Instance.Client.AddCallback(URI.FriendConnectivityChanged, OnFriendConnectivityChanged);
     }
 
     private void BuildStatsPanel()
@@ -81,7 +82,7 @@ public class MultiplayerManager : MonoBehaviour {
         ClearFriendsList();
         ClearSearchedPlayersList();
 
-        foreach (PlayerInfo f in Friends.ToArray())
+        foreach (PlayerInfo f in Friends.OrderBy(u => u.PlayerName).ToArray())
         {
             GameObject go = Instantiate(FriendGO, FriendsContainer.transform) as GameObject;
             go.GetComponentInChildren<Text>().text = f.PlayerName;
@@ -168,7 +169,7 @@ public class MultiplayerManager : MonoBehaviour {
         OnFriendClickPanel.SetActive(true);
     }
 
-    private void ChallengeRequestReply(JsonPacket p)
+    private void OnChallengeRequest(JsonPacket p)
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
@@ -259,7 +260,7 @@ public class MultiplayerManager : MonoBehaviour {
             RequestedID = requestedId
             
         };
-        ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, ChallengeRequestReply);
+        ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, OnChallengeRequest);
     }
 
     private void BuildProfilePanelButtons(PlayerInfo f, bool friend)
@@ -277,7 +278,7 @@ public class MultiplayerManager : MonoBehaviour {
             UnfriendButton.onClick.RemoveAllListeners();
             UnfriendButton.onClick.AddListener(() =>
             {
-                ServerManager.Instance.Client.Send(URI.Unfriend, f.ClientID, UnfriendReply);
+                ServerManager.Instance.Client.Send(URI.Unfriend, f.ClientID, OnUnfriend);
                 OnFriendClickPanel.SetActive(false);
             });
         }
@@ -289,13 +290,13 @@ public class MultiplayerManager : MonoBehaviour {
             AddfriendButton.onClick.RemoveAllListeners();
             AddfriendButton.onClick.AddListener(() =>
             {
-                ServerManager.Instance.Client.Send(URI.AddFriend, f.ClientID, AddFriendReply);
+                ServerManager.Instance.Client.Send(URI.AddFriend, f.ClientID, OnAddFriend);
                 OnFriendClickPanel.SetActive(false);
             });
         }
     }
 
-    private void UnfriendReply(JsonPacket p)
+    private void OnUnfriend(JsonPacket p)
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
@@ -310,12 +311,13 @@ public class MultiplayerManager : MonoBehaviour {
         }
     }
 
-    private void AddFriendReply(JsonPacket p)
+    private void OnAddFriend(JsonPacket p)
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             PlayerInfo added = p.DeserializeContent<PlayerInfo>();
             Friends.Add(added);
+
             FriendsUpdated = true;
             UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Uuuuuh so needy.", 2f, MessagePanel)));
         }
@@ -324,6 +326,18 @@ public class MultiplayerManager : MonoBehaviour {
             UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Couldn't add user.", 2f, MessagePanel)));
         }
 
+    }
+
+    private void OnFriendConnectivityChanged(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            PlayerInfo pi = p.DeserializeContent<PlayerInfo>();
+            
+            Friends.FirstOrDefault(f => f.ID == pi.ID).CurrentState = pi.CurrentState;
+
+            FriendsUpdated = true;
+        }
     }
 
     public void RandomChallenge()
