@@ -11,6 +11,7 @@ using MyFirstServ.Models.TouchItFaster;
 using Assets.Scripts.Multiplayer_Scene;
 using Assets.Scripts.Preloader;
 using Assets.Scripts.Utils;
+using GooglePlayGames.BasicApi.Multiplayer;
 
 public class MultiplayerManager : MonoBehaviour {
 
@@ -123,7 +124,7 @@ public class MultiplayerManager : MonoBehaviour {
         }
         else
         {
-            foreach (PlayerInfo pi in SearchedUsers.ToArray())
+            foreach (PlayerInfo pi in SearchedUsers.Where(u => u.ID != PlayerContainer.Instance.Info.ID).ToArray())
             {
                 GameObject go = Instantiate(FriendGO, FriendsContainer.transform) as GameObject;
                 go.GetComponentInChildren<Text>().text = pi.PlayerName;
