@@ -22,7 +22,7 @@ namespace Assets.Server.Models
 
 
 
-        public PlayerInfo Info { get; set; }
+        public PlayerInfo Info { get; private set; }
 
         internal void UpdateMultiplayerStats(int multiplayerHighestScore, int maxHitsInRowMultiplayer, int totalWins, int totalLoses)
         {
@@ -30,6 +30,11 @@ namespace Assets.Server.Models
             Info.Loses = totalLoses;
             Info.MultiplayerHighestScore = multiplayerHighestScore;
             Info.MaxHitsInRowMultiplayer = maxHitsInRowMultiplayer;
+        }
+
+        internal void SetPlayerInfo(PlayerInfo pInfo)
+        {
+            Info = pInfo;
         }
     }
 }

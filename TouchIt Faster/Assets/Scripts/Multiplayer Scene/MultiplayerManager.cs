@@ -13,7 +13,8 @@ using Assets.Scripts.Preloader;
 using Assets.Scripts.Utils;
 using GooglePlayGames.BasicApi.Multiplayer;
 
-public class MultiplayerManager : MonoBehaviour {
+public class MultiplayerManager : MonoBehaviour
+{
 
     public GameObject FriendGO;
     public GameObject FriendsContainer;
@@ -33,11 +34,15 @@ public class MultiplayerManager : MonoBehaviour {
     public GameObject DeclineButton;
 
     //Stats panel
-    public GameObject PlayerNameText;
     public GameObject PlayerHighestScoreText;
     public GameObject PlayerWinsText;
     public GameObject PlayerLosesText;
     public GameObject PlayerTapsText;
+    public GameObject NameLayoutGroup;
+
+    private Transform PlayerNameText => NameLayoutGroup.transform.Find("PlayerNameText");
+    private Transform EditNameButton => NameLayoutGroup.transform.Find("EditNameButton");
+    private Transform ChangeNameInputField => NameLayoutGroup.transform.Find("ChangeNameInputField");
 
     private List<PlayerInfo> Friends = new List<PlayerInfo>();
     private List<GameObject> FriendsGO = new List<GameObject>();
@@ -48,7 +53,8 @@ public class MultiplayerManager : MonoBehaviour {
     private bool FriendsUpdated = false, SearchedPlayers = false;
 
 
-	void Start () {
+    void Start()
+    {
         UpdateFriends();
         BuildStatsPanel();
         ServerManager.Instance.Client.AddCallback(URI.ChallengeRequest, OnFriendsChallengeRequest);
@@ -58,6 +64,10 @@ public class MultiplayerManager : MonoBehaviour {
 
     private void BuildStatsPanel()
     {
+        ChangeNameInputField.gameObject.SetActive(false);
+        PlayerNameText.gameObject.SetActive(true);
+        EditNameButton.gameObject.SetActive(true);
+
         PlayerNameText.GetComponent<Text>().text = PlayerContainer.Instance.Info.PlayerName;
         PlayerHighestScoreText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.MultiplayerHighestScore;
         PlayerWinsText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.Wins + " wins";
@@ -65,7 +75,8 @@ public class MultiplayerManager : MonoBehaviour {
         PlayerTapsText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.MaxHitsInRowMultiplayer + " taps in a row";
     }
 
-    void Update () {
+    void Update()
+    {
         if (FriendsUpdated)
         {
             FriendsContainerUpdate();
@@ -223,7 +234,7 @@ public class MultiplayerManager : MonoBehaviour {
 
     public void SearchPlayers(string value)
     {
-        if(value.Length >= 3)
+        if (value.Length >= 3)
         {
             ServerManager.Instance.Client.Send(URI.SearchPlayer, value, PlayerSearchResult);
         }
@@ -259,7 +270,7 @@ public class MultiplayerManager : MonoBehaviour {
         {
             RequesterID = PlayerContainer.Instance.Info.ID,
             RequestedID = requestedId
-            
+
         };
         ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, OnChallengeRequest);
     }
@@ -334,7 +345,7 @@ public class MultiplayerManager : MonoBehaviour {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             PlayerInfo pi = p.DeserializeContent<PlayerInfo>();
-            
+
             Friends.FirstOrDefault(f => f.ID == pi.ID).CurrentState = pi.CurrentState;
 
             FriendsUpdated = true;
@@ -415,6 +426,66 @@ public class MultiplayerManager : MonoBehaviour {
             });
             ChallengRequestPanel.SetActive(true);
         });
-        
+
+    }
+
+    public void EditName_OnValueChanged()
+    {
+        var value = ChangeNameInputField.Find("Text").GetComponent<Text>().text;
+        if (value.Length > 15)
+        {
+            var textGo = ChangeNameInputField.transform.Find("Text").GetComponent<Text>();
+            textGo.text = textGo.text.Substring(0, 15);
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Name can't have more than 15 chars", 3f, MessagePanel)));
+        }
+    }
+
+    public void EditName_OnValueEnd()
+    {
+        var value = ChangeNameInputField.Find("Text").GetComponent<Text>().text;
+        if (value.Length > 15)
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Name can't have more than 15 chars", 3f, MessagePanel)));
+            return;
+        }
+
+        if (value.Length < 3)
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Name can't have less than 3 chars", 3f, MessagePanel)));
+            });
+            return;
+        }
+
+        if (value.Length == 0)
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                BuildStatsPanel();
+            });
+            return;
+        }
+
+        ServerManager.Instance.Client.Send(URI.ChangeName, new ChangeNameDto() { Name = value }, OnNameChangedCallback);
+    }
+
+    private void OnNameChangedCallback(JsonPacket p)
+    {
+        if(p.ReplyStatus == ReplyStatus.Conflict)
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Name already exists, stop imitating boy", 3f, MessagePanel)));
+        }
+        else if(p.ReplyStatus == ReplyStatus.OK)
+        {
+            var pInfo = p.DeserializeContent<PlayerInfo>();
+            PlayerContainer.Instance.SetPlayerInfo(pInfo);
+
+            UnityMainThreadDispatcher.Instance().Enqueue((Action)(() =>
+            {
+                BuildStatsPanel();
+            }));
+        }
     }
 }

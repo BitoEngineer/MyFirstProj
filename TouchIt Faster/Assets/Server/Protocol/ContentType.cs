@@ -7,6 +7,8 @@ namespace Assets.Server.Protocol
         Login,
         Request,
         Friends,
+        FriendConnectivityChanged,
+        ChangeName,
         ChallengeRequest,
         ChallengeReply,
         ChallengeUpdate,

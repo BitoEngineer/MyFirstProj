@@ -135,7 +135,7 @@ public class MainMenuManager : MonoBehaviour {
         {
             Debug.Log("TouchItFaster - Start with Server done");
             PlayerInfo pi = p.DeserializeContent<PlayerInfo>();
-            PlayerContainer.Instance.Info = pi;
+            PlayerContainer.Instance.SetPlayerInfo(pi);
             if (IsSettings)
             {
                 IsSettings = false;
