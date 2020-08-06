@@ -12,6 +12,7 @@ using Assets.Scripts.Multiplayer_Scene;
 using Assets.Scripts.Preloader;
 using Assets.Scripts.Utils;
 using GooglePlayGames.BasicApi.Multiplayer;
+using System.Net.Mime;
 
 public class MultiplayerManager : MonoBehaviour
 {
@@ -58,7 +59,7 @@ public class MultiplayerManager : MonoBehaviour
         UpdateFriends();
         BuildStatsPanel();
         ServerManager.Instance.Client.AddCallback(URI.ChallengeRequest, OnFriendsChallengeRequest);
-        ServerManager.Instance.Client.AddCallback(URI.ChallengeReply, OnChallengeRequest);
+        ServerManager.Instance.Client.AddCallback(URI.ChallengeReply, OnChallengeReply);
         ServerManager.Instance.Client.AddCallback(URI.FriendConnectivityChanged, OnFriendConnectivityChanged);
     }
 
@@ -181,7 +182,7 @@ public class MultiplayerManager : MonoBehaviour
         OnFriendClickPanel.SetActive(true);
     }
 
-    private void OnChallengeRequest(JsonPacket p)
+    private void OnChallengeReply(JsonPacket p)
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
@@ -194,7 +195,7 @@ public class MultiplayerManager : MonoBehaviour
             else if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
             {
                 UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("You got a challenge!", 0.5f, MessagePanel)));
-                GameContainer.CurrentGameId = reply.ChallengeID;
+                GameContainer.SetChallengeId(reply.ChallengeID);
                 ServerManager.Instance.NextScene = "MultiplayerInGame";
             }
             else if (reply.Reply == ChallengeReplyType.ChallengeRefused)
@@ -202,9 +203,13 @@ public class MultiplayerManager : MonoBehaviour
                 UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Ahah he's scared as sh*t", 3f, MessagePanel)));
             }
         }
-        else if (p.ReplyStatus == ReplyStatus.Forbidden)
+        else if (p.ReplyStatus == ReplyStatus.Conflict)
         {
-            /*TODO*/
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Ooops, opponent left or is already in game", 2f, MessagePanel)));
+        }
+        else
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Some problem occurred", 2f, MessagePanel)));
         }
     }
 
@@ -272,7 +277,7 @@ public class MultiplayerManager : MonoBehaviour
             RequestedID = requestedId
 
         };
-        ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, OnChallengeRequest);
+        ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, OnChallengeReply);
     }
 
     private void BuildProfilePanelButtons(PlayerInfo f, bool friend)
@@ -370,7 +375,7 @@ public class MultiplayerManager : MonoBehaviour
             }
             else if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
             {
-                GameContainer.CurrentGameId = reply.ChallengeID;
+                GameContainer.StartGame(reply.ChallengeID, reply.OpponentName, reply.OpponentID);
                 ServerManager.Instance.NextScene = "MultiplayerInGame";
             }
         }
@@ -405,12 +410,34 @@ public class MultiplayerManager : MonoBehaviour
                     ChallengeID = cr.ID,
                     Reply = ChallengeReplyType.ChallengeAccepted
                 };
-                ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
-
-                UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("You got a challenge!", 0.5f, MessagePanel)));
-                GameContainer.CurrentGameId = creply.ChallengeID;
-                ServerManager.Instance.NextScene = "MultiplayerInGame";
-
+                ServerManager.Instance.Client.Send(URI.ChallengeReply, creply, (p) =>
+                {
+                    if(p.ReplyStatus == ReplyStatus.Conflict)
+                    {
+                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                        {
+                            ChallengRequestPanel.SetActive(false);
+                            StartCoroutine(UIUtils.ShowMessageInPanel("Ooops, opponent left or is already in game", 2f, MessagePanel));
+                        });
+                    }
+                    else if(p.ReplyStatus == ReplyStatus.OK)
+                    {
+                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                        {
+                            StartCoroutine(UIUtils.ShowMessageInPanel("You got a challenge!", 0.5f, MessagePanel));
+                        });
+                        GameContainer.SetChallengeId(creply.ChallengeID);
+                        ServerManager.Instance.NextScene = "MultiplayerInGame";
+                    }
+                    else
+                    {
+                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                        {
+                            ChallengRequestPanel.SetActive(false);
+                            StartCoroutine(UIUtils.ShowMessageInPanel("Some problem occurred", 2f, MessagePanel));
+                        });
+                    }
+                });
             });
             DeclineButton.GetComponent<Button>().onClick.AddListener(() =>
             {

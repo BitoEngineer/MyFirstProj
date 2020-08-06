@@ -63,7 +63,7 @@ public class CountDown : MonoBehaviour {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             ChallengeReply reply = p.DeserializeContent<ChallengeReply>();
-            GameContainer.OpponentID = reply.OpponentID;
+            GameContainer.SetOpponentId(reply.OpponentID);
         }
     }
 }

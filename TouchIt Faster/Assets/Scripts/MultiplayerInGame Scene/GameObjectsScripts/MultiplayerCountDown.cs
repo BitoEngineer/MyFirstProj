@@ -72,8 +72,8 @@ public class MultiplayerCountDown : MonoBehaviour
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             ChallengeReply reply = p.DeserializeContent<ChallengeReply>();
-            GameContainer.OpponentID = reply.OpponentID;
-            GameContainer.OpponentName = reply.OpponentName;
+            
+            GameContainer.SetOpponent(reply.OpponentID, reply.OpponentName);
 
             TimerCounterGO.GetComponent<MultiplayerTimerCounter>().ResumeTimer();
         }

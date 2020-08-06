@@ -95,7 +95,7 @@ public class GameOverUIController : MonoBehaviour
             else if (reply.Reply == ChallengeReplyType.ChallengeAccepted)
             {
                 UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Be faster this time!", 2f, MessagePanel)));
-                GameContainer.CurrentGameId = reply.ChallengeID;
+                GameContainer.SetChallengeId(reply.ChallengeID);
                 ServerManager.Instance.NextScene = "MultiplayerInGame";
             }
             else if (reply.Reply == ChallengeReplyType.ChallengeRefused || reply.Reply == ChallengeReplyType.ChallengeRefused)
@@ -133,7 +133,7 @@ public class GameOverUIController : MonoBehaviour
                     ServerManager.Instance.Client.Send(URI.ChallengeReply, creply);
 
                     UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Be faster this time!", 2f, MessagePanel)));
-                    GameContainer.CurrentGameId = creply.ChallengeID;
+                    GameContainer.SetChallengeId(creply.ChallengeID);
                     ServerManager.Instance.NextScene = "MultiplayerInGame";
                 });
 
