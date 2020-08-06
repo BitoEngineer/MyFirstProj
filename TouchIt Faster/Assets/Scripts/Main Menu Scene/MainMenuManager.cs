@@ -213,4 +213,9 @@ public class MainMenuManager : MonoBehaviour {
     {
         //AdManager.Instance.DestroyBanner();
     }
+
+    private void OnApplicationQuit()
+    {
+        ServerManager.Instance.Client.Stop();
+    }
 }

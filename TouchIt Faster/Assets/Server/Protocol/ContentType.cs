@@ -21,7 +21,8 @@ namespace Assets.Server.Protocol
 	    RandomChallengeRequest,
 	    GameOver,
 	    Revenge,
-        PlayerLeft
+        PlayerLeft,
+        GetOnlinePlayers
     }
 }
 

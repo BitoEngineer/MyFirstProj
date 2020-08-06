@@ -13,6 +13,7 @@ using Assets.Scripts.Preloader;
 using Assets.Scripts.Utils;
 using GooglePlayGames.BasicApi.Multiplayer;
 using System.Net.Mime;
+using Assets.Server.DTO;
 
 public class MultiplayerManager : MonoBehaviour
 {
@@ -33,6 +34,7 @@ public class MultiplayerManager : MonoBehaviour
     public GameObject ChallengRequestPanel;
     public GameObject AcceptButton;
     public GameObject DeclineButton;
+    public GameObject NumPlayersOnlineText;
 
     //Stats panel
     public GameObject PlayerHighestScoreText;
@@ -52,7 +54,7 @@ public class MultiplayerManager : MonoBehaviour
     private List<GameObject> SearchedGO = new List<GameObject>();
 
     private bool FriendsUpdated = false, SearchedPlayers = false;
-
+    private DateTime LastGetPlayersOnlineRequest { get; set; } = DateTime.UtcNow;
 
     void Start()
     {
@@ -86,6 +88,18 @@ public class MultiplayerManager : MonoBehaviour
         if (SearchedPlayers)
         {
             SearchPlayersUpdate();
+        }
+
+        if((DateTime.UtcNow - LastGetPlayersOnlineRequest).TotalSeconds >= 2)
+        {
+            try
+            {
+                SendGetPlayersOnline();
+            }
+            finally
+            {
+                LastGetPlayersOnlineRequest = DateTime.UtcNow;
+            }
         }
     }
 
@@ -233,8 +247,22 @@ public class MultiplayerManager : MonoBehaviour
             {
                 Debug.Log("Fódeu gerau");
             }
-
         }
+    }
+
+    private void SendGetPlayersOnline()
+    {
+        ServerManager.Instance.Client.Send(URI.GetOnlinePlayers, null, (p) =>
+        {
+            if (p.ReplyStatus == ReplyStatus.OK)
+            {
+                var dto = p.DeserializeContent<GetPlayersOnlineDto>();
+                UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                {
+                    NumPlayersOnlineText.GetComponent<Text>().text = dto.NumPlayers + " players";
+                });
+            }
+        });
     }
 
     public void SearchPlayers(string value)
