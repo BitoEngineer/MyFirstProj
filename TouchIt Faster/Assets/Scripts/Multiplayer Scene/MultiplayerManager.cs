@@ -90,7 +90,7 @@ public class MultiplayerManager : MonoBehaviour
             SearchPlayersUpdate();
         }
 
-        if((DateTime.UtcNow - LastGetPlayersOnlineRequest).TotalSeconds >= 2)
+        if ((DateTime.UtcNow - LastGetPlayersOnlineRequest).TotalSeconds >= 2)
         {
             try
             {
@@ -438,34 +438,7 @@ public class MultiplayerManager : MonoBehaviour
                     ChallengeID = cr.ID,
                     Reply = ChallengeReplyType.ChallengeAccepted
                 };
-                ServerManager.Instance.Client.Send(URI.ChallengeReply, creply, (p) =>
-                {
-                    if(p.ReplyStatus == ReplyStatus.Conflict)
-                    {
-                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                        {
-                            ChallengRequestPanel.SetActive(false);
-                            StartCoroutine(UIUtils.ShowMessageInPanel("Ooops, opponent left or is already in game", 2f, MessagePanel));
-                        });
-                    }
-                    else if(p.ReplyStatus == ReplyStatus.OK)
-                    {
-                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                        {
-                            StartCoroutine(UIUtils.ShowMessageInPanel("You got a challenge!", 0.5f, MessagePanel));
-                        });
-                        GameContainer.SetChallengeId(creply.ChallengeID);
-                        ServerManager.Instance.NextScene = "MultiplayerInGame";
-                    }
-                    else
-                    {
-                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                        {
-                            ChallengRequestPanel.SetActive(false);
-                            StartCoroutine(UIUtils.ShowMessageInPanel("Some problem occurred", 2f, MessagePanel));
-                        });
-                    }
-                });
+                ServerManager.Instance.Client.Send(URI.ChallengeReply, creply, OnChallengeAcceptedOkCallback, new ReplyStatus[] { ReplyStatus.OK }, OnChallengeAccepteNotOkCallback);
             });
             DeclineButton.GetComponent<Button>().onClick.AddListener(() =>
             {
@@ -482,6 +455,37 @@ public class MultiplayerManager : MonoBehaviour
             ChallengRequestPanel.SetActive(true);
         });
 
+    }
+
+    public void OnChallengeAccepteNotOkCallback(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.Conflict)
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                ChallengRequestPanel.SetActive(false);
+                StartCoroutine(UIUtils.ShowMessageInPanel("Ooops, opponent left or is already in game", 2f, MessagePanel));
+            });
+        }
+        else
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                ChallengRequestPanel.SetActive(false);
+                StartCoroutine(UIUtils.ShowMessageInPanel("Some problem occurred", 2f, MessagePanel));
+            });
+        }
+    }
+
+    public void OnChallengeAcceptedOkCallback(JsonPacket p)
+    {
+        var creply = p.DeserializeContent<ChallengeReply>();
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            StartCoroutine(UIUtils.ShowMessageInPanel("You got a challenge!", 0.5f, MessagePanel));
+        });
+        GameContainer.SetChallengeId(creply.ChallengeID);
+        ServerManager.Instance.NextScene = "MultiplayerInGame";
     }
 
     public void EditName_OnValueChanged()
@@ -528,11 +532,11 @@ public class MultiplayerManager : MonoBehaviour
 
     private void OnNameChangedCallback(JsonPacket p)
     {
-        if(p.ReplyStatus == ReplyStatus.Conflict)
+        if (p.ReplyStatus == ReplyStatus.Conflict)
         {
             UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Name already exists, stop imitating boy", 3f, MessagePanel)));
         }
-        else if(p.ReplyStatus == ReplyStatus.OK)
+        else if (p.ReplyStatus == ReplyStatus.OK)
         {
             var pInfo = p.DeserializeContent<PlayerInfo>();
             PlayerContainer.Instance.SetPlayerInfo(pInfo);

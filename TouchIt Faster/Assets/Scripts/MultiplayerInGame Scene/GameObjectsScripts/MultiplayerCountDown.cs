@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Multiplayer_Scene;
+using Assets.Scripts.Preloader;
 using Assets.Server.Protocol;
 using MyFirstServ.Models.TouchItFaster;
 using System;
@@ -75,7 +76,10 @@ public class MultiplayerCountDown : MonoBehaviour
             
             GameContainer.SetOpponent(reply.OpponentID, reply.OpponentName);
 
-            TimerCounterGO.GetComponent<MultiplayerTimerCounter>().ResumeTimer();
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                TimerCounterGO.GetComponent<MultiplayerTimerCounter>().ResumeTimer();
+            });
         }
     }
 }

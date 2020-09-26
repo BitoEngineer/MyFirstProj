@@ -44,9 +44,12 @@ public class TouchManager : MonoBehaviour
 
     //DATA
     public int Lifes = 3;
-    public Image Life1;
-    public Image Life2;
-    public Image Life3;
+    public GameObject Life1;
+    public GameObject Die1;
+    public GameObject Life2;
+    public GameObject Die2;
+    public GameObject Life3;
+    public GameObject Die3;
     public GameObject GameOverPanel;
     public Text GameOverPointsText;
     public bool OnPause = false;
@@ -238,13 +241,16 @@ public class TouchManager : MonoBehaviour
         switch (Lifes--)
         {
             case 3:
-                Life3.enabled = false;
+                Life1.SetActive(false);
+                Die1.SetActive(true);
                 break;
             case 2:
-                Life2.enabled = false;
+                Life2.SetActive(false);
+                Die2.SetActive(true);
                 break;
             case 1:
-                Life1.enabled = false;
+                Life3.SetActive(false);
+                Die3.SetActive(true);
                 GameOver();
                 break;
         }
@@ -361,9 +367,8 @@ public class TouchManager : MonoBehaviour
             GameOverPanel.SetActive(false);
 
             CleanUpCircles();
-            Life1.enabled = false;
-            Life2.enabled = false;
-            Life3.enabled = false;
+            DisableAllLifes();
+
             OnPause = false;
             Lifes = 3;
             CountDownGO.GetComponent<CountDown>().StartCountDown(false);
@@ -373,6 +378,16 @@ public class TouchManager : MonoBehaviour
             //Generate text saying that AD already was used
         }
 
+    }
+
+    public void DisableAllLifes()
+    {
+        Life3.SetActive(false);
+        Die3.SetActive(true);
+        Life2.SetActive(false);
+        Die2.SetActive(true);
+        Life1.SetActive(false);
+        Die1.SetActive(true);
     }
 
     public void CleanUpCircles()

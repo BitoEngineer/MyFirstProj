@@ -29,9 +29,7 @@ public class GameOver : MonoBehaviour
             gameOverPanel.SetActive(false);
 
             touchManager.CleanUpCircles();
-            touchManager.Life1.enabled = false;
-            touchManager.Life2.enabled = false;
-            touchManager.Life3.enabled = false;
+            touchManager.DisableAllLifes();
             touchManager.OnPause = false;
             touchManager.Lifes = 3;
             //timerCounter.GetComponent<TimerCounter>().ResumeTimer(); ;
