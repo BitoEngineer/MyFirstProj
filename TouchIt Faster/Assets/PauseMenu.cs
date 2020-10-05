@@ -7,6 +7,7 @@ public class PauseMenu : MonoBehaviour
 {
     
     public GameObject timerCounter;
+    public GameObject spawnerCanvas;
     public GameObject pauseMenu;
 
     private TouchManager touchManager;
@@ -18,7 +19,7 @@ public class PauseMenu : MonoBehaviour
 
     public void Resume()
     {
-        GameObject.Find("SpawnerCanvas").SetActive(true);
+        spawnerCanvas.SetActive(true);
         touchManager.Resume();
         pauseMenu.SetActive(false);
     }
@@ -28,7 +29,7 @@ public class PauseMenu : MonoBehaviour
         touchManager = GameObject.Find("Touch").GetComponent<TouchManager>();
         touchManager.Pause();
 
-        GameObject.Find("SpawnerCanvas").SetActive(false);
+        spawnerCanvas.SetActive(false);
     }
 
     public void LoadMenu()

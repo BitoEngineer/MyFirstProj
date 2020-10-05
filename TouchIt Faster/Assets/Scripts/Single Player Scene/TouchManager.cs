@@ -1,9 +1,11 @@
 ﻿
 using Assets.Scripts.Data;
 using Assets.Scripts.Single_Player_Scene.Models;
+using Assets.Scripts.Utils;
 using Assets.Server.Models;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -14,27 +16,15 @@ public class TouchManager : MonoBehaviour
     public GameObject Circle_Black_GO;
     public GameObject Circle_Red_GO;
     public GameObject Circle_Blue_GO;
+    public GameObject AliveCirclesText;
     public float ScaleCircle = 10;
     public Text PointsText;
     private Dictionary<GameObject, Circle> AliveCircles = new Dictionary<GameObject, Circle>();
-    private float LastCircleSpawnAge_s = 0;
-    public float CIRCLE_SPAWN_s = 2f;
-    public float CIRCLE_SPAWN_LIMIT_s = 2f;
-    public float DEC_CIRCLE_SPAWN_s = 0.2f;
-    public float MAX_CIRCLES = 5;
-    public float CIRCLE_LIFETIME_s = 2.0f;
 
     //BOMB
     public GameObject BombExplosion;
     public float ScaleBomb = 10;
     public GameObject BombGO;
-    public float Bomb_Spawn_s = 1f;
-    public float HitBombDamage_percentage = 0.2f;
-    public float BombLifeTime_s = 5f;
-    public float Prob_Bomb = 0.2f;
-    public float Bomb_Spawn_Inc_probability = 0.01f;
-    public float MAX_BOMB_SPAWN_probability = 0.5f;
-    private float LastBombSpawn_s = 0f;
     private Dictionary<GameObject, Bomb> AliveBombs = new Dictionary<GameObject, Bomb>();
 
     //SQUARE
@@ -80,6 +70,19 @@ public class TouchManager : MonoBehaviour
     private Game Game = new Game();
     public Game GetGame() => Game;
 
+    private float LastCircleSpawnAge_s = 0;
+    private float CIRCLE_SPAWN_s = 2f;
+    private float CIRCLE_SPAWN_LIMIT_s = 0.2f;
+    private float DEC_CIRCLE_SPAWN_s = 0.2f;
+    private float MAX_CIRCLES = 10;
+    private float CIRCLE_LIFETIME_s = 1.5f;
+    private float BOMB_SPAWN_s = 1.5f;
+    private float BOMB_LIFE_TIME_s = 2f;
+    private float Prob_Bomb = 0.2f;
+    private float Bomb_Spawn_Inc_probability = 0.01f;
+    private float MAX_BOMB_SPAWN_probability = 0.5f;
+    private float LastBombSpawn_s = 0f;
+
     void Start()
     {
         Circles[0] = Circle_Black_GO;
@@ -102,20 +105,42 @@ public class TouchManager : MonoBehaviour
 
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (!OnPause && !CountDownGO.GetComponent<CountDown>().Counting)
         {
-            if (CheckGameOver()) return;
+            if (CheckGameOver())
+            {
+                SetAliveCirclesText();
+                return;
+            }
 
             float time = Time.time;
             SpawnObjects(time);
             CheckSquaresToDestroy(time);
             CheckBombsToDestroy(time);
             CheckCirclesToDestroy(time);
+            SetAliveCirclesText();
         }
+    }
 
+    private void SetAliveCirclesText()
+    {
+        var totalCircles = AliveCircles.Values.Count();
+        var aliveCirclesTextComp = AliveCirclesText.GetComponent<Text>();
+        aliveCirclesTextComp.text = totalCircles + "";
+        if (totalCircles > MAX_CIRCLES * 0.8)
+        {
+            aliveCirclesTextComp.color = Constants.RED;
+        }
+        else if (totalCircles >= MAX_CIRCLES * 0.5 && totalCircles <= MAX_CIRCLES * 0.8)
+        {
+            aliveCirclesTextComp.color = Constants.ORANGE;
+        }
+        else
+        {
+            aliveCirclesTextComp.color = Color.black;
+        }
     }
 
     private void OnDestroy()
@@ -130,7 +155,7 @@ public class TouchManager : MonoBehaviour
             GenerateCircles();
             GenerateSquare();
         }
-        if (time - LastBombSpawn_s > Bomb_Spawn_s)
+        if (time - LastBombSpawn_s > BOMB_SPAWN_s)
         {
             GenerateBomb();
         }
@@ -178,7 +203,7 @@ public class TouchManager : MonoBehaviour
     {
         foreach (Bomb b in AliveBombs.Values)
         {
-            if (time - b.Age_s > BombLifeTime_s)
+            if (time - b.Age_s > BOMB_LIFE_TIME_s)
             {
                 GameObject bomb = b.Bomb_GO;
                 AliveBombs.Remove(bomb);
@@ -321,7 +346,7 @@ public class TouchManager : MonoBehaviour
         if (CIRCLE_SPAWN_s > CIRCLE_SPAWN_LIMIT_s)
         {
             CIRCLE_SPAWN_s -= DEC_CIRCLE_SPAWN_s;
-            DEC_CIRCLE_SPAWN_s -= DEC_CIRCLE_SPAWN_s / 20;
+            DEC_CIRCLE_SPAWN_s -= (DEC_CIRCLE_SPAWN_s * 0.1f);
         }
 
     }

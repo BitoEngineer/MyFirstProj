@@ -21,7 +21,6 @@ public class GameOverSinglePlayer : MonoBehaviour {
 
         GameObject.Find("SpawnerCanvas").SetActive(false);
 
-        GameOverNameText.text = PlayerContainer.Instance.Info?.PlayerName ?? "YOU :)";
         GameOverPointsText.text = Game.Points.ToString("f0");
         GameOverTapsInRowText.text = Game.TapsInRow.ToString("f0") + " IN ROW";
         GameOverHighestPointsText.text = Game.HighestScore.ToString("f0");
@@ -30,5 +29,10 @@ public class GameOverSinglePlayer : MonoBehaviour {
     public void OnBackClick()
     {
         SceneManager.LoadScene("Main Menu");
+    }
+
+    public void OnTryAgainClick()
+    {
+        SceneManager.LoadScene("Single player");
     }
 }

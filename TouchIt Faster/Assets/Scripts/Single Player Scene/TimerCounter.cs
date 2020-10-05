@@ -31,16 +31,19 @@ public class TimerCounter : MonoBehaviour {
             timerText.text = minutes + ":" + sec;
         }
         
-	} 
+	}
 
+    private float? lastStopTime = null;
     public void StopTimer()
     {
         active = false;
-
+        lastStopTime = Time.time;
     }
 
     public void ResumeTimer(float afterSec = 0)
     {
         active = true;
+        var diff = lastStopTime.HasValue ? (Time.time - lastStopTime.Value) : 0f;
+        startTime = startTime + diff;
     }
 }
