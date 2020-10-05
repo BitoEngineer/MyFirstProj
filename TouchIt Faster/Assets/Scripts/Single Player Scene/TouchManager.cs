@@ -1,5 +1,7 @@
 ﻿
 using Assets.Scripts.Data;
+using Assets.Scripts.Single_Player_Scene.Models;
+using Assets.Server.Models;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -40,7 +42,6 @@ public class TouchManager : MonoBehaviour
     public float SpecialCircleLifeTime_s = 3f;
     public float Prob_SpecialCircle = 0.5f;
     private Dictionary<GameObject, Square> AliveSpecialCircles = new Dictionary<GameObject, Square>();
-    List<TextTimer> TextDestroyedSpecialCircles = new List<TextTimer>();
 
     //DATA
     public int Lifes = 3;
@@ -51,18 +52,15 @@ public class TouchManager : MonoBehaviour
     public GameObject Life3;
     public GameObject Die3;
     public GameObject GameOverPanel;
-    public Text GameOverPointsText;
     public bool OnPause = false;
     public Canvas canvas;
     public Canvas SpawnerCanvas;
     private RectTransform CanvasRect;
     private RectTransform SpawnerCanvasRect;
-    public Text SpecialCircleHittedText;
     public float SpecialCircleTextLifeTime_s = 1f;
     private float X_length;
     private float Y_length;
     private Vector3 stageDimensions;
-    private float Points;
     public AudioClip CircleSound;
     public AudioClip SquareSound;
     public AudioClip BombSound;
@@ -78,7 +76,10 @@ public class TouchManager : MonoBehaviour
 
     public GameObject CountDownGO;
     public GameObject TimerCounterGO;
-    
+
+    private Game Game = new Game();
+    public Game GetGame() => Game;
+
     void Start()
     {
         Circles[0] = Circle_Black_GO;
@@ -92,8 +93,6 @@ public class TouchManager : MonoBehaviour
         CanvasRect = canvas.GetComponent<RectTransform>();
         SpawnerCanvasRect = SpawnerCanvas.GetComponent<RectTransform>();
 
-        Points = 0;
-
         stageDimensions = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
         X_length = stageDimensions.x - (Circle_Black_GO.transform.localScale.x);
         Y_length = stageDimensions.y - (Circle_Black_GO.transform.localScale.y * 4);
@@ -102,8 +101,6 @@ public class TouchManager : MonoBehaviour
         BombSize = new Vector3(CanvasRect.rect.width / 30, CanvasRect.rect.width / 30, 0);
 
     }
-
-
 
     // Update is called once per frame
     void Update()
@@ -123,7 +120,7 @@ public class TouchManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        PlayerPrefs.SetFloat("points", Points);
+        Game.SetScoreOnPlayerPrefs();
     }
 
     private void SpawnObjects(float time)
@@ -160,16 +157,6 @@ public class TouchManager : MonoBehaviour
                 Destroy(square);
             }
         }
-        foreach (TextTimer t in TextDestroyedSpecialCircles)
-        {
-            if (time - t.Age_s > SpecialCircleTextLifeTime_s)
-            {
-                TextDestroyedSpecialCircles.Remove(t);
-                Destroy(t.text);
-            }
-        }
-
-
     }
 
     public void CheckCirclesToDestroy(float time)
@@ -226,8 +213,9 @@ public class TouchManager : MonoBehaviour
     public void BombTouched(GameObject gameObject)
     {
         Vector3 v = gameObject.transform.position;
-        Points = Points * (1 - HitBombDamage_percentage);
-        PointsText.text = Points.ToString("f0");
+
+        Game.ResetTapsInRow();
+
         AliveBombs.Remove(gameObject);
         Destroy(gameObject);
         GameObject anim = Instantiate(BombExplosion, v, Quaternion.identity);
@@ -281,14 +269,10 @@ public class TouchManager : MonoBehaviour
         source.PlayOneShot(SquareSound);
         Vector3 v = WorldToCanvasCoords(go.transform.position, SpawnerCanvasRect);
         AliveSpecialCircles.Remove(go);
-        Text t = Instantiate(SpecialCircleHittedText, v, Quaternion.identity) as Text;
-        t.transform.SetParent(canvas.transform, false);
-        TextDestroyedSpecialCircles.Add(new TextTimer { text = t, Age_s = Time.time });
 
-        Points += POINTS_SQUARE;
-        PointsText.text = Points.ToString("f0");
+        Game.IncreasePoints(POINTS_SQUARE);
+        PointsText.text = Game.Points.ToString("f0");
     }
-
 
     private void GenerateCircles()
     {
@@ -326,11 +310,11 @@ public class TouchManager : MonoBehaviour
 
     public void PointsUpdate(GameObject destroyedCircle)
     {
-        Points += MAX_POINTS_CIRCLE;
+        Game.IncreasePoints(MAX_POINTS_CIRCLE);
 
         source.PlayOneShot(CircleSound);
 
-        PointsText.text = Points.ToString("f0");
+        PointsText.text = Game.Points.ToString("f0");
         Destroy(AliveCircles[destroyedCircle].counter);
         AliveCircles.Remove(destroyedCircle);
 
@@ -351,11 +335,22 @@ public class TouchManager : MonoBehaviour
 
     private void GameOver()
     {
-        //Time.timeScale = 0f;
+        Game.SetScoreOnPlayerPrefs();
+        Pause();
+
+        GameOverPanel.SetActive(true);
+    }
+
+    public void Resume()
+    {
+        TimerCounterGO.GetComponent<TimerCounter>().ResumeTimer();
+        OnPause = false;
+    }
+
+    public void Pause()
+    {
         TimerCounterGO.GetComponent<TimerCounter>().StopTimer();
         OnPause = true;
-        GameOverPanel.SetActive(true);
-        GameOverPointsText.text = "Points: " + Points.ToString("f0");
     }
 
     public void ContinueOnClick()

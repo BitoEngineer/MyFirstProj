@@ -191,19 +191,6 @@ public class MainMenuManager : MonoBehaviour {
         ServerManager.Instance.Client.Send(URI.Login, new Handshake(), LoginReply, null, null, null, 5000);
     }
 
-    public void ChangeNameListener()
-    {
-        NameInputField.text = NameText.text;
-        NameInputField.gameObject.SetActive(true);
-    }
-
-    public void OnNameChanged(string value)
-    {
-        PlayerInfo player = PlayerContainer.Instance.Info;
-        player.PlayerName = value;
-        /*TODO ServerManager.Instance.Client.Send(URI.UpdatePlayer, player, OnPlayerUpdate, null, 5000);*/
-    }
-
     public void OnPlayerUpdate(JsonPacket p)
     {
 

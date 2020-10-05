@@ -5,37 +5,30 @@ using UnityEngine.SceneManagement;
 
 public class PauseMenu : MonoBehaviour
 {
-    private TouchManager touchManager;
     
     public GameObject timerCounter;
     public GameObject pauseMenu;
 
-    // Start is called before the first frame update
+    private TouchManager touchManager;
+
     public void Start()
     {
         touchManager = GameObject.Find("Touch").GetComponent<TouchManager>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void Resume()
     {
-        timerCounter.GetComponent<TimerCounter>().ResumeTimer();
+        GameObject.Find("SpawnerCanvas").SetActive(true);
+        touchManager.Resume();
         pauseMenu.SetActive(false);
-        Time.timeScale = 1f;
-        touchManager.OnPause = false;
     }
 
     public void Pause()
     {
         touchManager = GameObject.Find("Touch").GetComponent<TouchManager>();
-        touchManager.OnPause = true;
-        timerCounter.GetComponent<TimerCounter>().StopTimer();
-        Time.timeScale = 0f;
+        touchManager.Pause();
+
+        GameObject.Find("SpawnerCanvas").SetActive(false);
     }
 
     public void LoadMenu()
