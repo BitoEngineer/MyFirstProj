@@ -18,6 +18,8 @@ using Assets.Server.DTO;
 public class MultiplayerManager : MonoBehaviour
 {
 
+    public GameObject RandomChallengeButton;
+    public GameObject NoConnectionImage;
     public GameObject FriendGO;
     public GameObject FriendsContainer;
     public GameObject OnFriendClickPanel;
@@ -58,11 +60,25 @@ public class MultiplayerManager : MonoBehaviour
 
     void Start()
     {
-        UpdateFriends();
+        if (ConnectionHelper.HasInternet)
+        {
+            UpdateFriends();
+        }
+        else
+        {
+            SetOfflineMode();
+        }
+
         BuildStatsPanel();
         ServerManager.Instance.Client.AddCallback(URI.ChallengeRequest, OnFriendsChallengeRequest);
         ServerManager.Instance.Client.AddCallback(URI.ChallengeReply, OnChallengeReply);
         ServerManager.Instance.Client.AddCallback(URI.FriendConnectivityChanged, OnFriendConnectivityChanged);
+    }
+
+    private void SetOfflineMode()
+    {
+        RandomChallengeButton.GetComponent<Button>().interactable = false;
+        NoConnectionImage.SetActive(true);
     }
 
     private void BuildStatsPanel()
@@ -90,7 +106,7 @@ public class MultiplayerManager : MonoBehaviour
             SearchPlayersUpdate();
         }
 
-        if ((DateTime.UtcNow - LastGetPlayersOnlineRequest).TotalSeconds >= 2)
+        if ((DateTime.UtcNow - LastGetPlayersOnlineRequest).TotalSeconds >= 4)
         {
             try
             {
@@ -252,21 +268,30 @@ public class MultiplayerManager : MonoBehaviour
 
     private void SendGetPlayersOnline()
     {
-        ServerManager.Instance.Client.Send(URI.GetOnlinePlayers, null, (p) =>
+        if (ConnectionHelper.HasInternet)
         {
-            if (p.ReplyStatus == ReplyStatus.OK)
+            ServerManager.Instance.Client.Send(URI.GetOnlinePlayers, null, (p) =>
             {
-                var dto = p.DeserializeContent<GetPlayersOnlineDto>();
-                UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                if (p.ReplyStatus == ReplyStatus.OK)
                 {
-                    NumPlayersOnlineText.GetComponent<Text>().text = dto.NumPlayers + " players";
-                });
-            }
-        });
+                    var dto = p.DeserializeContent<GetPlayersOnlineDto>();
+                    UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                    {
+                        NumPlayersOnlineText.GetComponent<Text>().text = dto.NumPlayers + " players";
+                    });
+                }
+            });
+        }
     }
 
     public void SearchPlayers(string value)
     {
+        if (!ConnectionHelper.HasInternet)
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("You need to connect bro", 3f, MessagePanel)));
+            return;
+        }
+
         if (value.Length >= 3)
         {
             ServerManager.Instance.Client.Send(URI.SearchPlayer, value, PlayerSearchResult);
@@ -502,6 +527,12 @@ public class MultiplayerManager : MonoBehaviour
 
     public void EditName_OnValueEnd()
     {
+        if (!ConnectionHelper.HasInternet)
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("You need to connect bro", 3f, MessagePanel)));
+            return;
+        }
+            
         var value = ChangeNameInputField.Find("Text").GetComponent<Text>().text;
         if (value.Length > 15)
         {

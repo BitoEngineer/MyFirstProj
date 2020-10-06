@@ -12,6 +12,7 @@ using Assets.Server.Protocol;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using UnityEngine.Networking;
+using Newtonsoft.Json;
 
 public class MainMenuManager : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class MainMenuManager : MonoBehaviour
 
     private bool changeToMultiplayer = false;
 
-    public const string IP = "192.168.1.171";
+    public const string IP = "192.168.1.80";
     public const int PORT = 2223;
 
     private readonly string ClientID = "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com";
@@ -46,7 +47,7 @@ public class MainMenuManager : MonoBehaviour
         Debug.Log("TouchItFaster - MainMenuManager starting");
         //SetJoke();
 
-        if (HasInternetConnection())
+        if (ConnectionHelper.HasInternet)
         {
 #if DEBUG
             string debugClientID = "debugtestclientid";
@@ -60,7 +61,13 @@ public class MainMenuManager : MonoBehaviour
         }
         else
         {
-            //TODO
+
+            var parsedPlayerInfo = PlayerPrefs.GetString(PlayerContainer.PLAYER_INFO_KEY);
+            var playerInfo = JsonConvert.DeserializeObject<PlayerInfo>(parsedPlayerInfo);
+            LoginReply(new JsonPacket(null, URI.Login.ToString(), playerInfo)
+            {
+                ReplyStatus = ReplyStatus.OK
+            });
         }
     }
 
@@ -144,7 +151,8 @@ public class MainMenuManager : MonoBehaviour
 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                BetterThanText.GetComponent<Text>().text = $"Hey, your best is better than {pi.BetterThan}% of users";
+                var betterThan = pi.BetterThan <= 0 ? "-" : pi.BetterThan.ToString();
+                BetterThanText.GetComponent<Text>().text = $"Hey, your best is better than {betterThan}% of users";
                 BetterThanText.SetActive(true);
             });
 
@@ -156,12 +164,6 @@ public class MainMenuManager : MonoBehaviour
             Debug.Log("TouchItFaster - Server failed: " + p.ReplyStatus); // TODO Say to user that there's problems with the server
         }
 
-    }
-
-    private bool HasInternetConnection()
-    {
-        //TODO
-        return true;
     }
 
     IEnumerator GetRequest(string uri, Action<string> action)

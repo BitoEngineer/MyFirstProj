@@ -11,7 +11,7 @@ namespace Assets.Server.Models
 {
     public class PlayerContainer
     {
-        private const string PLAYER_INFO_KEY = "player_info";
+        public const string PLAYER_INFO_KEY = "player_info";
 
         private static PlayerContainer _instance = null;
 
