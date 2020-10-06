@@ -19,5 +19,7 @@ namespace Assets.Server.Models
         public int Wins;
         public int Loses;
         public int MaxHitsInRowMultiplayer;
+
+        public int BetterThan;
     }
 }

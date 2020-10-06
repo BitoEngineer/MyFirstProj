@@ -13,9 +13,11 @@ using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using UnityEngine.Networking;
 
-public class MainMenuManager : MonoBehaviour {
+public class MainMenuManager : MonoBehaviour
+{
 
     public Button SinglePlayerButton;
+    public GameObject BetterThanText;
     public Button MultiplayerButton;
     public Text JokeText;
     public GameObject MessagePanel;
@@ -29,47 +31,57 @@ public class MainMenuManager : MonoBehaviour {
     public Text TapsInARowText;
 
     private bool changeToMultiplayer = false;
-    private bool IsSettings = false;
 
     public const string IP = "192.168.1.171";
-    public const int PORT = 2223; 
+    public const int PORT = 2223;
 
     private readonly string ClientID = "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com";
     //private readonly string Jokes_API_URL = "http://geek-jokes.sameerkumar.website/api";
 
 
     // Use this for initialization
-    void Start () {
-
+    void Start()
+    {
         Debug.Log("--------------------------------ZZZZZZZZZZZZZZZZZZZZZZZZZ-------------------------------");
         Debug.Log("TouchItFaster - MainMenuManager starting");
-        /*StartCoroutine(GetRequest(Jokes_API_URL, (joke) =>
-            {
-                UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                {
-                    JokeText.gameObject.SetActive(true);
-                    if (joke != null)
-                    {
-                        JokeText.text = joke.Substring(1, joke.Length-3);
-                    }                        
-                });
-            }));*/
+        //SetJoke();
+
+        if (HasInternetConnection())
+        {
 #if DEBUG
-        string debugClientID = "debugtestclientid";
-        ServerManager.Instance.Client.Start(IP, PORT, debugClientID);
+            string debugClientID = "debugtestclientid";
+            ServerManager.Instance.Client.Start(IP, PORT, debugClientID, () =>
+            {
+                ServerManager.Instance.Client.Send(URI.Login, new Handshake(), LoginReply, null, null, null, 5000);
+            });
 #endif
-        Debug.Log("TouchItFaster - MainMenuManager ended Start");
+            Debug.Log("TouchItFaster - Starting authentication");
+            Authenticate();
+        }
+        else
+        {
+            //TODO
+        }
     }
 
-    // Update is called once per frame
-    void Update () {
-        //AdManager.Instance.ShowBanner(); CREATE PRELOADER SCENE https://www.youtube.com/watch?v=khlROw-PfNE
-        if (changeToMultiplayer)
+    private void SetJoke()
+    {/*
+        StartCoroutine(GetRequest(Jokes_API_URL, (joke) =>
         {
-            changeToMultiplayer = false;
-            SceneManager.LoadScene("Multiplayer");
-        }
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                JokeText.gameObject.SetActive(true);
+                if (joke != null)
+                {
+                    JokeText.text = joke.Substring(1, joke.Length - 3);
+                }
+            });
+        }));*/
+    }
 
+    void Update()
+    {
+        //AdManager.Instance.ShowBanner(); CREATE PRELOADER SCENE https://www.youtube.com/watch?v=khlROw-PfNE
     }
 
     public void ChangeScene(string sceneName)
@@ -78,17 +90,11 @@ public class MainMenuManager : MonoBehaviour {
 
         if (sceneName == "Multiplayer")
         {
-#if DEBUG
-            ServerManager.Instance.Client.Send(URI.Login, null, LoginReply, null /* TODO*/, null, null, 50000);
-#else
-            Debug.Log("TouchItFaster - Starting authentication");
-            Authenticate();
-#endif
+            while (!changeToMultiplayer) ;
+
         }
-        else
-        {
-            SceneManager.LoadScene(sceneName);
-        }
+
+        SceneManager.LoadScene(sceneName);
     }
 
     private void Authenticate()
@@ -116,7 +122,6 @@ public class MainMenuManager : MonoBehaviour {
     }
     private void Authenticated()
     {
-
         string userInfo = "Username: " + PlayGamesPlatform.Instance.localUser.userName +
             "\nUser ID: " + PlayGamesPlatform.Instance.localUser.id +
             "\nIsUnderage: " + PlayGamesPlatform.Instance.localUser.underage;
@@ -136,18 +141,14 @@ public class MainMenuManager : MonoBehaviour {
             Debug.Log("TouchItFaster - Start with Server done");
             PlayerInfo pi = p.DeserializeContent<PlayerInfo>();
             PlayerContainer.Instance.SetPlayerInfo(pi);
-            if (IsSettings)
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                IsSettings = false;
-                UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                {
-                    BuildSettingsPanel();
-                });
-            }
-            else
-            {
-                changeToMultiplayer = true;
-            }
+                BetterThanText.GetComponent<Text>().text = $"Hey, your best is better than {pi.BetterThan}% of users";
+                BetterThanText.SetActive(true);
+            });
+
+            changeToMultiplayer = true;
         }
         else
         {
@@ -155,6 +156,12 @@ public class MainMenuManager : MonoBehaviour {
             Debug.Log("TouchItFaster - Server failed: " + p.ReplyStatus); // TODO Say to user that there's problems with the server
         }
 
+    }
+
+    private bool HasInternetConnection()
+    {
+        //TODO
+        return true;
     }
 
     IEnumerator GetRequest(string uri, Action<string> action)
@@ -172,23 +179,6 @@ public class MainMenuManager : MonoBehaviour {
             Debug.Log("TouchItFaster - Received: " + uwr.downloadHandler.text);
             action(uwr.downloadHandler.text);
         }
-    }
-
-    public void BuildSettingsPanel()
-    {
-        NameText.text = PlayerContainer.Instance.Info.PlayerName;
-        // TODO HighestScore.text = PlayerContainer.Instance.Info.HighestScore;
-        // TODO TapsInARowText.text = PlayerContainer.Instance.Info.TapsInARow;
-        string wltxt = WinsLosesText.text.Replace("WW", PlayerContainer.Instance.Info.Wins.ToString());
-        wltxt = wltxt.Replace("LL", PlayerContainer.Instance.Info.Loses.ToString());
-        WinsLosesText.text = wltxt;
-        SettingsPanel.SetActive(true);
-    }
-
-    public void SettingsListener()
-    {
-        IsSettings = true;
-        ServerManager.Instance.Client.Send(URI.Login, new Handshake(), LoginReply, null, null, null, 5000);
     }
 
     public void OnPlayerUpdate(JsonPacket p)
