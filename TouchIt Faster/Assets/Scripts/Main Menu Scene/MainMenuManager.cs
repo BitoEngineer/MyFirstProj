@@ -33,7 +33,7 @@ public class MainMenuManager : MonoBehaviour
 
     private bool changeToMultiplayer = false;
 
-    public const string IP = "192.168.1.80";
+    public const string IP = "192.168.1.171";
     public const int PORT = 2223;
 
     private readonly string ClientID = "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com";

@@ -19,6 +19,7 @@ public class TouchManager : MonoBehaviour
     public GameObject AliveCirclesText;
     public float ScaleCircle = 10;
     public Text PointsText;
+    public Text HighestPointsText;
     private Dictionary<GameObject, Circle> AliveCircles = new Dictionary<GameObject, Circle>();
 
     //BOMB
@@ -47,7 +48,6 @@ public class TouchManager : MonoBehaviour
     public Canvas SpawnerCanvas;
     private RectTransform CanvasRect;
     private RectTransform SpawnerCanvasRect;
-    public float SpecialCircleTextLifeTime_s = 1f;
     private float X_length;
     private float Y_length;
     private Vector3 stageDimensions;
@@ -70,21 +70,33 @@ public class TouchManager : MonoBehaviour
     private Game Game = new Game();
     public Game GetGame() => Game;
 
-    private float LastCircleSpawnAge_s = 0;
+    private float LAST_CIRCLE_SPAWNED_AGE_s = 0;
+    private float LAST_BOMB_SPAWN_AGE_s = 0f;
+
+    //Time between spawns
     private float CIRCLE_SPAWN_s = 2f;
-    private float CIRCLE_SPAWN_LIMIT_s = 0.2f;
-    private float DEC_CIRCLE_SPAWN_s = 0.2f;
-    private float MAX_CIRCLES = 10;
+    private float SPAWN_CIRCLE_DECREMENT_s = 0.1f;
+    private float BOMB_SPAWN_s = 2.5f;
+
+    //Minimum time between circle spawns
+    private float CIRCLE_SPAWN_LIMIT_s = 0.35f;
+
+    //Lifetime
     private float CIRCLE_LIFETIME_s = 1.5f;
-    private float BOMB_SPAWN_s = 1.5f;
     private float BOMB_LIFE_TIME_s = 2f;
-    private float Prob_Bomb = 0.2f;
-    private float Bomb_Spawn_Inc_probability = 0.01f;
-    private float MAX_BOMB_SPAWN_probability = 0.5f;
-    private float LastBombSpawn_s = 0f;
+
+    //Probability to spawn
+    private float SPAWN_BOMB_PROBABILITY = 0.2f;
+    private float SPAWN_BOMB_PROBABILITY_INCREMENT = 0.01f;
+    private float MAX_BOMB_SPAWN_PROBABILITY = 0.5f;
+
+    //Maximum circles in game
+    private float MAX_CIRCLES = 10;
 
     void Start()
     {
+        HighestPointsText.GetComponent<Text>().text = PlayerContainer.Instance.Info?.SinglePlayerHighestScore.ToString() ?? "-";
+
         Circles[0] = Circle_Black_GO;
         Circles[1] = Circle_Red_GO;
         Circles[2] = Circle_Blue_GO;
@@ -148,14 +160,18 @@ public class TouchManager : MonoBehaviour
         Game.SetScoreOnPlayerPrefs();
     }
 
+    private bool IsToSpawnCircle(float time) => (time - LAST_CIRCLE_SPAWNED_AGE_s) > CIRCLE_SPAWN_s;
+    private bool IsToSpawnBomb(float time) => (time - LAST_BOMB_SPAWN_AGE_s) > BOMB_SPAWN_s;
+
     private void SpawnObjects(float time)
     {
-        if (time - LastCircleSpawnAge_s > CIRCLE_SPAWN_s)
+        if (IsToSpawnCircle(time))
         {
             GenerateCircles();
             GenerateSquare();
         }
-        if (time - LastBombSpawn_s > BOMB_SPAWN_s)
+
+        if (IsToSpawnBomb(time))
         {
             GenerateBomb();
         }
@@ -184,6 +200,7 @@ public class TouchManager : MonoBehaviour
         }
     }
 
+    private bool IsToGenerateBombWith20Probability() => (Random.Range(0f, 100f) / 100f) <= SPAWN_BOMB_PROBABILITY;
     public void CheckCirclesToDestroy(float time)
     {
         foreach (Circle c in AliveCircles.Values)
@@ -213,25 +230,24 @@ public class TouchManager : MonoBehaviour
     }
 
 
-    private bool GenerateBomb()
+    private bool GenerateBomb(Vector3? v = null)
     {
-        float randomBomb = Random.Range(0f, 100f) / 100f;
-        if (randomBomb <= Prob_Bomb)
+        if (IsToGenerateBombWith20Probability())
         {
             BoxCollider2D bc = BombGO.GetComponent<BoxCollider2D>();
-            Vector3 v = GetVallidCoords(bc.size.x * 100);
-            GenerateBomb(v);
+            v = v ?? GetVallidCoords(bc.size.x * 100);
+            InstantiateBomb(v.Value);
             return true;
         }
         return false;
     }
 
-    private void GenerateBomb(Vector3 v)
+    private void InstantiateBomb(Vector3 v)
     {
         Bomb b = new Bomb { Bomb_GO = Instantiate(BombGO, v, Quaternion.identity) as GameObject, Age_s = Time.time };
         b.Bomb_GO.transform.SetParent(SpawnerCanvas.transform, false);
         b.Bomb_GO.transform.localScale = BombSize;
-        LastBombSpawn_s = b.Age_s;
+        LAST_BOMB_SPAWN_AGE_s = b.Age_s;
         AliveBombs.Add(b.Bomb_GO, b);
     }
 
@@ -247,8 +263,8 @@ public class TouchManager : MonoBehaviour
         anim.transform.SetParent(SpawnerCanvasRect);
         Destroy(anim, 0.8f);
 
-        if (Prob_Bomb < MAX_BOMB_SPAWN_probability)
-            Prob_Bomb += Bomb_Spawn_Inc_probability;
+        if (SPAWN_BOMB_PROBABILITY < MAX_BOMB_SPAWN_PROBABILITY)
+            SPAWN_BOMB_PROBABILITY += SPAWN_BOMB_PROBABILITY_INCREMENT;
 
         source.PlayOneShot(BombSound);
         switch (Lifes--)
@@ -316,7 +332,7 @@ public class TouchManager : MonoBehaviour
         add.Circle_Prefab.transform.localScale = CircleSize;
 
         AliveCircles.Add(add.Circle_Prefab, add);
-        LastCircleSpawnAge_s = Time.time;
+        LAST_CIRCLE_SPAWNED_AGE_s = Time.time;
     }
 
     private Vector3 GetVallidCoords(float halfWidth)
@@ -333,8 +349,10 @@ public class TouchManager : MonoBehaviour
         return v;
     }
 
+    private int totalClicks = 1;
     public void PointsUpdate(GameObject destroyedCircle)
     {
+        ++totalClicks;
         Game.IncreasePoints(MAX_POINTS_CIRCLE);
 
         source.PlayOneShot(CircleSound);
@@ -343,10 +361,10 @@ public class TouchManager : MonoBehaviour
         Destroy(AliveCircles[destroyedCircle].counter);
         AliveCircles.Remove(destroyedCircle);
 
-        if (CIRCLE_SPAWN_s > CIRCLE_SPAWN_LIMIT_s)
+        if (CIRCLE_SPAWN_s >= CIRCLE_SPAWN_LIMIT_s)
         {
-            CIRCLE_SPAWN_s -= DEC_CIRCLE_SPAWN_s;
-            DEC_CIRCLE_SPAWN_s -= (DEC_CIRCLE_SPAWN_s * 0.1f);
+            CIRCLE_SPAWN_s -= SPAWN_CIRCLE_DECREMENT_s;
+            SPAWN_CIRCLE_DECREMENT_s = SPAWN_CIRCLE_DECREMENT_s * 0.95f;
         }
 
     }

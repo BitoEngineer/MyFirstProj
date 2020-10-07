@@ -343,7 +343,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 53 loses
+  m_Text: '- loses'
 --- !u!222 &23158047
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4367,7 +4367,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: '21 taps in a row
+  m_Text: '- taps in a row
 
 '
 --- !u!222 &1337574771
@@ -4776,7 +4776,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 1255
+  m_Text: '-'
 --- !u!222 &1413200506
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5437,7 +5437,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 88 wins
+  m_Text: '- wins'
 --- !u!222 &1729463086
 CanvasRenderer:
   m_ObjectHideFlags: 0
