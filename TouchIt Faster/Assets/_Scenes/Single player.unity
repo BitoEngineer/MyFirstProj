@@ -179,7 +179,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 9d49b8459f2b89144a44a174222028c5, type: 3}
-    m_FontSize: 54
+    m_FontSize: 50
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -914,8 +914,6 @@ MonoBehaviour:
   BombGO: {fileID: 1797299000780716, guid: 4a6b0efe7b2f038438df965c6a14aa8f, type: 3}
   SpecialCircleGO: {fileID: 1712286596921222, guid: c833637685e07e5458e19adc64b7da32,
     type: 3}
-  SpecialCircleLifeTime_s: 3
-  Prob_SpecialCircle: 0.5
   Lifes: 3
   Life1: {fileID: 234332171}
   Die1: {fileID: 2063611571}
@@ -936,6 +934,8 @@ MonoBehaviour:
     m_Bits: 0
   CountDownGO: {fileID: 70066217}
   TimerCounterGO: {fileID: 1695545756}
+  SPECIAL_CIRCLE_LIFETIME_s: 0
+  SPAWN_SPECIAL_CIRCLE_PROBABILITY: 0
 --- !u!1 &495620276
 GameObject:
   m_ObjectHideFlags: 0
@@ -1926,13 +1926,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 771456354}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.65813893, g: 0.7735849, b: 0.5728907, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3326,7 +3326,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 9d49b8459f2b89144a44a174222028c5, type: 3}
-    m_FontSize: 90
+    m_FontSize: 86
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
@@ -3416,7 +3416,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9811321, g: 0.9467796, b: 0.89320046, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
