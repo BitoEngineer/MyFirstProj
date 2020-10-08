@@ -9,9 +9,12 @@ using UnityEngine.UI;
 using Assets.Scripts.Multiplayer_Scene;
 using Assets.Scripts.Preloader;
 using Assets.Scripts.Utils;
+using System.Linq;
 
 public class TouchManagerMultiplayer : MonoBehaviour
 {
+
+    public const int BOMB_TIMELIFE_ms = 2500;
 
     //BOMB
     public GameObject BombGO;
@@ -84,9 +87,16 @@ public class TouchManagerMultiplayer : MonoBehaviour
         {
             SpawnObject(objectsToAdd.Dequeue());
         }
+
         while (objectsToDelete.Count > 0)
         {
             DeleteById(objectsToDelete.Dequeue());
+        }
+
+        var bombsToDestroy = _bombsAlive.Where(bomb => BombIsAliveForMoreThan2Seconds(bomb)).ToList();
+        foreach (var bomb in bombsToDestroy)
+        {
+            DeleteById(bomb.Id, true);
         }
     }
 
@@ -96,6 +106,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
         ServerManager.Instance.Client.Send(URI.PlayerLeft, dto);
     }
 
+    bool BombIsAliveForMoreThan2Seconds(BombSpawned bomb) => (DateTime.UtcNow - bomb.BornAt).TotalMilliseconds >= BOMB_TIMELIFE_ms;
     void OnObjectDeletion(JsonPacket p)
     {
         if (p.ReplyStatus == ReplyStatus.OK)
@@ -144,7 +155,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
         }
     }
 
-    public void DeleteById(int id)
+    public void DeleteById(int id, bool setInactive=false)
     {
         GameObject go = null;
         AliveObjects.TryGetValue(id, out go);
@@ -152,8 +163,18 @@ public class TouchManagerMultiplayer : MonoBehaviour
         {
             Debug.Log("ID of the object must be wrong, it doesn't exists");
         }
+
+        _bombsAlive.RemoveAll(p => p.Id == id);
         AliveObjects.Remove(id);
-        Destroy(go);
+
+        if (setInactive)
+        {
+            go.SetActive(false);
+        }
+        else
+        {
+            Destroy(go);
+        }
     }
 
     private void SpawnObject(NewObject obj)
@@ -185,6 +206,12 @@ public class TouchManagerMultiplayer : MonoBehaviour
         }
     }
 
+    private class BombSpawned 
+    { 
+        public int Id { get; set; } 
+        public DateTime BornAt { get; set; } 
+    }
+    private List<BombSpawned> _bombsAlive = new List<BombSpawned>();
     private void SpawnBomb(Vector3 v, int id)
     {
         Bomb b = new Bomb { Bomb_GO = Instantiate(BombGO, v, Quaternion.identity) as GameObject, Age_s = Time.time };
@@ -193,6 +220,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
         b.Bomb_GO.GetComponent<BombMultiplayer>().Id = id;
 
         AliveObjects.Add(id, b.Bomb_GO);
+        _bombsAlive.Add(new BombSpawned() { Id = id, BornAt = DateTime.UtcNow });
     }
 
     private void SpawnSpecial(Vector3 v, int id)

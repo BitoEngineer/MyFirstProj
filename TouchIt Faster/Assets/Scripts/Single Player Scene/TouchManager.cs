@@ -30,8 +30,6 @@ public class TouchManager : MonoBehaviour
 
     //SQUARE
     public GameObject SpecialCircleGO;
-    public float SpecialCircleLifeTime_s = 3f;
-    public float Prob_SpecialCircle = 0.5f;
     private Dictionary<GameObject, Square> AliveSpecialCircles = new Dictionary<GameObject, Square>();
 
     //DATA
@@ -82,13 +80,15 @@ public class TouchManager : MonoBehaviour
     private float CIRCLE_SPAWN_LIMIT_s = 0.35f;
 
     //Lifetime
+    public float SPECIAL_CIRCLE_LIFETIME_s = 1f;
     private float CIRCLE_LIFETIME_s = 1.5f;
     private float BOMB_LIFE_TIME_s = 2f;
 
     //Probability to spawn
-    private float SPAWN_BOMB_PROBABILITY = 0.2f;
+    private float SPAWN_BOMB_PROBABILITY = 0.4f;
     private float SPAWN_BOMB_PROBABILITY_INCREMENT = 0.01f;
     private float MAX_BOMB_SPAWN_PROBABILITY = 0.5f;
+    public float SPAWN_SPECIAL_CIRCLE_PROBABILITY = 0.3f;
 
     //Maximum circles in game
     private float MAX_CIRCLES = 10;
@@ -191,7 +191,7 @@ public class TouchManager : MonoBehaviour
     {
         foreach (Square s in AliveSpecialCircles.Values)
         {
-            if (time - s.Age_s > SpecialCircleLifeTime_s)
+            if (time - s.Age_s > SPECIAL_CIRCLE_LIFETIME_s)
             {
                 GameObject square = s.Square_GO;
                 AliveBombs.Remove(square);
@@ -288,7 +288,7 @@ public class TouchManager : MonoBehaviour
     private bool GenerateSquare()
     {
         float randomSquare = Random.Range(0f, 100f) / 100f;
-        if (randomSquare <= Prob_SpecialCircle)
+        if (randomSquare <= SPAWN_SPECIAL_CIRCLE_PROBABILITY)
         {
             BoxCollider2D bc = SpecialCircleGO.GetComponent<BoxCollider2D>();
             Vector3 v = GetVallidCoords(bc.size.x * 100);
