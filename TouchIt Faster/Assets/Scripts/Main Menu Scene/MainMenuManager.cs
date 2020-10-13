@@ -33,8 +33,9 @@ public class MainMenuManager : MonoBehaviour
 
     private static bool isAlreadyLoggedIn = false;
 
-    public const string IP = "13.80.44.245";//"192.168.1.171";//
-    public const int PORT = 2223;
+    //public const string IP = "192.168.1.171";////
+    public const string IP = "touchitfaster.westeurope.cloudapp.azure.com";//"40.115.22.55";// 
+    public const int PORT = 2222;
 
     private readonly string ClientID = "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com";
     //private readonly string Jokes_API_URL = "http://geek-jokes.sameerkumar.website/api";
@@ -47,16 +48,14 @@ public class MainMenuManager : MonoBehaviour
         Debug.Log("TouchItFaster - MainMenuManager starting");
         //SetJoke();
 
-        MultiplayerButton.GetComponent<Button>().interactable = false;
 
         if (ConnectionHelper.HasInternet)
         {
 #if DEBUG
             string debugClientID = "testingfirstlogin-1";
             ConnectToServerAndSendLogin(debugClientID);
-#endif
             Debug.Log("TouchItFaster - Starting authentication");
-
+#else
             if (!isAlreadyLoggedIn)
             {
                 var clientId = PlayerPrefs.GetString("touchitfaster-clientid");
@@ -71,6 +70,7 @@ public class MainMenuManager : MonoBehaviour
                     ConnectToServerAndSendLogin(clientId);
                 }
             }
+#endif
         }
         else
         {
@@ -128,7 +128,7 @@ public class MainMenuManager : MonoBehaviour
         {
             var errorMessage = "F*ck, authentication didn't complete with success";
             Debug.Log(errorMessage);
-            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel(errorMessage, 5f, MessagePanel)));
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel(errorMessage, 2f, MessagePanel)));
             return;
         }
 
@@ -173,6 +173,7 @@ public class MainMenuManager : MonoBehaviour
 
     private void ConnectToServerAndSendLogin(string clientId)
     {
+        MultiplayerButton.GetComponent<Button>().interactable = false;
         //Google Client Id: PlayGamesPlatform.Instance.localUser.id
         ServerManager.Instance.Client.Start(IP, PORT, clientId, () =>
         {
@@ -185,7 +186,6 @@ public class MainMenuManager : MonoBehaviour
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             isAlreadyLoggedIn = true;
-            MultiplayerButton.GetComponent<Button>().interactable = true;
 
             Debug.Log("TouchItFaster - Start with Server done");
             PlayerInfo pi = p.DeserializeContent<PlayerInfo>();
@@ -193,6 +193,8 @@ public class MainMenuManager : MonoBehaviour
 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
+                MultiplayerButton.GetComponent<Button>().interactable = true;
+
                 var clientId = ServerManager.Instance.Client.ClientId;
                 PlayerPrefs.SetString("touchitfaster-clientid", clientId);
 
