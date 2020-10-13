@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 
 public class MultiplayerReturnBack : MonoBehaviour {
 
+    public GameObject SpawnerCanvas;
     public GameObject ExitPopup;
     private TouchManagerMultiplayer touchM;
     public GameObject TimerCounterGO;
@@ -23,6 +24,7 @@ public class MultiplayerReturnBack : MonoBehaviour {
     public void OnMouseDown()
     {
         ExitPopup.SetActive(true);
+        SpawnerCanvas.SetActive(false);
     }
 
     public void Leave()
@@ -39,6 +41,7 @@ public class MultiplayerReturnBack : MonoBehaviour {
 
     public void Resume()
     {
+        SpawnerCanvas.SetActive(true);
         ExitPopup.SetActive(false);
         //touchM.OnPause = false;
 

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts.Preloader;
 using Assets.Scripts.Utils;
@@ -10,7 +11,7 @@ public class MultiplayerTimerCounter : MonoBehaviour
     public Text TimerText;
     public Text ExtraTimeText;
 
-    private float StartTime = 60f;
+    private float StartTime = 30f;
     private bool Active = false;
 
     public static MultiplayerTimerCounter Instance { get; set; }
@@ -31,20 +32,18 @@ public class MultiplayerTimerCounter : MonoBehaviour
             string seconds = (StartTime % 60).ToString("f1");
             string sec = seconds.Split('.')[0];
             sec = sec.Length > 1 ? sec : "0" + sec;
-            string ms = seconds.Split(',')[1];
-            ms = ms.Length > 1 ? ms : "0" + ms;
 
             if (StartTime < 10f)
             {
                 TimerText.color = Constants.RED;
 
-                if(StartTime <= 0f)
+                if (StartTime <= 0f)
                 {
                     StopTimer();
                 }
             }
 
-            TimerText.text = minutes + ":" + sec;// + "." + ms;
+            TimerText.text = minutes + ":" + sec;
         }
 
     }

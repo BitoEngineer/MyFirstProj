@@ -77,17 +77,16 @@ public class TouchManager : MonoBehaviour
     private float BOMB_SPAWN_s = 2.5f;
 
     //Minimum time between circle spawns
-    private float CIRCLE_SPAWN_LIMIT_s = 0.35f;
+    private float CIRCLE_SPAWN_LIMIT_s = 0.3f;
 
     //Lifetime
-    public float SPECIAL_CIRCLE_LIFETIME_s = 1f;
+    public float SPECIAL_CIRCLE_LIFETIME_s = 2f;
     private float CIRCLE_LIFETIME_s = 1.5f;
     private float BOMB_LIFE_TIME_s = 2f;
 
     //Probability to spawn
     private float SPAWN_BOMB_PROBABILITY = 0.4f;
-    private float SPAWN_BOMB_PROBABILITY_INCREMENT = 0.01f;
-    private float MAX_BOMB_SPAWN_PROBABILITY = 0.5f;
+    private float SPAWN_BOMB_PROBABILITY_INCREMENT = 0.2f;
     public float SPAWN_SPECIAL_CIRCLE_PROBABILITY = 0.3f;
 
     //Maximum circles in game
@@ -262,9 +261,8 @@ public class TouchManager : MonoBehaviour
         GameObject anim = Instantiate(BombExplosion, v, Quaternion.identity);
         anim.transform.SetParent(SpawnerCanvasRect);
         Destroy(anim, 0.8f);
-
-        if (SPAWN_BOMB_PROBABILITY < MAX_BOMB_SPAWN_PROBABILITY)
-            SPAWN_BOMB_PROBABILITY += SPAWN_BOMB_PROBABILITY_INCREMENT;
+            
+        SPAWN_BOMB_PROBABILITY += SPAWN_BOMB_PROBABILITY_INCREMENT;
 
         source.PlayOneShot(BombSound);
         switch (Lifes--)

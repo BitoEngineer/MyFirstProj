@@ -432,9 +432,9 @@ public class MultiplayerManager : MonoBehaviour
                 ServerManager.Instance.NextScene = "MultiplayerInGame";
             }
         }
-        else if (p.ReplyStatus == ReplyStatus.Forbidden)
+        else if (p.ReplyStatus == ReplyStatus.BadRequest)
         {
-            /*TODO*/
+            StartCoroutine(UIUtils.ShowMessageInPanel("You need to wait my friend ..", 2f, MessagePanel));
         }
     }
 

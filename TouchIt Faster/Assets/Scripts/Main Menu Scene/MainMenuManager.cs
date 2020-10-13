@@ -31,9 +31,9 @@ public class MainMenuManager : MonoBehaviour
     public Text HighestScore;
     public Text TapsInARowText;
 
-    private bool changeToMultiplayer = false;
+    private static bool isAlreadyLoggedIn = false;
 
-    public const string IP = "192.168.1.171";
+    public const string IP = "13.80.44.245";//"192.168.1.171";//
     public const int PORT = 2223;
 
     private readonly string ClientID = "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com";
@@ -47,17 +47,30 @@ public class MainMenuManager : MonoBehaviour
         Debug.Log("TouchItFaster - MainMenuManager starting");
         //SetJoke();
 
+        MultiplayerButton.GetComponent<Button>().interactable = false;
+
         if (ConnectionHelper.HasInternet)
         {
 #if DEBUG
-            string debugClientID = "debugtestclientid";
-            ServerManager.Instance.Client.Start(IP, PORT, debugClientID, () =>
-            {
-                ServerManager.Instance.Client.Send(URI.Login, new Handshake(), LoginReply, null, null, null, 5000);
-            });
+            string debugClientID = "testingfirstlogin-1";
+            ConnectToServerAndSendLogin(debugClientID);
 #endif
             Debug.Log("TouchItFaster - Starting authentication");
-            Authenticate();
+
+            if (!isAlreadyLoggedIn)
+            {
+                var clientId = PlayerPrefs.GetString("touchitfaster-clientid");
+
+                if (string.IsNullOrEmpty(clientId))
+                {
+                    AuthenticateWithGoogle();
+                    //LoginWithoutGoogle();
+                }
+                else
+                {
+                    ConnectToServerAndSendLogin(clientId);
+                }
+            }
         }
         else
         {
@@ -68,6 +81,22 @@ public class MainMenuManager : MonoBehaviour
             {
                 ReplyStatus = ReplyStatus.OK
             });
+        }
+    }
+
+    private void LoginWithoutGoogle()
+    {
+        var clientId = PlayerPrefs.GetString("clientId");
+        var isFirstLogin = string.IsNullOrEmpty(clientId);
+        if (isFirstLogin)
+        {
+            var newUserClientId = Guid.NewGuid().ToString().Substring(0, 12);
+            ConnectToServerAndSendLogin(newUserClientId);
+            PlayerPrefs.SetString("clientId", newUserClientId);
+        }
+        else
+        {
+            ConnectToServerAndSendLogin(clientId);
         }
     }
 
@@ -95,16 +124,18 @@ public class MainMenuManager : MonoBehaviour
     {
         Debug.Log("TouchItFaster - ChangeScene called with the scene name " + sceneName);
 
-        if (sceneName == "Multiplayer")
+        if (sceneName == "Multiplayer" && !isAlreadyLoggedIn)
         {
-            while (!changeToMultiplayer) ;
-
+            var errorMessage = "F*ck, authentication didn't complete with success";
+            Debug.Log(errorMessage);
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel(errorMessage, 5f, MessagePanel)));
+            return;
         }
 
         SceneManager.LoadScene(sceneName);
     }
 
-    private void Authenticate()
+    private void AuthenticateWithGoogle()
     {
         if (PlayGamesPlatform.Instance.localUser.authenticated)
         {
@@ -122,11 +153,13 @@ public class MainMenuManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("TouchItFaster - Login failed!"); // TODO Say to user that can't login with google
+                    UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Google Sign In didn't complete with success", 2f, MessagePanel)));
+                    Debug.Log("TouchItFaster - Login failed!"); 
                 }
             });
         }
     }
+
     private void Authenticated()
     {
         string userInfo = "Username: " + PlayGamesPlatform.Instance.localUser.userName +
@@ -135,7 +168,13 @@ public class MainMenuManager : MonoBehaviour
 
         Debug.Log("TouchItFaster - " + userInfo);
 
-        ServerManager.Instance.Client.Start(IP, PORT, PlayGamesPlatform.Instance.localUser.id, () =>
+        ConnectToServerAndSendLogin(PlayGamesPlatform.Instance.localUser.id);
+    }
+
+    private void ConnectToServerAndSendLogin(string clientId)
+    {
+        //Google Client Id: PlayGamesPlatform.Instance.localUser.id
+        ServerManager.Instance.Client.Start(IP, PORT, clientId, () =>
         {
             ServerManager.Instance.Client.Send(URI.Login, new Handshake(), LoginReply, null, null, null, 5000);
         });
@@ -145,18 +184,22 @@ public class MainMenuManager : MonoBehaviour
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
+            isAlreadyLoggedIn = true;
+            MultiplayerButton.GetComponent<Button>().interactable = true;
+
             Debug.Log("TouchItFaster - Start with Server done");
             PlayerInfo pi = p.DeserializeContent<PlayerInfo>();
             PlayerContainer.Instance.SetPlayerInfo(pi);
 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
+                var clientId = ServerManager.Instance.Client.ClientId;
+                PlayerPrefs.SetString("touchitfaster-clientid", clientId);
+
                 var betterThan = pi.BetterThan <= 0 ? "-" : pi.BetterThan.ToString();
                 BetterThanText.GetComponent<Text>().text = $"Hey, your best is better than {betterThan}% of users";
                 BetterThanText.SetActive(true);
             });
-
-            changeToMultiplayer = true;
         }
         else
         {

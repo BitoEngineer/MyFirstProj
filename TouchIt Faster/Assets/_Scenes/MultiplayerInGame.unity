@@ -522,6 +522,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c0eb5346d944004cbe64f6df95c85e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SpawnerCanvas: {fileID: 650473509}
   ExitPopup: {fileID: 1976054930}
   TimerCounterGO: {fileID: 1695545756}
 --- !u!114 &108984796
