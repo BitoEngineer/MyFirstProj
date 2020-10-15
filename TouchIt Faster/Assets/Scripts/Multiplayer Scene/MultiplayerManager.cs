@@ -60,6 +60,8 @@ public class MultiplayerManager : MonoBehaviour
 
     void Start()
     {
+        GameObject.FindGameObjectWithTag("BackgroundMusic").GetComponent<BackgroundMusicScript>().PlayMusic();
+
         if (ConnectionHelper.HasInternet)
         {
             UpdateFriends();

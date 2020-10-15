@@ -9,6 +9,7 @@ TagManager:
   - checker
   - bomb
   - CanvasSpawner
+  - BackgroundMusic
   layers:
   - Default
   - TransparentFX

@@ -28,7 +28,7 @@ public class GameOverSinglePlayer : MonoBehaviour {
 
     public void OnBackClick()
     {
-        SceneManager.LoadScene("Main Menu");
+        SceneManager.LoadScene("Single Player Menu");
     }
 
     public void OnTryAgainClick()

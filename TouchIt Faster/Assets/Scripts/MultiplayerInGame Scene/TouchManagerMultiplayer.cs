@@ -57,6 +57,9 @@ public class TouchManagerMultiplayer : MonoBehaviour
     void Start()
     {
         Instance = this;
+        
+        GameObject.FindGameObjectWithTag("BackgroundMusic").GetComponent<BackgroundMusicScript>().PlayMusic();
+
         CountDownGO.GetComponent<MultiplayerCountDown>().StartCountDown(true);
         gameObject.AddComponent<AudioSource>();
         source.clip = CircleSound;

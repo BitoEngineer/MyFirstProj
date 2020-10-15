@@ -44,6 +44,8 @@ public class MainMenuManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        GameObject.FindGameObjectWithTag("BackgroundMusic").GetComponent<BackgroundMusicScript>().PlayMusic();
+
         Debug.Log("--------------------------------ZZZZZZZZZZZZZZZZZZZZZZZZZ-------------------------------");
         Debug.Log("TouchItFaster - MainMenuManager starting");
         //SetJoke();
