@@ -261,7 +261,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
         {
             var gameOverObj = p.DeserializeContent<GameOverDTO>();
 
-            PlayerContainer.Instance.UpdateMultiplayerStats(gameOverObj.MultiplayerHighestScore, gameOverObj.MaxHitsInRowMultiplayer, gameOverObj.TotalWins, gameOverObj.TotalLoses);
+            MyPlayer.Instance.UpdateMultiplayerStats(gameOverObj.MultiplayerHighestScore, gameOverObj.MaxHitsInRowMultiplayer, gameOverObj.TotalWins, gameOverObj.TotalLoses);
             gameEnded = true;
 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
@@ -280,7 +280,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
             var dto = p.DeserializeContent<PlayerLeftGame>();
             var gameOverObj = dto.GameOverDto;
 
-            PlayerContainer.Instance.UpdateMultiplayerStats(gameOverObj.MultiplayerHighestScore, gameOverObj.MaxHitsInRowMultiplayer, gameOverObj.TotalWins, gameOverObj.TotalLoses);
+            MyPlayer.Instance.UpdateMultiplayerStats(gameOverObj.MultiplayerHighestScore, gameOverObj.MaxHitsInRowMultiplayer, gameOverObj.TotalWins, gameOverObj.TotalLoses);
             gameEnded = true;
 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>

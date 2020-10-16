@@ -33,7 +33,7 @@ public class MultiplayerReturnBack : MonoBehaviour {
         ServerManager.Instance.Client.Send(URI.PlayerLeft, dto, (p) => 
         {
             var gameOverObj = p.DeserializeContent<GameOverDTO>();
-            PlayerContainer.Instance.UpdateMultiplayerStats(gameOverObj.MultiplayerHighestScore, gameOverObj.MaxHitsInRowMultiplayer, gameOverObj.TotalWins, gameOverObj.TotalLoses);
+            MyPlayer.Instance.UpdateMultiplayerStats(gameOverObj.MultiplayerHighestScore, gameOverObj.MaxHitsInRowMultiplayer, gameOverObj.TotalWins, gameOverObj.TotalLoses);
 
             UnityMainThreadDispatcher.Instance().Enqueue(() => SceneManager.LoadScene("Multiplayer"));
         });

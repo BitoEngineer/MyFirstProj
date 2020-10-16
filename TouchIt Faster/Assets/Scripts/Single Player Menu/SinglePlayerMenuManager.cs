@@ -1,14 +1,231 @@
-﻿using System.Collections;
+﻿using Assets.Scripts.Preloader;
+using Assets.Scripts.Utils;
+using Assets.Server.Models;
+using Assets.Server.Protocol;
+using MyFirstServ.Models.TouchItFaster;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SinglePlayerMenuManager : MonoBehaviour
 {
+
+    public GameObject HghestScoreText;
+    public GameObject MaxTapsText;
+    public GameObject TopPlayersList;
+    public GameObject NoConnectionImage;
+
+    public GameObject MessagePanel;
+
+    public GameObject UserGO;
+    public GameObject UserContainer;
+    public GameObject UserProfilePanel;
+
+    private Text UserProfilePanel_Name => UserProfilePanel.transform.Find("NameAndQuitLayoutGroup").transform.Find("NameText").GetComponent<Text>();
+    private Text UserProfilePanel_HighestScore => UserProfilePanel.transform.Find("StatsLayoutGroup").transform.Find("HighestScorePanel").transform.Find("HighestScoreText").GetComponent<Text>();
+    private Text UserProfilePanel_Taps => UserProfilePanel.transform.Find("StatsLayoutGroup").transform.Find("TapsLayoutGroup").transform.Find("TapsText").GetComponent<Text>();
+    private Button UserProfilePanel_Quit => UserProfilePanel.transform.Find("NameAndQuitLayoutGroup").transform.Find("QuitButton").GetComponent<Button>();
+    private Button UserProfilePanel_AddFriend => UserProfilePanel.transform.Find("ButtonsLayoutGroup").transform.Find("AddButton").GetComponent<Button>();
+    private Button UserProfilePanel_Unfriend => UserProfilePanel.transform.Find("ButtonsLayoutGroup").transform.Find("UnfriendButton").GetComponent<Button>();
+    private Button UserProfilePanel_Fight => UserProfilePanel.transform.Find("ButtonsLayoutGroup").transform.Find("FightButton").GetComponent<Button>();
+
+
+
+    private List<PlayerInfo> users = new List<PlayerInfo>();
+    private List<GameObject> usersGO = new List<GameObject>();
+    private bool usersUpdated = false;
+    private int rank = 999;
+
     void Start()
     {
-        //TODO request top 10        
+        var highestScore = PlayerPrefs.GetFloat(PlayerPrefsKeys.SINGLE_HIGHEST_SCORE_KEY);
+        HghestScoreText.GetComponent<Text>().text = highestScore == 0.0f ? "-" : highestScore.ToString("f0");
+
+        var maxTaps = PlayerPrefs.GetFloat(PlayerPrefsKeys.SINGLE_MAX_TAPS_KEY);
+        MaxTapsText.GetComponent<Text>().text = (maxTaps == 0.0f ? "-" : maxTaps.ToString("f0")) + " taps in row";
+
+        if (ConnectionHelper.HasInternet)
+        {
+            ServerManager.Instance.Client.Send(URI.GetTopFive, null, OnGetTopFive);
+        }
+        else
+        {
+            NoConnectionImage.SetActive(true);
+        }
     }
+
+    void Update()
+    {
+        if (usersUpdated && users.Any())
+        {
+            usersUpdated = false;
+            ShowUsersList();
+        }
+    }
+
+    private void OnGetTopFive(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            users.Clear();
+            var dto = p.DeserializeContent<TopFiveDto>();
+            users.AddRange(dto.TopFive);
+            rank = dto.PlayerRank;
+            if (dto.FriendsIds != null)
+            {
+                foreach (var friendId in dto.FriendsIds)
+                    MyPlayer.Instance.AddFriend(friendId);
+            }
+
+            usersUpdated = true;
+        }
+    }
+
+    private void ShowUsersList()
+    {
+        foreach (GameObject go in usersGO)
+        {
+            Destroy(go);
+        }
+
+        usersGO.Clear();
+
+        bool selfOnTop = false;
+
+        int position = 1;
+        foreach (PlayerInfo f in users.OrderByDescending(u => u.SinglePlayerHighestScore).ToArray())
+        {
+            GameObject go = Instantiate(UserGO, UserContainer.transform) as GameObject;
+            go.GetComponentInChildren<Text>().text = position + ". " + f.PlayerName;
+            ++position;
+            Button b = go.GetComponent<Button>();
+
+            if (f.ID == MyPlayer.Instance.Info.ID)
+            {
+                selfOnTop = true;
+                b.interactable = false;
+            }
+            else
+            {
+                string playerState = f.CurrentState == PlayerState.Offline ? "OfflineImage" : "OnlineImage";
+                go.transform.Find(playerState).gameObject.SetActive(true);
+
+                b.onClick.AddListener(() =>
+                {
+                    var isFriend = MyPlayer.Instance.IsFriendOf(f.ID);
+                    FillProfilePanel(f, isFriend);
+                });
+            }
+
+            usersGO.Add(go);
+        }
+
+        GameObject reticencias = Instantiate(UserGO, UserContainer.transform) as GameObject;
+        reticencias.GetComponentInChildren<Text>().text = "...";
+        reticencias.GetComponent<Button>().interactable = false;
+        usersGO.Add(reticencias);
+
+        if (!selfOnTop)
+        {
+            GameObject self = Instantiate(UserGO, UserContainer.transform) as GameObject;
+            self.GetComponentInChildren<Text>().text = rank + ". " + MyPlayer.Instance.Info.PlayerName;
+            self.GetComponent<Button>().interactable = false;
+            usersGO.Add(self);
+        }
+    }
+
+    private void FillProfilePanel(PlayerInfo f, bool isFriend)
+    {
+        UserProfilePanel_Name.text = f.PlayerName;
+        UserProfilePanel_HighestScore.text = f.SinglePlayerHighestScore.ToString();
+        UserProfilePanel_Taps.text = f.MaxHitsInRowSinglPlayer.ToString();
+        BuildProfilePanelButtons(f, isFriend);
+
+        UserProfilePanel_Quit.onClick.AddListener(() =>
+        {
+            UserProfilePanel.SetActive(false);
+        });
+
+        UserProfilePanel.transform.position = Input.mousePosition;
+        UserProfilePanel.SetActive(true);
+    }
+
+    //isFriend -> -1 = Friends not loaded
+    //isFriend -> 0 = false
+    //isFriend -> 1 = true
+    private void BuildProfilePanelButtons(PlayerInfo f, bool isFriend)
+    {
+        UserProfilePanel_Unfriend.onClick.RemoveAllListeners();
+        UserProfilePanel_Fight.onClick.RemoveAllListeners();
+        UserProfilePanel_AddFriend.onClick.RemoveAllListeners();
+
+        UserProfilePanel_Fight.gameObject.SetActive(false);
+        /* TODO
+        UserProfilePanel_Fight.gameObject.SetActive(f.CurrentState == PlayerState.Online);
+        UserProfilePanel_Fight.onClick.AddListener(() =>
+        {
+            ChallengeRequest(f.ID);
+        });
+        */
+
+        if (isFriend)
+        {
+            UserProfilePanel_AddFriend.gameObject.SetActive(false);
+            UserProfilePanel_Unfriend.gameObject.SetActive(true);
+            UserProfilePanel_Unfriend.onClick.AddListener(() =>
+            {
+                ServerManager.Instance.Client.Send(URI.Unfriend, f.ClientID, OnUnfriend);
+                UserProfilePanel.SetActive(false);
+            });
+        }
+        else
+        {
+            UserProfilePanel_AddFriend.gameObject.SetActive(true);
+            UserProfilePanel_Unfriend.gameObject.SetActive(false);
+            UserProfilePanel_AddFriend.onClick.AddListener(() =>
+            {
+                ServerManager.Instance.Client.Send(URI.AddFriend, f.ClientID, OnAddFriend);
+                UserProfilePanel.SetActive(false);
+            });
+        }
+    }
+
+    private void OnUnfriend(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            PlayerInfo removed = p.DeserializeContent<PlayerInfo>();
+            MyPlayer.Instance.RemoveFriend(removed.ID);
+            usersUpdated = true;
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Ye that boy was kicked out!", 3f, MessagePanel)));
+        }
+        else
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Couldn't delete user.", 3f, MessagePanel)));
+        }
+    }
+
+    private void OnAddFriend(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            PlayerInfo added = p.DeserializeContent<PlayerInfo>();
+            MyPlayer.Instance.AddFriend(added.ID);
+
+            usersUpdated = true;
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Uuuuuh so needy.", 2f, MessagePanel)));
+        }
+        else
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Couldn't add user.", 2f, MessagePanel)));
+        }
+
+    }
+
 
     public void OnStartClick()
     {

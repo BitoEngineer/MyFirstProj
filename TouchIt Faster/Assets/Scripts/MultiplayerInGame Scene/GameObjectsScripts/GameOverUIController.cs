@@ -43,7 +43,7 @@ public class GameOverUIController : MonoBehaviour
         bool playerLost = gameOver.OpponentPoints > gameOver.Points;
 
         FillStatsPanel(playerLost ? winnerpanel : loserpanel, GameContainer.OpponentName, gameOver.OpponentPoints, gameOver.OpponentTimePoints, gameOver.OpponentTapsInARow);
-        FillStatsPanel(playerLost ? loserpanel : winnerpanel, PlayerContainer.Instance.Info.PlayerName, gameOver.Points, gameOver.TimePoints, gameOver.TapsInARow);
+        FillStatsPanel(playerLost ? loserpanel : winnerpanel, MyPlayer.Instance.Info.PlayerName, gameOver.Points, gameOver.TimePoints, gameOver.TapsInARow);
     }
 
     private void FillStatsPanel(Transform panel, string playername, int points, int extraPoints, int hitInRow)
@@ -76,7 +76,7 @@ public class GameOverUIController : MonoBehaviour
     {
         ChallengeRequest cr = new ChallengeRequest()
         {
-            RequesterID = PlayerContainer.Instance.Info.ID,
+            RequesterID = MyPlayer.Instance.Info.ID,
             RequestedID = GameContainer.OpponentID
         };
         ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, RevengeReply);

@@ -33,7 +33,7 @@ public class PlayerLeftUIController : MonoBehaviour
     public void PlayerLeftUpdate(GameOverDTO gameOver)
     {
         var winnerpanel = transform.Find("WinnerPanel");
-        FillStatsPanel(winnerpanel, PlayerContainer.Instance.Info.PlayerName, gameOver.OpponentPoints, gameOver.OpponentTimePoints, gameOver.OpponentTapsInARow);
+        FillStatsPanel(winnerpanel, MyPlayer.Instance.Info.PlayerName, gameOver.OpponentPoints, gameOver.OpponentTimePoints, gameOver.OpponentTapsInARow);
 
         var loserPanel = transform.Find("LoserPanel");
         var loserText = loserPanel.Find("StatsAndNamePanel/NameText").GetComponent<Text>();
@@ -70,7 +70,7 @@ public class PlayerLeftUIController : MonoBehaviour
     {
         ChallengeRequest cr = new ChallengeRequest()
         {
-            RequesterID = PlayerContainer.Instance.Info.ID,
+            RequesterID = MyPlayer.Instance.Info.ID,
             RequestedID = GameContainer.OpponentID
         };
         ServerManager.Instance.Client.Send(URI.ChallengeRequest, cr, RevengeReply);

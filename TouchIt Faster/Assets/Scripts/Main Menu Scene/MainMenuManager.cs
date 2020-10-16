@@ -33,8 +33,8 @@ public class MainMenuManager : MonoBehaviour
 
     private static bool isAlreadyLoggedIn = false;
 
-    //public const string IP = "192.168.1.171";////
-    public const string IP = "touchitfaster.westeurope.cloudapp.azure.com";//"40.115.22.55";// 
+    public const string IP = "192.168.1.171";////
+    //public const string IP = "touchitfaster.westeurope.cloudapp.azure.com";//"40.115.22.55";// 
     public const int PORT = 2222;
 
     private readonly string ClientID = "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com";
@@ -77,7 +77,7 @@ public class MainMenuManager : MonoBehaviour
         else
         {
 
-            var parsedPlayerInfo = PlayerPrefs.GetString(PlayerContainer.PLAYER_INFO_KEY);
+            var parsedPlayerInfo = PlayerPrefs.GetString(PlayerPrefsKeys.PLAYER_INFO_KEY);
             var playerInfo = JsonConvert.DeserializeObject<PlayerInfo>(parsedPlayerInfo);
             LoginReply(new JsonPacket(null, URI.Login.ToString(), playerInfo)
             {
@@ -191,7 +191,7 @@ public class MainMenuManager : MonoBehaviour
 
             Debug.Log("TouchItFaster - Start with Server done");
             PlayerInfo pi = p.DeserializeContent<PlayerInfo>();
-            PlayerContainer.Instance.SetPlayerInfo(pi);
+            MyPlayer.Instance.SetPlayerInfo(pi);
 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {

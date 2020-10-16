@@ -22,7 +22,8 @@ namespace Assets.Server.Protocol
 	    GameOver,
 	    Revenge,
         PlayerLeft,
-        GetOnlinePlayers
+        GetOnlinePlayers,
+        GetTopFive,
     }
 }
 

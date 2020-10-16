@@ -19,7 +19,7 @@ public class PlayerStatsUIController : MonoBehaviour
     void Start ()
     {
         Instance = this;
-        NameText.GetComponent<Text>().text = PlayerContainer.Instance.Info.PlayerName;
+        NameText.GetComponent<Text>().text = MyPlayer.Instance.Info.PlayerName;
         points = 0;
     }
 

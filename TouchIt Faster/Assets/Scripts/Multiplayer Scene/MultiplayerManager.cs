@@ -64,7 +64,7 @@ public class MultiplayerManager : MonoBehaviour
 
         if (ConnectionHelper.HasInternet)
         {
-            UpdateFriends();
+            GetFriends();
         }
         else
         {
@@ -89,11 +89,11 @@ public class MultiplayerManager : MonoBehaviour
         PlayerNameText.gameObject.SetActive(true);
         EditNameButton.gameObject.SetActive(true);
 
-        PlayerNameText.GetComponent<Text>().text = PlayerContainer.Instance.Info.PlayerName;
-        PlayerHighestScoreText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.MultiplayerHighestScore;
-        PlayerWinsText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.Wins + " wins";
-        PlayerLosesText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.Loses + " loses";
-        PlayerTapsText.GetComponent<Text>().text = "" + PlayerContainer.Instance.Info.MaxHitsInRowMultiplayer + " taps in a row";
+        PlayerNameText.GetComponent<Text>().text = Assets.Server.Models.MyPlayer.Instance.Info.PlayerName;
+        PlayerHighestScoreText.GetComponent<Text>().text = "" + Assets.Server.Models.MyPlayer.Instance.Info.MultiplayerHighestScore;
+        PlayerWinsText.GetComponent<Text>().text = "" + Assets.Server.Models.MyPlayer.Instance.Info.Wins + " wins";
+        PlayerLosesText.GetComponent<Text>().text = "" + Assets.Server.Models.MyPlayer.Instance.Info.Loses + " loses";
+        PlayerTapsText.GetComponent<Text>().text = "" + Assets.Server.Models.MyPlayer.Instance.Info.MaxHitsInRowMultiplayer + " taps in a row";
     }
 
     void Update()
@@ -168,7 +168,7 @@ public class MultiplayerManager : MonoBehaviour
         }
         else
         {
-            foreach (PlayerInfo pi in SearchedUsers.Where(u => u.ID != PlayerContainer.Instance.Info.ID).ToArray())
+            foreach (PlayerInfo pi in SearchedUsers.Where(u => u.ID != MyPlayer.Instance.Info.ID).ToArray())
             {
                 GameObject go = Instantiate(FriendGO, FriendsContainer.transform) as GameObject;
                 go.GetComponentInChildren<Text>().text = pi.PlayerName;
@@ -245,12 +245,12 @@ public class MultiplayerManager : MonoBehaviour
         }
     }
 
-    public void UpdateFriends()
+    public void GetFriends()
     {
-        ServerManager.Instance.Client.Send(URI.Friends, null, RequestFriendsNamesReply);
+        ServerManager.Instance.Client.Send(URI.Friends, null, OnGetFriends);
     }
 
-    private void RequestFriendsNamesReply(JsonPacket p)
+    private void OnGetFriends(JsonPacket p)
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
@@ -258,7 +258,11 @@ public class MultiplayerManager : MonoBehaviour
             try
             {
                 ArrayWrapper mi = p.DeserializeContent<ArrayWrapper>();
-                Friends.AddRange(mi.GetArray<PlayerInfo>());
+                var friends = mi.GetArray<PlayerInfo>();
+                Friends.AddRange(friends);
+
+                Assets.Server.Models.MyPlayer.Instance.SetFriends(friends.Select(f => f.ID).ToList());
+
                 FriendsUpdated = true;
             }
             catch (Exception e)
@@ -328,7 +332,7 @@ public class MultiplayerManager : MonoBehaviour
     {
         ChallengeRequest cr = new ChallengeRequest()
         {
-            RequesterID = PlayerContainer.Instance.Info.ID,
+            RequesterID = Assets.Server.Models.MyPlayer.Instance.Info.ID,
             RequestedID = requestedId
 
         };
@@ -375,6 +379,8 @@ public class MultiplayerManager : MonoBehaviour
             PlayerInfo removed = p.DeserializeContent<PlayerInfo>();
             Friends.RemoveAll(pl => pl.ClientID.Equals(removed.ClientID));
             FriendsUpdated = true;
+            MyPlayer.Instance.RemoveFriend(removed.ID);
+
             UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Ye that boy was kicked out!", 3f, MessagePanel)));
         }
         else
@@ -389,6 +395,7 @@ public class MultiplayerManager : MonoBehaviour
         {
             PlayerInfo added = p.DeserializeContent<PlayerInfo>();
             Friends.Add(added);
+            MyPlayer.Instance.AddFriend(added.ID);
 
             FriendsUpdated = true;
             UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Uuuuuh so needy.", 2f, MessagePanel)));
@@ -572,7 +579,7 @@ public class MultiplayerManager : MonoBehaviour
         else if (p.ReplyStatus == ReplyStatus.OK)
         {
             var pInfo = p.DeserializeContent<PlayerInfo>();
-            PlayerContainer.Instance.SetPlayerInfo(pInfo);
+            Assets.Server.Models.MyPlayer.Instance.SetPlayerInfo(pInfo);
 
             UnityMainThreadDispatcher.Instance().Enqueue((Action)(() =>
             {

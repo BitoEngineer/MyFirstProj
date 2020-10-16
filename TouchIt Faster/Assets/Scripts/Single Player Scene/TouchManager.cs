@@ -96,7 +96,7 @@ public class TouchManager : MonoBehaviour
     {
         GameObject.FindGameObjectWithTag("BackgroundMusic").GetComponent<BackgroundMusicScript>().PlayMusic();
 
-        HighestPointsText.GetComponent<Text>().text = PlayerContainer.Instance.Info?.SinglePlayerHighestScore.ToString() ?? "-";
+        HighestPointsText.GetComponent<Text>().text = PlayerPrefs.GetFloat(PlayerPrefsKeys.SINGLE_HIGHEST_SCORE_KEY).ToString("f0"); //TODO PlayerContainer.Instance.Info?.SinglePlayerHighestScore.ToString() ?? "-";
 
         Circles[0] = Circle_Black_GO;
         Circles[1] = Circle_Red_GO;
@@ -158,7 +158,7 @@ public class TouchManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        Game.SetScoreOnPlayerPrefs();
+        Game.End();
     }
 
     private bool IsToSpawnCircle(float time) => (time - LAST_CIRCLE_SPAWNED_AGE_s) > CIRCLE_SPAWN_s;
@@ -256,7 +256,7 @@ public class TouchManager : MonoBehaviour
     {
         Vector3 v = gameObject.transform.position;
 
-        Game.ResetTapsInRow();
+        Game.UpdateTapsInRow();
 
         AliveBombs.Remove(gameObject);
         Destroy(gameObject);
@@ -378,7 +378,7 @@ public class TouchManager : MonoBehaviour
 
     private void GameOver()
     {
-        Game.SetScoreOnPlayerPrefs();
+        Game.End();
         Pause();
 
         GameOverPanel.SetActive(true);
