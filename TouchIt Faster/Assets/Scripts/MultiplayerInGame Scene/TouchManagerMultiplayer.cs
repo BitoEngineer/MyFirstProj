@@ -230,11 +230,11 @@ public class TouchManagerMultiplayer : MonoBehaviour
     {
         GameObject square_go = Instantiate(SpecialCircleGO, v, Quaternion.identity) as GameObject;
         square_go.transform.SetParent(SpawnerCanvas.transform, false);
-        Square s = new Square { Square_GO = square_go, Age_s = Time.time };
-        Vector3 scaled = s.Square_GO.transform.localScale;
+        SpecialCircle s = new SpecialCircle { Special_GO = square_go, Age_s = Time.time };
+        Vector3 scaled = s.Special_GO.transform.localScale;
         scaled.x = CircleSize.x / 2;
         scaled.y = CircleSize.y / 2;
-        s.Square_GO.transform.localScale = scaled;
+        s.Special_GO.transform.localScale = scaled;
         square_go.GetComponent<SpecialCircleMultiplayer>().Id = id;
 
         AliveObjects.Add(id, square_go);

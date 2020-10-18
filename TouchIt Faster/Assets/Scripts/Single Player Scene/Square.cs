@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Square {
+public class SpecialCircle {
 
-    public GameObject Square_GO { get; set; }
+    public GameObject Special_GO { get; set; }
     public float Age_s { get; set; }
 }

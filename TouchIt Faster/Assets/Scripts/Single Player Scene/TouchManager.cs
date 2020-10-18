@@ -30,7 +30,7 @@ public class TouchManager : MonoBehaviour
 
     //SQUARE
     public GameObject SpecialCircleGO;
-    private Dictionary<GameObject, Square> AliveSpecialCircles = new Dictionary<GameObject, Square>();
+    private Dictionary<GameObject, SpecialCircle> AliveSpecialCircles = new Dictionary<GameObject, SpecialCircle>();
 
     //DATA
     public int Lifes = 3;
@@ -80,14 +80,14 @@ public class TouchManager : MonoBehaviour
     private float CIRCLE_SPAWN_LIMIT_s = 0.3f;
 
     //Lifetime
-    public float SPECIAL_CIRCLE_LIFETIME_s = 2f;
+    public float SPECIAL_CIRCLE_LIFETIME_s = 5f;
     private float CIRCLE_LIFETIME_s = 1.5f;
     private float BOMB_LIFE_TIME_s = 2f;
 
     //Probability to spawn
     private float SPAWN_BOMB_PROBABILITY = 0.4f;
     private float SPAWN_BOMB_PROBABILITY_INCREMENT = 0.2f;
-    public float SPAWN_SPECIAL_CIRCLE_PROBABILITY = 0.3f;
+    private float SPAWN_SPECIAL_CIRCLE_PROBABILITY = 0.3f;
 
     //Maximum circles in game
     private float MAX_CIRCLES = 10;
@@ -130,7 +130,7 @@ public class TouchManager : MonoBehaviour
 
             float time = Time.time;
             SpawnObjects(time);
-            CheckSquaresToDestroy(time);
+            //CheckSpecialCirclesToDestroy(Time.time); //TODO BUG- destroying instantly
             CheckBombsToDestroy(time);
             CheckCirclesToDestroy(time);
             SetAliveCirclesText();
@@ -169,7 +169,7 @@ public class TouchManager : MonoBehaviour
         if (IsToSpawnCircle(time))
         {
             GenerateCircles();
-            GenerateSquare();
+            GenerateSpecialCircle();
         }
 
         if (IsToSpawnBomb(time))
@@ -188,15 +188,16 @@ public class TouchManager : MonoBehaviour
         return false;
     }
 
-    private void CheckSquaresToDestroy(float time)
+    private void CheckSpecialCirclesToDestroy(float time)
     {
-        foreach (Square s in AliveSpecialCircles.Values)
+        foreach (SpecialCircle s in AliveSpecialCircles.Values)
         {
-            if (time - s.Age_s > SPECIAL_CIRCLE_LIFETIME_s)
+            if ((time - s.Age_s) > SPECIAL_CIRCLE_LIFETIME_s)
             {
-                GameObject square = s.Square_GO;
-                AliveBombs.Remove(square);
-                Destroy(square);
+                GameObject specialCircle = s.Special_GO;
+                AliveSpecialCircles.Remove(specialCircle);
+                Destroy(specialCircle);
+                //GenerateBomb(s.Position); //TODO
             }
         }
     }
@@ -285,7 +286,7 @@ public class TouchManager : MonoBehaviour
         }
     }
 
-    private bool GenerateSquare()
+    private bool GenerateSpecialCircle()
     {
         float randomSquare = Random.Range(0f, 100f) / 100f;
         if (randomSquare <= SPAWN_SPECIAL_CIRCLE_PROBABILITY)
@@ -294,14 +295,15 @@ public class TouchManager : MonoBehaviour
             Vector3 v = GetVallidCoords(bc.size.x * 100);
             GameObject square_go = Instantiate(SpecialCircleGO, v, Quaternion.identity) as GameObject;
             square_go.transform.SetParent(SpawnerCanvas.transform, false);
-            Square s = new Square { Square_GO = square_go, Age_s = Time.time };
-            Vector3 scaled = s.Square_GO.transform.localScale;
+            SpecialCircle s = new SpecialCircle { Special_GO = square_go, Age_s = Time.time };
+            Vector3 scaled = s.Special_GO.transform.localScale;
             scaled.x = CircleSize.x / 2;
             scaled.y = CircleSize.y / 2;
-            s.Square_GO.transform.localScale = scaled;
+            s.Special_GO.transform.localScale = scaled;
             AliveSpecialCircles.Add(square_go, s);
             return true;
         }
+
         return false;
     }
 

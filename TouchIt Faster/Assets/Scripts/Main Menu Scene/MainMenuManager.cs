@@ -40,10 +40,15 @@ public class MainMenuManager : MonoBehaviour
     private readonly string ClientID = "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com";
     //private readonly string Jokes_API_URL = "http://geek-jokes.sameerkumar.website/api";
 
+    private int singlePlayerHighestScore = 0;
+    private int singlePlayerTapsInRow = 0;
 
     // Use this for initialization
     void Start()
     {
+        singlePlayerHighestScore = (int)PlayerPrefs.GetFloat(PlayerPrefsKeys.SINGLE_HIGHEST_SCORE_KEY);
+        singlePlayerTapsInRow = (int)PlayerPrefs.GetFloat(PlayerPrefsKeys.SINGLE_MAX_TAPS_KEY);
+
         GameObject.FindGameObjectWithTag("BackgroundMusic").GetComponent<BackgroundMusicScript>().PlayMusic();
 
         Debug.Log("--------------------------------ZZZZZZZZZZZZZZZZZZZZZZZZZ-------------------------------");
@@ -79,7 +84,7 @@ public class MainMenuManager : MonoBehaviour
 
             var parsedPlayerInfo = PlayerPrefs.GetString(PlayerPrefsKeys.PLAYER_INFO_KEY);
             var playerInfo = JsonConvert.DeserializeObject<PlayerInfo>(parsedPlayerInfo);
-            LoginReply(new JsonPacket(null, URI.Login.ToString(), playerInfo)
+            OnLogin(new JsonPacket(null, URI.Login.ToString(), playerInfo)
             {
                 ReplyStatus = ReplyStatus.OK
             });
@@ -179,11 +184,17 @@ public class MainMenuManager : MonoBehaviour
         //Google Client Id: PlayGamesPlatform.Instance.localUser.id
         ServerManager.Instance.Client.Start(IP, PORT, clientId, () =>
         {
-            ServerManager.Instance.Client.Send(URI.Login, new Handshake(), LoginReply, null, null, null, 5000);
+            var loginDto = new SinglePlayerStatsDto()
+            {
+                MaxHitsInRowSinglePlayer = singlePlayerTapsInRow,
+                SinglePlayerHighestScore = singlePlayerHighestScore
+            };
+
+            ServerManager.Instance.Client.Send(URI.Login, loginDto, OnLogin, null, null, null, 5000);
         });
     }
 
-    private void LoginReply(JsonPacket p)
+    private void OnLogin(JsonPacket p)
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
