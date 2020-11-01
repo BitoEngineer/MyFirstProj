@@ -38,6 +38,8 @@ public class MultiplayerManager : MonoBehaviour
     public GameObject DeclineButton;
     public GameObject NumPlayersOnlineText;
 
+    public GameObject DogSound;
+
     //Stats panel
     public GameObject PlayerHighestScoreText;
     public GameObject PlayerWinsText;
@@ -60,7 +62,7 @@ public class MultiplayerManager : MonoBehaviour
 
     void Start()
     {
-        GameObject.FindGameObjectWithTag("BackgroundMusic").GetComponent<BackgroundMusicScript>().PlayMusic();
+        GameObject.FindGameObjectWithTag("BackgroundMusic")?.GetComponent<BackgroundMusicScript>()?.PlayMusic();
 
         if (ConnectionHelper.HasInternet)
         {
@@ -454,6 +456,12 @@ public class MultiplayerManager : MonoBehaviour
         {
             ChallengeRequest cr = p.DeserializeContent<ChallengeRequest>();
             BuildChallengeRequestPanel(cr);
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                DogSound.SetActive(true);
+                DogSound.GetComponent<AudioSource>().Play();
+            });
         }
     }
 

@@ -20,9 +20,18 @@ public class SpecialCircleMultiplayer : MonoBehaviour {
         //PatxauText = GameObject.Find("PatxauText").GetComponent<Text>();
     }
 
+    private void PlaySound()
+    {
+        var audioSource = GetComponent<AudioSource>();
+        AudioSource.PlayClipAtPoint(audioSource.clip, transform.position, 1f);
+    }
+
+
     private void OnMouseDown()
     {
+        PlaySound();
         TouchManagerMultiplayer.Instance.DeleteById(Id);
+
         //if (PlayerInGameContainer.Instance.CurrTapsInARow > 5)
         //{
         //    UnityMainThreadDispatcher.Instance().Enqueue(() => 
@@ -32,6 +41,7 @@ public class SpecialCircleMultiplayer : MonoBehaviour {
         //        StartCoroutine(UIUtils.ShowMessageInText("Hell Yeah!!", 0.5f, PatxauText));
         //    });
         //}
+
         ServerManager.Instance.Client.Send(URI.DeleteObject, new DeleteObject() { ChallengeID = GameContainer.CurrentGameId, ObjectID = Id }, OnObjectDeletion);
     }
 

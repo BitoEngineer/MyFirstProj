@@ -19,8 +19,16 @@ public class CircleMultiplayer : MonoBehaviour {
         //PatxauText = GameObject.Find("PatxauText").GetComponent<Text>();
     }
 
+    private void PlaySound()
+    {
+        var audioSource = GetComponent<AudioSource>();
+        AudioSource.PlayClipAtPoint(audioSource.clip, transform.position, 1f);
+    }
+
+
     private void OnMouseDown()
     {
+        PlaySound();
         TouchManagerMultiplayer.Instance.DeleteById(Id);
         //if (PlayerInGameContainer.Instance.CurrTapsInARow > 5)
         //{

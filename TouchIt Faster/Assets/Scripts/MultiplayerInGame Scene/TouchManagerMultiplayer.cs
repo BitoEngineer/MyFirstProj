@@ -57,8 +57,14 @@ public class TouchManagerMultiplayer : MonoBehaviour
     void Start()
     {
         Instance = this;
-        
-        GameObject.FindGameObjectWithTag("BackgroundMusic").GetComponent<BackgroundMusicScript>().PlayMusic();
+
+        var backgroundMusic = GameObject.FindGameObjectWithTag("BackgroundMusic");
+        backgroundMusic?.GetComponent<BackgroundMusicScript>()?.PlayMusic();
+        var audioSOurce = backgroundMusic?.GetComponent<AudioSource>();
+        if (audioSOurce != null)
+        {
+            audioSOurce.volume = 0.1f;
+        }
 
         CountDownGO.GetComponent<MultiplayerCountDown>().StartCountDown(true);
         gameObject.AddComponent<AudioSource>();

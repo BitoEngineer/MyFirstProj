@@ -49,7 +49,7 @@ public class MainMenuManager : MonoBehaviour
         singlePlayerHighestScore = (int)PlayerPrefs.GetFloat(PlayerPrefsKeys.SINGLE_HIGHEST_SCORE_KEY);
         singlePlayerTapsInRow = (int)PlayerPrefs.GetFloat(PlayerPrefsKeys.SINGLE_MAX_TAPS_KEY);
 
-        GameObject.FindGameObjectWithTag("BackgroundMusic").GetComponent<BackgroundMusicScript>().PlayMusic();
+        GameObject.FindGameObjectWithTag("BackgroundMusic")?.GetComponent<BackgroundMusicScript>()?.PlayMusic();
 
         Debug.Log("--------------------------------ZZZZZZZZZZZZZZZZZZZZZZZZZ-------------------------------");
         Debug.Log("TouchItFaster - MainMenuManager starting");
@@ -133,7 +133,7 @@ public class MainMenuManager : MonoBehaviour
 
         if (sceneName == "Multiplayer" && !isAlreadyLoggedIn)
         {
-            var errorMessage = "F*ck, authentication didn't complete with success";
+            var errorMessage = "F*ck, something really bad hapened :O";
             Debug.Log(errorMessage);
             UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel(errorMessage, 2f, MessagePanel)));
             return;

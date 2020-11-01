@@ -27,8 +27,12 @@ public class BombMultiplayer : MonoBehaviour
         //PatxauText = GameObject.Find("PatxauText").GetComponent<Text>();
     }
 
+    private bool playSoundOnDestroy = false;
+
+
     private void OnMouseDown()
     {
+        playSoundOnDestroy = true;
         TouchManagerMultiplayer.Instance.DeleteById(Id);
 
         //PatxauText.fontSize = 25;
@@ -49,11 +53,18 @@ public class BombMultiplayer : MonoBehaviour
 
     private void OnDestroy()
     {
-        Vector3 v = gameObject.transform.position;
-        GameObject anim = Instantiate(BombExplosion, v, Quaternion.identity);
-        anim.transform.SetParent(transform.parent);
-        Destroy(anim, 0.8f);
-        source.PlayOneShot(BombSound);
+        if (playSoundOnDestroy)
+        {
+            var audioSource = GetComponent<AudioSource>();
+            audioSource.volume = 1; //TODO está a dar bué baixinho madafaker
+            AudioSource.PlayClipAtPoint(audioSource.clip, transform.position, 1f);
+
+            Vector3 v = gameObject.transform.position;
+            GameObject anim = Instantiate(BombExplosion, v, Quaternion.identity);
+            anim.transform.SetParent(transform.parent);
+            Destroy(anim, 0.8f);
+            //source.PlayOneShot(BombSound);
+        }
     }
 }
 

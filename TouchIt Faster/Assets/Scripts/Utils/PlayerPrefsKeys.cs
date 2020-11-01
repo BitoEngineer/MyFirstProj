@@ -8,6 +8,8 @@ namespace Assets.Scripts.Utils
 {
     public static class PlayerPrefsKeys
     {
+        public const string LAST_BACKGROUND_MUSIC_LOOP = "B";
+
         public const string SINGLE_HIGHEST_SCORE_KEY = "highest_score";
         public const string SINGLE_MAX_TAPS_KEY = "max_taps";
         public const string PLAYER_INFO_KEY = "player_info";

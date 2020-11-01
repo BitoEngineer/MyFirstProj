@@ -80,12 +80,12 @@ public class TouchManager : MonoBehaviour
     private float CIRCLE_SPAWN_LIMIT_s = 0.3f;
 
     //Lifetime
-    public float SPECIAL_CIRCLE_LIFETIME_s = 5f;
+    private float SPECIAL_CIRCLE_LIFETIME_s = 1f;
     private float CIRCLE_LIFETIME_s = 1.5f;
     private float BOMB_LIFE_TIME_s = 2f;
 
     //Probability to spawn
-    private float SPAWN_BOMB_PROBABILITY = 0.4f;
+    private float SPAWN_BOMB_PROBABILITY = 0.6f;
     private float SPAWN_BOMB_PROBABILITY_INCREMENT = 0.2f;
     private float SPAWN_SPECIAL_CIRCLE_PROBABILITY = 0.3f;
 
@@ -94,7 +94,13 @@ public class TouchManager : MonoBehaviour
 
     void Start()
     {
-        GameObject.FindGameObjectWithTag("BackgroundMusic").GetComponent<BackgroundMusicScript>().PlayMusic();
+        var backgroundMusic = GameObject.FindGameObjectWithTag("BackgroundMusic");
+        backgroundMusic?.GetComponent<BackgroundMusicScript>()?.PlayMusic();
+        var audioSOurce = backgroundMusic?.GetComponent<AudioSource>();
+        if(audioSOurce != null)
+        {
+            audioSOurce.volume = 0.1f;
+        }
 
         HighestPointsText.GetComponent<Text>().text = PlayerPrefs.GetFloat(PlayerPrefsKeys.SINGLE_HIGHEST_SCORE_KEY).ToString("f0"); //TODO PlayerContainer.Instance.Info?.SinglePlayerHighestScore.ToString() ?? "-";
 
@@ -130,7 +136,7 @@ public class TouchManager : MonoBehaviour
 
             float time = Time.time;
             SpawnObjects(time);
-            //CheckSpecialCirclesToDestroy(Time.time); //TODO BUG- destroying instantly
+            CheckSpecialCirclesToDestroy(time); //TODO BUG- destroying instantly
             CheckBombsToDestroy(time);
             CheckCirclesToDestroy(time);
             SetAliveCirclesText();
@@ -197,7 +203,7 @@ public class TouchManager : MonoBehaviour
                 GameObject specialCircle = s.Special_GO;
                 AliveSpecialCircles.Remove(specialCircle);
                 Destroy(specialCircle);
-                //GenerateBomb(s.Position); //TODO
+                GenerateBomb(specialCircle.transform.position); 
             }
         }
     }
@@ -296,10 +302,12 @@ public class TouchManager : MonoBehaviour
             GameObject square_go = Instantiate(SpecialCircleGO, v, Quaternion.identity) as GameObject;
             square_go.transform.SetParent(SpawnerCanvas.transform, false);
             SpecialCircle s = new SpecialCircle { Special_GO = square_go, Age_s = Time.time };
+            
             Vector3 scaled = s.Special_GO.transform.localScale;
             scaled.x = CircleSize.x / 2;
             scaled.y = CircleSize.y / 2;
             s.Special_GO.transform.localScale = scaled;
+
             AliveSpecialCircles.Add(square_go, s);
             return true;
         }
@@ -309,7 +317,7 @@ public class TouchManager : MonoBehaviour
 
     public void SquareTouched(GameObject go)
     {
-        source.PlayOneShot(SquareSound);
+        //source.PlayOneShot(SquareSound);
         Vector3 v = WorldToCanvasCoords(go.transform.position, SpawnerCanvasRect);
         AliveSpecialCircles.Remove(go);
 
@@ -357,7 +365,7 @@ public class TouchManager : MonoBehaviour
         ++totalClicks;
         Game.IncreasePoints(MAX_POINTS_CIRCLE);
 
-        source.PlayOneShot(CircleSound);
+        //source.PlayOneShot(CircleSound);
 
         PointsText.text = Game.Points.ToString("f0");
         Destroy(AliveCircles[destroyedCircle].counter);

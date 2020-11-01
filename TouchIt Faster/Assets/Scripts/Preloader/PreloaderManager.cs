@@ -1,4 +1,5 @@
-﻿using Firebase;
+﻿using Assets.Scripts.Utils;
+using Firebase;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using UnityEngine;
@@ -6,6 +7,9 @@ using UnityEngine.SceneManagement;
 
 public class PreloaderManager : MonoBehaviour
 {
+    public GameObject BackgroundMusicLoopA;
+    public GameObject BackgroundMusicLoopB;
+
 
     bool t = true;
     public FirebaseApp app;
@@ -16,11 +20,22 @@ public class PreloaderManager : MonoBehaviour
         Debug.Log("TouchItFaster - PreloaderManager createad");
 
         DontDestroyOnLoad(gameObject);
+        PlayerBackgroundMusic();
 
         CheckIfGooglePlayServicesIsUpToDate();
         PlayGamesPlatformConfig();
 
         Debug.Log("--------------------------------XXXXXXXXXXXXXXXXXXXXXXXXX-------------------------------");
+    }
+
+    private void PlayerBackgroundMusic()
+    {
+        var lastLoopPlayed = PlayerPrefs.GetString(PlayerPrefsKeys.LAST_BACKGROUND_MUSIC_LOOP) ?? "A";
+
+        var playLoopA = lastLoopPlayed == "B";
+        BackgroundMusicLoopA.SetActive(playLoopA);
+        BackgroundMusicLoopB.SetActive(!playLoopA);
+        PlayerPrefs.SetString(PlayerPrefsKeys.LAST_BACKGROUND_MUSIC_LOOP, playLoopA ? "A" : "B");
     }
 
     private void PlayGamesPlatformConfig()
