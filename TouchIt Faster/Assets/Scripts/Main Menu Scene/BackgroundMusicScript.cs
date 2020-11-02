@@ -14,7 +14,7 @@ public class BackgroundMusicScript : MonoBehaviour
     public void PlayMusic()
     {
         if (_audioSource.isPlaying) return;
-        _audioSource.Play();
+        //_audioSource.Play(); //Release 
     }
 
     public void StopMusic()

@@ -32,11 +32,14 @@ public class SinglePlayerMenuManager : MonoBehaviour
     private Button UserProfilePanel_Unfriend => UserProfilePanel.transform.Find("ButtonsLayoutGroup").transform.Find("UnfriendButton").GetComponent<Button>();
     private Button UserProfilePanel_Fight => UserProfilePanel.transform.Find("ButtonsLayoutGroup").transform.Find("FightButton").GetComponent<Button>();
 
+    private List<PlayerInfo> top5Uusers = new List<PlayerInfo>();
+    private List<GameObject> top5UsersGO = new List<GameObject>();
 
+    private List<GameObject> SearchedUsersGO = new List<GameObject>();
+    private List<PlayerInfo> SearchedUsers = new List<PlayerInfo>();
+    private bool IsToUpdateSearchedUsersList = false;
 
-    private List<PlayerInfo> users = new List<PlayerInfo>();
-    private List<GameObject> usersGO = new List<GameObject>();
-    private bool usersUpdated = false;
+    private bool IsToUpdateTop5List = false;
     private int rank = 999;
 
     void Start()
@@ -59,20 +62,28 @@ public class SinglePlayerMenuManager : MonoBehaviour
 
     void Update()
     {
-        if (usersUpdated && users.Any())
+        if (IsToUpdateTop5List && top5Uusers.Any())
         {
-            usersUpdated = false;
-            ShowUsersList();
+            IsToUpdateTop5List = false;
+            RenderTop5UsersList();
+        }
+
+        if (IsToUpdateSearchedUsersList)
+        {
+            IsToUpdateSearchedUsersList = false;
+            RenderSearchedUsersList();
         }
     }
+
+    #region Top best 5
 
     private void OnGetTopFive(JsonPacket p)
     {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
-            users.Clear();
+            top5Uusers.Clear();
             var dto = p.DeserializeContent<TopFiveDto>();
-            users.AddRange(dto.TopFive);
+            top5Uusers.AddRange(dto.TopFive);
             rank = dto.PlayerRank;
             if (dto.FriendsIds != null)
             {
@@ -80,23 +91,18 @@ public class SinglePlayerMenuManager : MonoBehaviour
                     MyPlayer.Instance.AddFriend(friendId);
             }
 
-            usersUpdated = true;
+            IsToUpdateTop5List = true;
         }
     }
 
-    private void ShowUsersList()
+    private void RenderTop5UsersList()
     {
-        foreach (GameObject go in usersGO)
-        {
-            Destroy(go);
-        }
-
-        usersGO.Clear();
+        CleanUpUsers();
+        CleanUpTop5();
 
         bool selfOnTop = false;
-
         int position = 1;
-        foreach (PlayerInfo f in users.OrderByDescending(u => u.SinglePlayerHighestScore).ToArray())
+        foreach (PlayerInfo f in top5Uusers.OrderByDescending(u => u.SinglePlayerHighestScore).ToArray())
         {
             GameObject go = Instantiate(UserGO, UserContainer.transform) as GameObject;
             go.GetComponentInChildren<Text>().text = position + ". " + f.PlayerName;
@@ -120,21 +126,31 @@ public class SinglePlayerMenuManager : MonoBehaviour
                 });
             }
 
-            usersGO.Add(go);
+            top5UsersGO.Add(go);
         }
 
         GameObject reticencias = Instantiate(UserGO, UserContainer.transform) as GameObject;
         reticencias.GetComponentInChildren<Text>().text = "...";
         reticencias.GetComponent<Button>().interactable = false;
-        usersGO.Add(reticencias);
+        top5UsersGO.Add(reticencias);
 
         if (!selfOnTop)
         {
             GameObject self = Instantiate(UserGO, UserContainer.transform) as GameObject;
             self.GetComponentInChildren<Text>().text = rank + ". " + MyPlayer.Instance.Info.PlayerName;
             self.GetComponent<Button>().interactable = false;
-            usersGO.Add(self);
+            top5UsersGO.Add(self);
         }
+    }
+
+    private void CleanUpTop5()
+    {
+        foreach (GameObject go in top5UsersGO)
+        {
+            Destroy(go);
+        }
+
+        top5UsersGO.Clear();
     }
 
     private void FillProfilePanel(PlayerInfo f, bool isFriend)
@@ -199,7 +215,7 @@ public class SinglePlayerMenuManager : MonoBehaviour
         {
             PlayerInfo removed = p.DeserializeContent<PlayerInfo>();
             MyPlayer.Instance.RemoveFriend(removed.ID);
-            usersUpdated = true;
+            IsToUpdateTop5List = true;
 
             UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Ye that boy was kicked out!", 3f, MessagePanel)));
         }
@@ -216,7 +232,7 @@ public class SinglePlayerMenuManager : MonoBehaviour
             PlayerInfo added = p.DeserializeContent<PlayerInfo>();
             MyPlayer.Instance.AddFriend(added.ID);
 
-            usersUpdated = true;
+            IsToUpdateTop5List = true;
             UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Uuuuuh so needy.", 2f, MessagePanel)));
         }
         else
@@ -225,6 +241,91 @@ public class SinglePlayerMenuManager : MonoBehaviour
         }
 
     }
+
+    #endregion
+
+    #region Search User
+
+    private void RenderSearchedUsersList()
+    {
+        IsToUpdateSearchedUsersList = false;
+
+        CleanUpTop5();
+        CleanUpUsers();
+
+        //NoResults.SetActive(false);
+
+        if (!SearchedUsers.Any())
+        {
+            //NoResults.SetActive(true);
+        }
+        else
+        {
+            foreach (PlayerInfo pi in SearchedUsers.Where(u => u.ID != MyPlayer.Instance.Info.ID).ToArray())
+            {
+                GameObject go = Instantiate(UserGO, UserContainer.transform) as GameObject;
+                go.GetComponentInChildren<Text>().text = pi.PlayerName;
+                SearchedUsersGO.Add(go);
+                Button b = go.GetComponent<Button>();
+
+                string playerState = pi.CurrentState == PlayerState.Offline ? "OfflineImage" : "OnlineImage";
+                go.transform.Find(playerState).gameObject.SetActive(true);
+
+                b.onClick.AddListener(() =>
+                {
+                    var isFriend = MyPlayer.Instance.IsFriendOf(pi.ID);
+                    FillProfilePanel(pi, isFriend);
+                });
+            }
+        }
+    }
+
+
+    private void CleanUpUsers()
+    {
+        foreach (GameObject go in SearchedUsersGO)
+        {
+            Destroy(go);
+        }
+
+        SearchedUsersGO.Clear();
+    }
+
+    public void SearchPlayers(string value)
+    {
+        if (!ConnectionHelper.HasInternet)
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("You need to connect bro", 3f, MessagePanel))); // TODO create MessagePanel on Single Player Menu and attach to this script
+            return;
+        }
+
+        if (value.Length >= 3)
+        {
+            ServerManager.Instance.Client.Send(URI.SearchPlayer, value, OnSearchPlayer);
+        }
+        else
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Give me some more letters pease", 3f, MessagePanel))); // TODO create MessagePanel on Single Player Menu and attach to this script
+        }
+    }
+
+
+    private void OnSearchPlayer(JsonPacket p)
+    {
+        if (p.ReplyStatus == ReplyStatus.OK)
+        {
+            SearchedUsers.Clear();
+            ArrayWrapper mi = p.DeserializeContent<ArrayWrapper>();
+            SearchedUsers.AddRange(mi.GetArray<PlayerInfo>().OrderBy(pi => pi.PlayerName));
+            IsToUpdateSearchedUsersList = true;
+        }
+        else
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Sorry, some Internet devil blew up the request to the server", 3f, MessagePanel))); // TODO create MessagePanel on Single Player Menu and attach to this script
+        }
+    }
+
+    #endregion
 
 
     public void OnStartClick()
