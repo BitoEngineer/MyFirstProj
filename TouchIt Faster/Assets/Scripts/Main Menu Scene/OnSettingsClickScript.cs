@@ -55,11 +55,6 @@ public class OnSettingsClickScript : MonoBehaviour
         //TODO
     }
 
-    public void OnBugClick()
-    {
-        //TODO
-    }
-
     public void OnInfoClick()
     {
         //TODO show instagram, email, sonia, tresh, etc
