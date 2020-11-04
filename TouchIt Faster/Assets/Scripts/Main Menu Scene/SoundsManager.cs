@@ -12,6 +12,10 @@ namespace Assets.Scripts.Main_Menu_Scene
     {
         public static bool IsVolumeOn = false;
 
+
+        /// <summary>
+        /// MUST BE CALLED IN THE UI THREAD 
+        /// </summary>
         public static void Start()
         {
             int sound = PlayerPrefs.GetInt(PlayerPrefsKeys.SOUND_ON);

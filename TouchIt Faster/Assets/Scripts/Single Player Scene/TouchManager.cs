@@ -265,6 +265,7 @@ public class TouchManager : MonoBehaviour
             
         SPAWN_BOMB_PROBABILITY += SPAWN_BOMB_PROBABILITY_INCREMENT;
 
+        source.volume = 0.4f;
         source.PlayOneShot(BombSound);
         switch (Lifes--)
         {

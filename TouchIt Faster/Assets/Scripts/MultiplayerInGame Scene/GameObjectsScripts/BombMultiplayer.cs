@@ -56,7 +56,7 @@ public class BombMultiplayer : MonoBehaviour
         if (playSoundOnDestroy)
         {
             var audioSource = GetComponent<AudioSource>();
-            audioSource.volume = 1; //TODO está a dar bué baixinho madafaker
+            audioSource.volume = 0.4f;            
             AudioSource.PlayClipAtPoint(audioSource.clip, transform.position, 1f);
 
             Vector3 v = gameObject.transform.position;

@@ -38,7 +38,7 @@ public class OnSettingsClickScript : MonoBehaviour
     {
         RenderVolumeIcon();
         LikeButton.SetActive(true);
-        BugButton.SetActive(true);
+        BugButton.SetActive(false);
         InfoButton.SetActive(true);
     }
 
@@ -57,6 +57,7 @@ public class OnSettingsClickScript : MonoBehaviour
     public void OnLikeClick()
     {
         //TODO redirect to play store
+        //Application.OpenURL ("market://details?id=" + Application.productName);
     }
 
     private void RenderVolumeIcon()
