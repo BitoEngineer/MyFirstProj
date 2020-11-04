@@ -210,7 +210,7 @@ public class MainMenuManager : MonoBehaviour
                 PlayerPrefs.SetString("touchitfaster-clientid", clientId);
 
                 var betterThan = pi.BetterThan <= 0 ? "-" : pi.BetterThan.ToString();
-                BetterThanText.GetComponent<Text>().text = $"Hey, your best is better than {betterThan}% of users";
+                BetterThanText.GetComponent<Text>().text = $"Your record is {pi.SinglePlayerHighestScore}, better than {betterThan}% of all players";
                 BetterThanText.SetActive(true);
             });
         }

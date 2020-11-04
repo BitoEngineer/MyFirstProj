@@ -784,7 +784,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Hey, your best is better than -% of users
+  m_Text: 
 --- !u!222 &418553818
 CanvasRenderer:
   m_ObjectHideFlags: 0
