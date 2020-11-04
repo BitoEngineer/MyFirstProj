@@ -55,11 +55,6 @@ public class OnSettingsClickScript : MonoBehaviour
         //TODO
     }
 
-    public void OnInfoClick()
-    {
-        //TODO show instagram, email, sonia, tresh, etc
-    }
-
     public void OnLikeClick()
     {
         //TODO redirect to play store
