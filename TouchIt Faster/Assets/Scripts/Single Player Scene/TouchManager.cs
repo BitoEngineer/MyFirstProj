@@ -94,14 +94,6 @@ public class TouchManager : MonoBehaviour
 
     void Start()
     {
-        var backgroundMusic = GameObject.FindGameObjectWithTag("BackgroundMusic");
-        backgroundMusic?.GetComponent<BackgroundMusicScript>()?.PlayMusic();
-        var audioSOurce = backgroundMusic?.GetComponent<AudioSource>();
-        if(audioSOurce != null)
-        {
-            audioSOurce.volume = 0.1f;
-        }
-
         HighestPointsText.GetComponent<Text>().text = PlayerPrefs.GetFloat(PlayerPrefsKeys.SINGLE_HIGHEST_SCORE_KEY).ToString("f0"); //TODO PlayerContainer.Instance.Info?.SinglePlayerHighestScore.ToString() ?? "-";
 
         Circles[0] = Circle_Black_GO;

@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Utils;
+﻿using Assets.Scripts.Main_Menu_Scene;
+using Assets.Scripts.Utils;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,28 +36,32 @@ public class OnSettingsClickScript : MonoBehaviour
 
     private void RenderSettingsLayout()
     {
-        int sound = PlayerPrefs.GetInt(PlayerPrefsKeys.SOUND_ON);
-        bool isSoundOn = sound >= 0; //TODO create SoundManager class and propagate 
-
-        VolumeButton.SetActive(!isSoundOn);
-        NoVolumeButton.SetActive(isSoundOn);
+        RenderVolumeIcon();
         LikeButton.SetActive(true);
         BugButton.SetActive(true);
         InfoButton.SetActive(true);
     }
 
-    public void OnVolumeClick()
+    public void SetVolumeOff()
     {
-        //TODO
+        SoundsManager.SetVolumeOff();
+        RenderVolumeIcon();
     }
 
-    public void OnNoVolumeClick()
+    public void SetVolumeOn()
     {
-        //TODO
+        SoundsManager.SetVolumeOn();
+        RenderVolumeIcon();
     }
 
     public void OnLikeClick()
     {
         //TODO redirect to play store
+    }
+
+    private void RenderVolumeIcon()
+    {
+        VolumeButton.SetActive(SoundsManager.IsVolumeOn);
+        NoVolumeButton.SetActive(!SoundsManager.IsVolumeOn);
     }
 }

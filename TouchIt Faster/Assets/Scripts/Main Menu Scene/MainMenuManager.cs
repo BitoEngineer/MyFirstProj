@@ -49,8 +49,6 @@ public class MainMenuManager : MonoBehaviour
         singlePlayerHighestScore = (int)PlayerPrefs.GetFloat(PlayerPrefsKeys.SINGLE_HIGHEST_SCORE_KEY);
         singlePlayerTapsInRow = (int)PlayerPrefs.GetFloat(PlayerPrefsKeys.SINGLE_MAX_TAPS_KEY);
 
-        GameObject.FindGameObjectWithTag("BackgroundMusic")?.GetComponent<BackgroundMusicScript>()?.PlayMusic();
-
         Debug.Log("--------------------------------ZZZZZZZZZZZZZZZZZZZZZZZZZ-------------------------------");
         Debug.Log("TouchItFaster - MainMenuManager starting");
         //SetJoke();

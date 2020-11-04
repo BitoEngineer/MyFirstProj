@@ -2697,7 +2697,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1600479205}
-        m_MethodName: OnNoVolumeClick
+        m_MethodName: SetVolumeOn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4185,7 +4185,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1600479205}
-        m_MethodName: OnVolumeClick
+        m_MethodName: SetVolumeOff
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
