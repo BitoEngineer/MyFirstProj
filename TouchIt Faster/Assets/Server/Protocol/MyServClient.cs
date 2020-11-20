@@ -186,7 +186,7 @@ namespace Assets.Server.Protocol
 
         protected virtual void startSending(JsonPacket p)
         {
-            if (LogDebugEvent != null) LogDebugEvent.Invoke("Packet sent: {0}", p.ToString());
+            if (LogDebugEvent != null) LogDebugEvent.Invoke("Packet sent: {0}", JsonConvert.SerializeObject(p));
             var data = p.GetPacket();
             var args = new SocketAsyncEventArgs();
 

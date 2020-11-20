@@ -17,6 +17,7 @@ public class PreloaderManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        //PlayerPrefs.DeleteAll();
         Debug.Log("TouchItFaster - PreloaderManager createad");
 
         DontDestroyOnLoad(gameObject);
