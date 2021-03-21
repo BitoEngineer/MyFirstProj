@@ -230,8 +230,8 @@ public class TouchManagerMultiplayer : MonoBehaviour
         square_go.transform.SetParent(SpawnerCanvas.transform, false);
         SpecialCircle s = new SpecialCircle { Special_GO = square_go, Age_s = Time.time };
         Vector3 scaled = s.Special_GO.transform.localScale;
-        scaled.x = CircleSize.x / 2;
-        scaled.y = CircleSize.y / 2;
+        scaled.x = CircleSize.x * 0.7f;
+        scaled.y = CircleSize.y * 0.7f;
         s.Special_GO.transform.localScale = scaled;
         square_go.GetComponent<SpecialCircleMultiplayer>().Id = id;
 
