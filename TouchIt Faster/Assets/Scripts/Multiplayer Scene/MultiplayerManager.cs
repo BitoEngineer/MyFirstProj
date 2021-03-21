@@ -381,7 +381,7 @@ public class MultiplayerManager : MonoBehaviour
             FriendsUpdated = true;
             MyPlayer.Instance.RemoveFriend(removed.ID);
 
-            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Ye that boy was kicked out!", 3f, MessagePanel)));
+            UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Kicked out!", 3f, MessagePanel)));
         }
         else
         {
