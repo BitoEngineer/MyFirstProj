@@ -50,7 +50,7 @@ public class GameOverUIController : MonoBehaviour
     {
         panel.Find("StatsAndNamePanel/NameText").GetComponent<Text>().text = playername.ToUpperInvariant();
         panel.Find("StatsAndNamePanel/StatsPanel/PointsPanel/PointsText").GetComponent<Text>().text = "" + points;
-        panel.Find("StatsAndNamePanel/StatsPanel/PointsPanel/ExtraPointsText").GetComponent<Text>().text = "(+" + extraPoints + ")";
+        panel.Find("StatsAndNamePanel/StatsPanel/PointsPanel/ExtraPointsText").GetComponent<Text>().text = extraPoints >= 0 ? "(+" + extraPoints + ")" : "(" + -extraPoints + ")";
         panel.Find("StatsAndNamePanel/StatsPanel/TapsInRowText").GetComponent<Text>().text = "" + hitInRow + " IN ROW";
     }
 

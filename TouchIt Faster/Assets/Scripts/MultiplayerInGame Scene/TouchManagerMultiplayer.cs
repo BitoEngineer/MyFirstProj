@@ -12,11 +12,12 @@ using Assets.Scripts.Utils;
 using System.Linq;
 using Assets.Scripts.MultiplayerInGame_Scene.Objects;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 public class TouchManagerMultiplayer : MonoBehaviour
 {
 
-    public const int BOMB_TIMELIFE_ms = 2500;
+    public const int BOMB_TIMELIFE_ms = 3000;
 
     //BOMB
     public GameObject BombGO;
@@ -49,8 +50,8 @@ public class TouchManagerMultiplayer : MonoBehaviour
 
     private Dictionary<int, GameObject> AliveObjects = new Dictionary<int, GameObject>();
 
-    private Queue<NewObject> objectsToAdd = new Queue<NewObject>();
-    private Queue<int> objectsToDelete = new Queue<int>();
+    private ConcurrentQueue<NewObject> objectsToAdd = new ConcurrentQueue<NewObject>();
+    private ConcurrentQueue<int> objectsToDelete = new ConcurrentQueue<int>();
     private bool gameEnded = false;
 
     public static TouchManagerMultiplayer Instance;
@@ -88,12 +89,14 @@ public class TouchManagerMultiplayer : MonoBehaviour
 
         while (objectsToAdd.Count > 0)
         {
-            SpawnObject(objectsToAdd.Dequeue());
+            if(objectsToAdd.TryDequeue(out NewObject obj))
+                SpawnObject(obj);
         }
 
         while (objectsToDelete.Count > 0)
         {
-            DeleteById(objectsToDelete.Dequeue());
+            if (objectsToDelete.TryDequeue(out int id))
+                DeleteById(id);
         }
 
         var bombsToDestroy = _bombsAlive.Where(bomb => BombIsAliveForMoreThan2Seconds(bomb)).ToList();
@@ -159,6 +162,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
                 MultiplayerTimerCounter.Instance.ResumeTimer();
             }
             var obj = p.DeserializeContent<NewObject>();
+
             objectsToAdd.Enqueue(obj);
         }
     }
@@ -179,19 +183,23 @@ public class TouchManagerMultiplayer : MonoBehaviour
         {
             go.SetActive(false);
         }
-        else if(destoy)
+        else if(destoy && go != null)
         {
             var onClick = go.GetComponent<IOnClick>();
             if(onClick != null)
             {
                 onClick.PlayOpponentSound();
                 onClick.Disable();
-            }
 
-            Task.Delay(5000).ContinueWith(t =>
+                Task.Delay(5000).ContinueWith(t =>
+                {
+                    Destroy(go);
+                });
+            }
+            else
             {
                 Destroy(go);
-            });
+            }
         }
     }
 

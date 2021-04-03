@@ -34,7 +34,7 @@ public class PlayerStatsUIController : MonoBehaviour
 
             string pointsText = "";
             var pointsReceivedText = OnTouchPointsReceivedText.GetComponent<Text>();
-            if (pointsDifference > 0)
+            if (pointsDifference >= 0)
             {
                 pointsText = "+" + pointsDifference;
                 pointsReceivedText.color = Color.green;

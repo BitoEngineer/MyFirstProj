@@ -35,9 +35,9 @@ public class MainMenuManager : MonoBehaviour
 
     private static bool isAlreadyLoggedIn = false;
 
-    public const string IP = "192.168.1.171";//"16 9.254.69.6";//"94.245.88.47";//"192.168.1.171";////
+    public const string IP = "94.245.88.47";//"192.168.1.171";//
     //public const string IP = "touchitfaster.westeurope.cloudapp.azure.com";//"40.115.22.55";// 
-    public const int PORT = 2222;//2200;//
+    public const int PORT = 2200;//2222;//
 
     private readonly string ClientID = "574776742495-hl8c1nhu7nkkcusmbpsmedua7a29a6g4.apps.googleusercontent.com";
     //private readonly string Jokes_API_URL = " http://geek-jokes.sameerkumar.website/api";

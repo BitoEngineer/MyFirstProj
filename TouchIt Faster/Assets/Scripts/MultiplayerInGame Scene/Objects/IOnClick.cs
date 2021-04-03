@@ -10,5 +10,7 @@ namespace Assets.Scripts.MultiplayerInGame_Scene.Objects
     {
         void PlayOpponentSound();
         void Disable();
+
+        void ShowPoints(int pointsDiff);
     }
 }

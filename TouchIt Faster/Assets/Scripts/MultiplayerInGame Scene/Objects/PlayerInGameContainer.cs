@@ -63,13 +63,19 @@ namespace Assets.Scripts.MultiplayerInGame_Scene
             }
         }
 
-        public void UpdateGameStats(OnDeletedObject deletedObj)
+        public int UpdateGameStats(OnDeletedObject deletedObj)
         {
+            if (deletedObj == null)
+                return 0;
+
+            var pointsDiff = deletedObj.CurrentPoints - CurrentPoints;
             CurrentPoints = deletedObj.CurrentPoints;
             MaxTapsInARow = deletedObj.MaxTapsInARow;
             CurrTapsInARow = deletedObj.CurrTapsInARow;
             Time = deletedObj.Time;
             ExtraTime = deletedObj.ExtraTime;
+
+            return pointsDiff;
         }
     }
 }

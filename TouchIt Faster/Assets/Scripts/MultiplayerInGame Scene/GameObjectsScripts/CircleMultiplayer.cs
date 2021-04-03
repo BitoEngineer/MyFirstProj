@@ -11,6 +11,7 @@ using UnityEngine.UI;
 using UnityEngine.Audio;
 using System.Threading.Tasks;
 using Assets.Scripts.MultiplayerInGame_Scene.Objects;
+using Assets.Scripts.Preloader;
 
 public class CircleMultiplayer : MonoBehaviour, IOnClick {
 
@@ -18,11 +19,14 @@ public class CircleMultiplayer : MonoBehaviour, IOnClick {
     public AudioMixerGroup CircleAudioMixer;
     public AudioClip ScorePointsClip;
     public AudioClip OpponentScoreClip;
-    //private Text PatxauText;
+    public GameObject PointsTextGO;
+
+    private GameObject PointsTextNewGO;
 
     void Start ()
     {
-        //PatxauText = GameObject.Find("PatxauText").GetComponent<Text>();
+        PointsTextNewGO = Instantiate(PointsTextGO, gameObject.transform.parent);
+
     }
 
     public void PlayOpponentSound()
@@ -53,12 +57,7 @@ public class CircleMultiplayer : MonoBehaviour, IOnClick {
 
         ServerManager.Instance.Client.Send(URI.DeleteObject, new DeleteObject() { ChallengeID = GameContainer.CurrentGameId, ObjectID = Id }, OnObjectDeletion);
 
-        //if (PlayerInGameContainer.Instance.CurrTapsInARow > 5)
-        //{
-        //    PatxauText.fontSize = 15 + ((PlayerInGameContainer.Instance.CurrTapsInARow - 6) * 2);
-        //    PatxauText.gameObject.transform.position = transform.position;
-        //    StartCoroutine(UIUtils.ShowMessageInText("PATXXAU", 0.5f, PatxauText));
-        //}
+        
     }
 
     private void OnObjectDeletion(JsonPacket p)
@@ -66,10 +65,33 @@ public class CircleMultiplayer : MonoBehaviour, IOnClick {
         if (p.ReplyStatus == ReplyStatus.OK)
         {
             OnDeletedObject deletedObj = p.DeserializeContent<OnDeletedObject>();
-            PlayerInGameContainer.Instance.UpdateGameStats(deletedObj);
+            var pointsDiff = PlayerInGameContainer.Instance.UpdateGameStats(deletedObj);
+            
+            ShowPoints(pointsDiff);
         }
 
         Destroy(gameObject);
+    }
+
+    public void ShowPoints(int pointsDiff)
+    {
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            PointsTextNewGO.transform.position = transform.position;
+            var text = PointsTextNewGO.GetComponent<Text>();
+            var pointsText = "";
+            if (pointsDiff > 0)
+            {
+                pointsText = "+" + pointsDiff;
+                text.color = Color.green;
+            }
+            else
+            {
+                pointsText = "" + pointsDiff;
+                text.color = Color.red;
+            }
+            StartCoroutine(UIUtils.ShowMessageInText(pointsText, 1.0f, text));
+        });
     }
 
     public void Disable()

@@ -148,6 +148,8 @@ MonoBehaviour:
     type: 2}
   ScorePointsClip: {fileID: 8300000, guid: 1dbe506724f589d4a80d218a80c5b2fb, type: 3}
   OpponentScoreClip: {fileID: 8300000, guid: 9225d7b501df3804493aab53be06cdba, type: 3}
+  PointsTextGO: {fileID: 4528570657144233757, guid: af5949b1ded74f0438e9b8faaa8d9227,
+    type: 3}
 --- !u!82 &3508948872202300236
 AudioSource:
   m_ObjectHideFlags: 0
