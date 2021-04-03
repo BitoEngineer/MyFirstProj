@@ -10,6 +10,8 @@ using Assets.Scripts.Multiplayer_Scene;
 using Assets.Scripts.Preloader;
 using Assets.Scripts.Utils;
 using System.Linq;
+using Assets.Scripts.MultiplayerInGame_Scene.Objects;
+using System.Threading.Tasks;
 
 public class TouchManagerMultiplayer : MonoBehaviour
 {
@@ -101,6 +103,11 @@ public class TouchManagerMultiplayer : MonoBehaviour
         }
     }
 
+    public void ChangeScene(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
+    }
+
     private void OnApplicationQuit()
     {
         var dto = new PlayerLeftGame() { Reason = "Arrrsh, that coward left the game", ChallengeID = GameContainer.CurrentGameId, OpponentID = GameContainer.OpponentID };
@@ -156,7 +163,7 @@ public class TouchManagerMultiplayer : MonoBehaviour
         }
     }
 
-    public void DeleteById(int id, bool setInactive=false)
+    public void DeleteById(int id, bool setInactive=false, bool destoy = true)
     {
         GameObject go = null;
         AliveObjects.TryGetValue(id, out go);
@@ -172,9 +179,19 @@ public class TouchManagerMultiplayer : MonoBehaviour
         {
             go.SetActive(false);
         }
-        else
+        else if(destoy)
         {
-            Destroy(go);
+            var onClick = go.GetComponent<IOnClick>();
+            if(onClick != null)
+            {
+                onClick.PlayOpponentSound();
+                onClick.Disable();
+            }
+
+            Task.Delay(5000).ContinueWith(t =>
+            {
+                Destroy(go);
+            });
         }
     }
 

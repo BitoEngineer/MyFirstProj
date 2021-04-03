@@ -31,6 +31,8 @@ public class MainMenuManager : MonoBehaviour
     public Text HighestScore;
     public Text TapsInARowText;
 
+    public AudioSource OnButtonClickAudio;
+
     private static bool isAlreadyLoggedIn = false;
 
     public const string IP = "192.168.1.171";//"16 9.254.69.6";//"94.245.88.47";//"192.168.1.171";////
@@ -78,7 +80,7 @@ public class MainMenuManager : MonoBehaviour
                 {
                     Debug.Log("TouchItFaster - MainMenuManager.Start - PlayerInfo already in cache");
                     var clientId = JsonConvert.DeserializeObject<PlayerInfo>(playerInfo).ClientID;
-                    Debug.Log("TouchItFaster - MainMenuManager.Start - PlayerInfo already in cache, client id: "+ clientId);
+                    Debug.Log("TouchItFaster - MainMenuManager.Start - PlayerInfo already in cache, client id: " + clientId);
                     ConnectToServerAndSendLogin(clientId);
                 }
             }
@@ -86,7 +88,7 @@ public class MainMenuManager : MonoBehaviour
             {
                 Debug.Log("TouchItFaster - MainMenuManager.Start - Alreay logged in");
             }
-//#endif
+            //#endif
         }
         else
         {
@@ -171,7 +173,7 @@ public class MainMenuManager : MonoBehaviour
                 {
                     LoginWithoutGoogle();
                     //UnityMainThreadDispatcher.Instance().Enqueue(() => StartCoroutine(UIUtils.ShowMessageInPanel("Google Sign In didn't complete with success", 2f, MessagePanel)));
-                    Debug.Log("TouchItFaster - Login failed!"); 
+                    Debug.Log("TouchItFaster - Login failed!");
                 }
             });
         }
@@ -180,7 +182,8 @@ public class MainMenuManager : MonoBehaviour
     private void Authenticated()
     {
         GooglePlayGames.OurUtils.PlayGamesHelperObject.RunOnGameThread(
-                   () => {
+                   () =>
+                   {
                        string userInfo = "Username: " + PlayGamesPlatform.Instance.localUser.userName +
                            "\nUser ID: " + PlayGamesPlatform.Instance.localUser.id +
                            "\nEmail: " + PlayGamesPlatform.Instance.GetUserEmail() + //returning empty
@@ -221,7 +224,7 @@ public class MainMenuManager : MonoBehaviour
 
                 ServerManager.Instance.Client.Send(URI.Login, loginDto, OnLogin, null, null, null, 5000);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.Log("ConnectToServerAndSendLogin - ERROR - " + e.ToString());
             }

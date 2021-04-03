@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -49,9 +50,8 @@ public class TouchManager : MonoBehaviour
     private float X_length;
     private float Y_length;
     private Vector3 stageDimensions;
-    public AudioClip CircleSound;
-    public AudioClip SquareSound;
     public AudioClip BombSound;
+    public AudioMixerGroup BombAudioMixer;
     private AudioSource source { get { return GetComponent<AudioSource>(); } }
 
     public bool AdSeen = false;
@@ -101,8 +101,6 @@ public class TouchManager : MonoBehaviour
         Circles[2] = Circle_Blue_GO;
         CountDownGO.GetComponent<CountDown>().StartCountDown(false);
         gameObject.AddComponent<AudioSource>();
-        source.clip = CircleSound;
-        source.playOnAwake = false;
 
         CanvasRect = canvas.GetComponent<RectTransform>();
         SpawnerCanvasRect = SpawnerCanvas.GetComponent<RectTransform>();
@@ -188,45 +186,58 @@ public class TouchManager : MonoBehaviour
 
     private void CheckSpecialCirclesToDestroy(float time)
     {
+        var circlesToRemove = new List<GameObject>();
         foreach (SpecialCircle s in AliveSpecialCircles.Values)
         {
             if ((time - s.Age_s) > SPECIAL_CIRCLE_LIFETIME_s)
             {
                 GameObject specialCircle = s.Special_GO;
-                AliveSpecialCircles.Remove(specialCircle);
+                circlesToRemove.Add(specialCircle);
                 Destroy(specialCircle);
                 GenerateBomb(specialCircle.transform.position); 
             }
         }
+
+        foreach(var specialCircle in circlesToRemove)
+            AliveSpecialCircles.Remove(specialCircle);
     }
 
     private bool IsToGenerateBombWith20Probability() => (Random.Range(0f, 100f) / 100f) <= SPAWN_BOMB_PROBABILITY;
     public void CheckCirclesToDestroy(float time)
     {
+        var circlesToRemove = new List<GameObject>();
         foreach (Circle c in AliveCircles.Values)
         {
             if (time - c.Age_s > CIRCLE_LIFETIME_s)
             {
                 GameObject circle = c.Circle_Prefab;
-                AliveCircles.Remove(circle);
+                circlesToRemove.Add(circle);
                 Destroy(circle);
                 GenerateBomb(c.Position);
             }
         }
+
+        foreach(var circle in circlesToRemove)
+            AliveCircles.Remove(circle);
     }
 
 
     private void CheckBombsToDestroy(float time)
     {
+        var bombsToRemove = new List<GameObject>();
+
         foreach (Bomb b in AliveBombs.Values)
         {
             if (time - b.Age_s > BOMB_LIFE_TIME_s)
             {
                 GameObject bomb = b.Bomb_GO;
-                AliveBombs.Remove(bomb);
+                bombsToRemove.Add(bomb);
                 Destroy(bomb);
             }
         }
+
+        foreach(var bomb in bombsToRemove)
+            AliveBombs.Remove(bomb);
     }
 
 
@@ -265,7 +276,7 @@ public class TouchManager : MonoBehaviour
             
         SPAWN_BOMB_PROBABILITY += SPAWN_BOMB_PROBABILITY_INCREMENT;
 
-        source.volume = 0.4f;
+        source.outputAudioMixerGroup = BombAudioMixer;
         source.PlayOneShot(BombSound);
         switch (Lifes--)
         {
@@ -310,7 +321,6 @@ public class TouchManager : MonoBehaviour
 
     public void SquareTouched(GameObject go)
     {
-        //source.PlayOneShot(SquareSound);
         Vector3 v = WorldToCanvasCoords(go.transform.position, SpawnerCanvasRect);
         AliveSpecialCircles.Remove(go);
 
@@ -352,13 +362,9 @@ public class TouchManager : MonoBehaviour
         return v;
     }
 
-    private int totalClicks = 1;
     public void PointsUpdate(GameObject destroyedCircle)
     {
-        ++totalClicks;
         Game.IncreasePoints(MAX_POINTS_CIRCLE);
-
-        //source.PlayOneShot(CircleSound);
 
         PointsText.text = Game.Points.ToString("f0");
         Destroy(AliveCircles[destroyedCircle].counter);

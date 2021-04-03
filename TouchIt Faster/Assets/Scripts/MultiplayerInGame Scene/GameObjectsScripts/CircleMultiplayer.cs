@@ -8,10 +8,16 @@ using Assets.Scripts.Utils;
 using Assets.Server.Models;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Audio;
+using System.Threading.Tasks;
+using Assets.Scripts.MultiplayerInGame_Scene.Objects;
 
-public class CircleMultiplayer : MonoBehaviour {
+public class CircleMultiplayer : MonoBehaviour, IOnClick {
 
     public int Id { get; set; }
+    public AudioMixerGroup CircleAudioMixer;
+    public AudioClip ScorePointsClip;
+    public AudioClip OpponentScoreClip;
     //private Text PatxauText;
 
     void Start ()
@@ -19,24 +25,40 @@ public class CircleMultiplayer : MonoBehaviour {
         //PatxauText = GameObject.Find("PatxauText").GetComponent<Text>();
     }
 
-    private void PlaySound()
+    public void PlayOpponentSound()
     {
-        var audioSource = GetComponent<AudioSource>();
-        AudioSource.PlayClipAtPoint(audioSource.clip, transform.position, 1f);
+        PlaySound(OpponentScoreClip);
+    }
+
+    private void PlaySound(AudioClip clip)
+    {
+        var source = GetComponent<AudioSource>();
+
+        source.outputAudioMixerGroup = CircleAudioMixer;
+        source.PlayOneShot(clip);
     }
 
 
+    private bool isDead = false;
     private void OnMouseDown()
     {
-        PlaySound();
-        TouchManagerMultiplayer.Instance.DeleteById(Id);
+        if (isDead)
+            return;
+
+        PlaySound(ScorePointsClip);
+
+        Disable();
+
+        TouchManagerMultiplayer.Instance.DeleteById(Id, false, false);
+
+        ServerManager.Instance.Client.Send(URI.DeleteObject, new DeleteObject() { ChallengeID = GameContainer.CurrentGameId, ObjectID = Id }, OnObjectDeletion);
+
         //if (PlayerInGameContainer.Instance.CurrTapsInARow > 5)
         //{
         //    PatxauText.fontSize = 15 + ((PlayerInGameContainer.Instance.CurrTapsInARow - 6) * 2);
         //    PatxauText.gameObject.transform.position = transform.position;
         //    StartCoroutine(UIUtils.ShowMessageInText("PATXXAU", 0.5f, PatxauText));
         //}
-        ServerManager.Instance.Client.Send(URI.DeleteObject, new DeleteObject() { ChallengeID = GameContainer.CurrentGameId, ObjectID = Id }, OnObjectDeletion);
     }
 
     private void OnObjectDeletion(JsonPacket p)
@@ -46,5 +68,13 @@ public class CircleMultiplayer : MonoBehaviour {
             OnDeletedObject deletedObj = p.DeserializeContent<OnDeletedObject>();
             PlayerInGameContainer.Instance.UpdateGameStats(deletedObj);
         }
+
+        Destroy(gameObject);
+    }
+
+    public void Disable()
+    {
+        isDead = true;
+        gameObject.GetComponent<SpriteRenderer>().enabled = false;
     }
 }
